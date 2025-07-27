@@ -18,8 +18,7 @@ The project follows a standard Django layout with a few additions for multi-tena
 .
 ├── apps/
 │   ├── core/                 # Core functionality, models, utilities
-│   ├── tenants/              # Multi-tenancy management
-│   ├── accounts/             # User management and authentication
+│   ├── accounts/             # Multi-tenancy management & User management and authentication
 │   ├── feature_flags/        # Feature flag system
 │   └── [custom_apps]/        # Domain-specific applications
 ├── config/
