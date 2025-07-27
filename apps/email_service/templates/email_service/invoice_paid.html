@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Paid - {{ organization.name }}</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .content {
+            padding: 30px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid #f0f0f0;
+            color: #666;
+            font-size: 14px;
+        }
+        .invoice-details {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .success-icon {
+            color: #28a745;
+            font-size: 48px;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Payment Confirmed</h1>
+        <div class="success-icon">✓</div>
+    </div>
+    
+    <div class="content">
+        <p>Hi {{ user_name | default('there') }},</p>
+        
+        <p>Thank you! We've successfully received your payment for {{ organization.name }}.</p>
+        
+        <div class="invoice-details">
+            <h3>Payment Details</h3>
+            <p><strong>Invoice #:</strong> {{ invoice_number }}</p>
+            <p><strong>Amount Paid:</strong> {{ amount | currency }}</p>
+            <p><strong>Payment Date:</strong> {{ payment_date | default('today') }}</p>
+            <p><strong>Payment Method:</strong> {{ payment_method | default('Credit Card') }}</p>
+            {% if next_billing_date %}
+            <p><strong>Next Billing Date:</strong> {{ next_billing_date }}</p>
+            {% endif %}
+        </div>
+        
+        {% if invoice_url %}
+        <p>
+            <a href="{{ invoice_url }}" class="button">View Invoice</a>
+        </p>
+        {% endif %}
+        
+        <p>Your service will continue uninterrupted. If you have any questions about your billing or need assistance, please contact our support team at {{ support_email }}.</p>
+        
+        <p>Thank you for your business!</p>
+        
+        <p>Best regards,<br>
+        The {{ organization.name }} Team</p>
+    </div>
+    
+    <div class="footer">
+        <p>© {{ organization.name }}. All rights reserved.</p>
+        <p>{{ site_url }}</p>
+    </div>
+</body>
+</html>

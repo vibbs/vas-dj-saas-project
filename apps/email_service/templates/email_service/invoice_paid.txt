@@ -1,0 +1,25 @@
+Payment Confirmed ✓
+
+Hi {{ user_name | default('there') }},
+
+Thank you! We've successfully received your payment for {{ organization.name }}.
+
+PAYMENT DETAILS:
+- Invoice #: {{ invoice_number }}
+- Amount Paid: {{ amount | currency }}
+- Payment Date: {{ payment_date | default('today') }}
+- Payment Method: {{ payment_method | default('Credit Card') }}
+{% if next_billing_date %}- Next Billing Date: {{ next_billing_date }}{% endif %}
+
+{% if invoice_url %}View Invoice: {{ invoice_url }}{% endif %}
+
+Your service will continue uninterrupted. If you have any questions about your billing or need assistance, please contact our support team at {{ support_email }}.
+
+Thank you for your business!
+
+Best regards,
+The {{ organization.name }} Team
+
+---
+© {{ organization.name }}. All rights reserved.
+{{ site_url }}

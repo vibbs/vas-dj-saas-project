@@ -1,0 +1,20 @@
+Welcome to {{ organization.name }}!
+
+Hi {{ user_name | default('there') }},
+
+Welcome to {{ organization.name }}! We're excited to have you on board.
+
+Your account has been successfully created and you can now start using our platform.
+
+{% if login_url %}
+Get started: {{ login_url }}
+{% endif %}
+
+If you have any questions or need assistance, don't hesitate to reach out to our support team at {{ support_email }}.
+
+Best regards,
+The {{ organization.name }} Team
+
+---
+© {{ organization.name }}. All rights reserved.
+{{ site_url }}

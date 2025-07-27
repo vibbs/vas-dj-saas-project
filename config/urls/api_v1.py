@@ -9,4 +9,6 @@ urlpatterns = [
     path("organizations/", include("apps.organizations.urls.api_v1")),
     # Billing API endpoints
     path("billing/", include("apps.billing.urls.api_v1")),
+    # Email Service API endpoints
+    path("email_service/", include("apps.email_service.urls.api_v1")),
 ]

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subject | default('Notification') }} - {{ organization.name }}</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .content {
+            padding: 30px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid #f0f0f0;
+            color: #666;
+            font-size: 14px;
+        }
+        .alert {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .alert-info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+        }
+        .alert-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ title | default('Notification') }}</h1>
+    </div>
+    
+    <div class="content">
+        <p>Hi {{ user_name | default('there') }},</p>
+        
+        {% if alert_type %}
+        <div class="alert alert-{{ alert_type }}">
+            {{ message }}
+        </div>
+        {% else %}
+        <p>{{ message }}</p>
+        {% endif %}
+        
+        {% if action_url and action_text %}
+        <p>
+            <a href="{{ action_url }}" class="button">{{ action_text }}</a>
+        </p>
+        {% endif %}
+        
+        {% if additional_info %}
+        <p>{{ additional_info }}</p>
+        {% endif %}
+        
+        <p>If you have any questions, please contact our support team at {{ support_email }}.</p>
+        
+        <p>Best regards,<br>
+        The {{ organization.name }} Team</p>
+    </div>
+    
+    <div class="footer">
+        <p>© {{ organization.name }}. All rights reserved.</p>
+        <p>{{ site_url }}</p>
+    </div>
+</body>
+</html>
