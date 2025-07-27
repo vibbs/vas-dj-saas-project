@@ -1,112 +1,217 @@
-# Django SaaS Backend
+# Django SaaS Project
 
-This project serves as a robust and scalable backend foundation for a Software as a Service (SaaS) application, built with Python and the Django framework. It includes essential features like user authentication, multi-tenancy preparation, background task processing, and a RESTful API.
+A comprehensive, production-ready SaaS backend built with Django and Django REST Framework. This project provides a solid foundation for building multi-tenant SaaS applications with modern architecture patterns.
 
-## Overview
+## 🚀 Features
 
-The goal of this project is to provide a production-ready starting point for building SaaS applications. By handling the common boilerplate and setup, developers can focus on implementing the unique business logic of their product.
+### Core Functionality
+- **Multi-Tenant Architecture**: Organization-based tenancy with subdomain support
+- **Custom User Management**: Extended user model with comprehensive profile fields
+- **RESTful API**: Full-featured API built with Django REST Framework
+- **Interactive API Documentation**: Swagger/OpenAPI documentation with drf-spectacular
+- **Background Task Processing**: Celery integration with Redis broker
+- **Role-Based Permissions**: Flexible user roles and organization-level permissions
 
-The architecture is designed to be modular, making it easy to extend and customize.
+### Authentication & Security
+- **Session & Token Authentication**: Multiple authentication methods supported
+- **Multi-Provider Auth Support**: Extensible authentication provider system
+- **Email & Phone Verification**: Built-in verification workflows
+- **Two-Factor Authentication Ready**: 2FA infrastructure in place
 
----
+### Development Experience
+- **Docker Development Environment**: Complete containerized setup
+- **Environment-Based Configuration**: Separate settings for development/production
+- **Poetry Dependency Management**: Modern Python package management
+- **Comprehensive Test Structure**: Ready-to-use testing framework
 
-## Core Features
+## 🛠 Technology Stack
 
-*   **RESTful API**: A comprehensive API built with [Django REST Framework](https://www.django-rest-framework.org/) for frontend communication.
-*   **Token-based Authentication**: Secure user authentication using JSON Web Tokens (JWT) via the [dj-rest-auth](https://dj-rest-auth.readthedocs.io/en/latest/) library.
-*   **User & Organization Management**: Pre-configured models for Users and Organizations, laying the groundwork for multi-tenancy.
-*   **Asynchronous Background Tasks**: Integrated [Celery](https://docs.celeryq.dev/en/stable/) with [Redis](https://redis.io/) for handling long-running tasks like sending emails or processing data without blocking the API.
-*   **Environment-based Configuration**: Securely manage settings and secrets using environment variables with [python-decouple](https://pypi.org/project/python-decouple/).
-*   **Containerized Development**: Full [Docker](https://www.docker.com/) and `docker-compose` setup for consistent development, testing, and production environments.
-*   **Automated API Documentation**: Auto-generated, interactive API documentation using Swagger/OpenAPI.
+- **Backend**: Python 3.11+, Django 5.2+
+- **API**: Django REST Framework 3.16+
+- **Database**: PostgreSQL
+- **Cache & Message Broker**: Redis
+- **Background Tasks**: Celery
+- **API Documentation**: drf-spectacular (OpenAPI/Swagger)
+- **Containerization**: Docker & Docker Compose
+- **Dependency Management**: Poetry
 
----
-
-## Technology Stack
-
-*   **Backend**: Python 3.11+, Django 5.0+
-*   **API**: Django REST Framework
-*   **Database**: PostgreSQL
-*   **Async Tasks**: Celery & Redis
-*   **Containerization**: Docker
-
----
-
-## Project Structure
+## 📁 Project Structure
 
 ```
-django-saas-backend/
-├── .envs/              # Directory for environment variable files
-│   ├── .dev.db
-│   └── .dev.env
-├── core/               # Core Django project configuration
-│   ├── settings.py
-│   └── urls.py
-├── users/              # Django app for user models and authentication
-├── organizations/      # Django app for organization/tenant models
-├── tasks/              # Celery task definitions
-├── docker-compose.yml  # Docker service definitions
-├── Dockerfile          # Dockerfile for the Django application
-└── manage.py           # Django's command-line utility
+django-saas-project/
+├── apps/
+│   ├── accounts/          # User management and authentication
+│   │   ├── models/
+│   │   │   ├── account.py # Custom user model
+│   │   │   └── team.py    # Team and membership models
+│   │   ├── serializers.py # API serializers
+│   │   ├── views.py       # API views
+│   │   └── enums.py       # User-related enums
+│   ├── core/              # Shared utilities and base models
+│   │   ├── models.py      # Base model classes
+│   │   ├── managers.py    # Custom model managers
+│   │   └── utils/
+│   │       └── enums.py   # Custom enum base class
+│   └── organizations/     # Multi-tenancy and organization management
+│       ├── models.py      # Organization model
+│       ├── middleware.py  # Tenant middleware
+│       └── managers.py    # Organization managers
+├── config/
+│   ├── settings/
+│   │   ├── base.py        # Base settings
+│   │   ├── development.py # Development settings
+│   │   └── production.py  # Production settings
+│   ├── urls.py            # Main URL configuration
+│   └── celery.py          # Celery configuration
+├── docker/
+│   ├── Dockerfile         # Application container
+│   └── docker-compose.yml # Service orchestration
+├── Makefile              # Development commands
+└── pyproject.toml        # Poetry configuration
 ```
 
----
-
-## Getting Started
+## 🚦 Quick Start
 
 ### Prerequisites
 
-*   Docker
-*   Docker Compose
+- Docker
+- Docker Compose
 
-### Installation & Setup
+### Installation
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <your-repository-url>
-    cd django-saas-backend
-    ```
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd django-saas-project
+   ```
 
-2.  **Set up environment variables:**
-    Create a `.env` file in the root directory by copying the example file.
-    ```bash
-    cp .envs/.dev.env .env
-    ```
-    Update the `.env` file with your desired settings, especially the `SECRET_KEY`.
+2. **Set up environment variables:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
 
-3.  **Build and run the containers:**
-    This command will build the Docker images and start the Django application, PostgreSQL database, and Redis services.
-    ```bash
-    docker-compose up --build -d
-    ```
+3. **Build and start services:**
+   ```bash
+   make build
+   make start
+   ```
 
----
+4. **Run database migrations:**
+   ```bash
+   make migrate
+   ```
 
-## Usage
+5. **Create a superuser:**
+   ```bash
+   docker compose -f ./docker/docker-compose.yml run --rm web python manage.py createsuperuser
+   ```
 
-### Running Migrations
+## 🖥 Development Commands
 
-After the containers are running, apply the database migrations:
+The project includes a Makefile with convenient commands:
+
 ```bash
-docker-compose exec web python manage.py migrate
+# Build containers
+make build
+
+# Start all services
+make start
+
+# Stop all services
+make stop
+
+# Create migrations
+make migrations
+
+# Apply migrations
+make migrate
+
+# Clean up containers and volumes
+make clean
 ```
 
-### Creating a Superuser
+## 🌐 API Documentation
 
+### Interactive Documentation
+- **Swagger UI**: http://localhost:8000/api/docs/
+- **ReDoc**: http://localhost:8000/api/redoc/
+- **Schema JSON**: http://localhost:8000/api/schema/
+
+### Available Endpoints
+
+#### Accounts API (`/api/v1/accounts/`)
+- `GET /users/` - List user accounts
+- `POST /users/` - Create new user account
+- `GET /users/{id}/` - Get user details
+- `PATCH /users/{id}/` - Update user account
+- `DELETE /users/{id}/` - Delete user account
+- `GET /users/me/` - Get current user profile
+- `PATCH /users/update_profile/` - Update current user profile
+- `GET /users/{id}/auth_providers/` - Get user's authentication providers
+
+#### Organizations API (`/api/v1/organizations/`)
+- `GET /` - List organizations
+- `POST /` - Create new organization
+- `GET /{id}/` - Get organization details
+- `PATCH /{id}/` - Update organization
+- `DELETE /{id}/` - Delete organization
+- `GET /{id}/stats/` - Get organization statistics
+
+## 🏗 Architecture Overview
+
+### Multi-Tenant Design
+- **Organization-Based Tenancy**: Each organization acts as a tenant
+- **Subdomain Routing**: Organizations accessible via subdomains
+- **Tenant-Aware Models**: All models automatically scoped to organizations
+- **Custom Middleware**: Request processing for tenant context
+
+### User Management
+- **Custom User Model**: Extended Django user with comprehensive fields
+- **Multiple Authentication**: Support for various auth providers
+- **Role-Based Access**: Flexible permission system
+- **Team Management**: Users can belong to teams within organizations
+
+### API Architecture
+- **RESTful Design**: Consistent REST API patterns
+- **Comprehensive Documentation**: Auto-generated OpenAPI documentation
+- **Pagination**: Built-in pagination for list endpoints
+- **Authentication Required**: Secure by default
+
+## 🧪 Testing
+
+Run the test suite:
 ```bash
-docker-compose exec web python manage.py createsuperuser
+docker compose -f ./docker/docker-compose.yml run --rm web python manage.py test
 ```
 
-### Accessing the Application
+## 🚀 Production Deployment
 
-*   **API**: `http://localhost:8000/api/`
-*   **Admin Panel**: `http://localhost:8000/admin/`
-*   **API Documentation**: `http://localhost:8000/api/docs/`
+The project includes production-ready configurations:
 
-### Running Celery Worker
+1. **Environment Variables**: Configure production settings in `.env`
+2. **Database**: Use PostgreSQL in production
+3. **Static Files**: Configure static file serving
+4. **Security**: Review and update security settings
+5. **Monitoring**: Add monitoring and logging as needed
 
-The Celery worker starts automatically with `docker-compose up`. You can view its logs with:
-```bash
-docker-compose logs -f celeryworker
-```
+## 📝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🤝 Support
+
+For support and questions:
+- Create an issue in the repository
+- Check the documentation at `/api/docs/`
+- Review the CLAUDE.md file for development guidance
 
