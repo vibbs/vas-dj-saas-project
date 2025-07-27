@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 from django.conf import settings
-from .managers import OrganizationManager
+from apps.organizations.managers import OrganizationManager
 
 
 class TenantAwareModel(models.Model):

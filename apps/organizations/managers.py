@@ -41,3 +41,9 @@ class OrganizationManager(models.Manager):
         organization.save()
 
         return organization, creator_user
+
+    def _get_current_organization(self, user):
+        """Get the organization for the current user"""
+        if hasattr(user, "organization"):
+            return user.organization
+        return None
