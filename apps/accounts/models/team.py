@@ -28,8 +28,8 @@ class TeamMembership(BaseFields, models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="members")
     role = models.CharField(
         max_length=50,
-        choices=[(tag, tag.value) for tag in TeamRoleTypes],
-        default=TeamRoleTypes.MEMBER,
+        choices=TeamRoleTypes.choices(),
+        default=TeamRoleTypes.MEMBER.value,
     )
     joined_at = models.DateTimeField(auto_now_add=True)
 

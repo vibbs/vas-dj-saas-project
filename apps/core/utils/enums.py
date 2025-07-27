@@ -15,7 +15,7 @@ class CustomEnum(Enum):
         Returns a list of tuples for use in model fields.
         Each tuple contains the enum value and its name.
         """
-        return [(tag.name, tag.value) for tag in cls]
+        return [(tag.value, tag.value) for tag in cls]
     
 
     def __str__(self):

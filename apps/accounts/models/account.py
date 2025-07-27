@@ -66,13 +66,13 @@ class Account(BaseFields, AbstractBaseUser, PermissionsMixin):
     date_of_birth = models.DateField(null=True, blank=True)
     gender = models.CharField(
         max_length=10,
-        choices=[(tag, tag.value) for tag in GenderTypes],
-        default=GenderTypes.UNKNOWN,
+        choices=GenderTypes.choices(),
+        default=GenderTypes.UNKNOWN.value,
     )
     role = models.CharField(
         max_length=10,
-        choices=[(tag, tag.value) for tag in UserRoleTypes],
-        default=UserRoleTypes.USER,
+        choices=UserRoleTypes.choices(),
+        default=UserRoleTypes.USER.value,
     )
 
     # Auth flags
@@ -87,8 +87,8 @@ class Account(BaseFields, AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     status = models.CharField(
         max_length=10,
-        choices=[(tag, tag.value) for tag in UserStatusTypes],
-        default=UserStatusTypes.ACTIVE,
+        choices=UserStatusTypes.choices(),
+        default=UserStatusTypes.ACTIVE.value,
     )
 
     # Admin roles
