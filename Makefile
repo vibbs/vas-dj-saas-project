@@ -20,3 +20,9 @@ migrations:
 
 migrate:
 	docker compose -f ./docker/docker-compose.yml run --rm web python manage.py migrate
+
+createsuperuser:
+	docker compose -f ./docker/docker-compose.yml run --rm web python manage.py createsuperuser
+
+check-system:
+	docker compose -f ./docker/docker-compose.yml run --rm web python manage.py check

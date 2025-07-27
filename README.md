@@ -129,6 +129,9 @@ make migrate
 
 # Clean up containers and volumes
 make clean
+
+# Check System Status
+make check-status
 ```
 
 ## 🌐 API Documentation

@@ -11,6 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `make clean` - Stop containers and clean up volumes/networks
 - `make migrations` - Create new Django migrations
 - `make migrate` - Apply database migrations
+- `make check-status` - Check Django system check status
 
 ### Direct Django Commands (inside container)
 - `docker compose -f ./docker/docker-compose.yml run --rm web python manage.py <command>`

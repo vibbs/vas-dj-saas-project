@@ -274,20 +274,6 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
-name = "django-tenants"
-version = "3.8.0"
-description = "Tenant support for Django using PostgreSQL schemas."
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "django_tenants-3.8.0.tar.gz", hash = "sha256:07d009d5d01be2d65c3f5ddbf323d58d1228838fc1a64fded15c8e5c6f41cf8f"},
-]
-
-[package.dependencies]
-Django = ">=2.1,<6.0"
-
-[[package]]
 name = "djangorestframework"
 version = "3.16.0"
 description = "Web APIs for Django, made easy."
@@ -948,4 +934,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11"
-content-hash = "c057616c6e1d3459adbe2eed667f667771f24ff42e491d629e9b450e39080ff8"
+content-hash = "79716cd7e1faababcdf579436345156431fe6781f67ef55daf411d788b6267d4"
