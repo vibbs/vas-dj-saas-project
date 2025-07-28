@@ -5,26 +5,72 @@ Logging configuration for Django SaaS project.
 import logging
 import logging.config
 import logging.handlers
+
 from django.conf import settings
+
+APP_ENV = settings.APP_ENV.lower()
+LOG_LEVEL = settings.LOG_LEVEL.upper()
+LOG_APP_PREFIX = settings.LOG_APP_PREFIX.lower()
+
+# Use different formatters based on environment
+if APP_ENV == "prod":
+    try:
+        from pythonjsonlogger import jsonlogger
+
+        json_formatter = {
+            "()": jsonlogger.JsonFormatter,
+            "fmt": "%(asctime)s %(levelname)s %(name)s %(message)s",
+            "rename_fields": {
+                "asctime": "timestamp",
+                "levelname": "level",
+                "name": "logger",
+                "message": "message",
+            },
+        }
+    except ImportError:
+        raise ImportError(
+            "Install python-json-logger for prod log formatting: pip install python-json-logger"
+        )
+
+    formatter_name = "json"
+    formatter_config = {"json": json_formatter}
+
+else:
+    # Use color logs in development if available
+    try:
+        from rich.logging import RichHandler
+
+        handler_class = "rich.logging.RichHandler"
+        formatter_name = "rich"
+        formatter_config = {
+            "rich": {
+                "format": "[%(levelname)s] %(message)s",
+                "datefmt": "%Y-%m-%d %H:%M:%S",
+            }
+        }
+    except ImportError:
+        handler_class = "logging.StreamHandler"
+        formatter_name = "default"
+        formatter_config = {
+            "default": {
+                "format": "%(levelname)s %(asctime)s %(name)s %(message)s",
+                "datefmt": "%Y-%m-%d %H:%M:%S",
+            }
+        }
 
 config = {
     "version": 1,
     "disable_existing_loggers": False,
-    "formatters": {
-        "default": {
-            "format": "%(levelname)s %(asctime)s %(name)s %(message)s",
-            "datefmt": "%Y-%m-%d %H:%M:%S",
-        },
-    },
+    "formatters": formatter_config,
     "handlers": {
         "console": {
-            "level": settings.LOG_LEVEL,
-            "class": "logging.StreamHandler",
-            "formatter": "default",
+            "level": LOG_LEVEL,
+            "class": handler_class if APP_ENV == "dev" else "logging.StreamHandler",
+            "formatter": formatter_name,
         },
         "syslog": {
             "class": "logging.handlers.SysLogHandler",
-            "formatter": "default",
+            "formatter": formatter_name,
             "facility": logging.handlers.SysLogHandler.LOG_LOCAL7,
             "level": logging.DEBUG,
         },
@@ -32,27 +78,27 @@ config = {
     "loggers": {
         "d": {
             "handlers": ["console"],
-            "level": settings.LOG_LEVEL,
-            "propogate": True,
+            "level": LOG_LEVEL,
+            "propagate": True,
         },
-        settings.LOG_APP_PREFIX: {
+        LOG_APP_PREFIX: {
             "handlers": ["console"],
-            "level": settings.LOG_LEVEL,
+            "level": LOG_LEVEL,
             "propagate": False,
         },
         "django": {
             "handlers": ["console"],
-            "propogate": True,
-            "level": settings.LOG_LEVEL,
+            "level": LOG_LEVEL,
+            "propagate": True,
         },
         "django.server": {
             "handlers": ["console"],
-            "level": settings.LOG_LEVEL,
+            "level": LOG_LEVEL,
             "propagate": False,
         },
         "django.request": {
             "handlers": ["console"],
-            "level": settings.LOG_LEVEL,
+            "level": LOG_LEVEL,
             "propagate": True,
         },
     },

@@ -21,6 +21,8 @@ LOG_LEVEL = config("LOG_LEVEL", default="INFO").upper()
 
 LOG_APP_PREFIX = "d"
 
+APP_ENV = config("APP_ENV", default="dev")
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
