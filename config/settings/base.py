@@ -10,8 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import dj_database_url
 from pathlib import Path
-from decouple import config
+from decouple import config, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,7 +31,7 @@ SECRET_KEY = "django-insecure-vedw$*as9s=(=_(vv)8&a94(u8k_s-f%17m9204l*)+f3k3+yk
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="", cast=Csv())
 
 
 # Application definition
@@ -89,24 +90,13 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-DB_NAME = config("DB_NAME")
-DB_USER = config("DB_USER")
-DB_PASSWORD = config("DB_PASSWORD")
-DB_HOST = config("DB_HOST")
-DB_PORT = config("DB_PORT")
-if not DB_NAME or not DB_USER or not DB_PASSWORD or not DB_HOST or not DB_PORT:
+DATABASE_URL = config("DATABASE_URL", default=None)
+
+
+if not DATABASE_URL:
     raise ValueError("Database environment variables are not set properly.")
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": DB_NAME,
-        "USER": DB_USER,
-        "PASSWORD": DB_PASSWORD,
-        "HOST": DB_HOST,
-        "PORT": DB_PORT,
-    }
-}
+DATABASES = {"default": config("DATABASE_URL", cast=dj_database_url.parse)}
 
 
 # Password validation

@@ -20,6 +20,7 @@ dependencies = [
     "stripe (>=11.3.0,<12.0.0)",
     "jinja2 (>=3.1.0,<4.0.0)",
     "python-decouple (>=3.8,<4.0)",
+    "dj-database-url (>=3.0.1,<4.0.0)",
 ]
 
 
