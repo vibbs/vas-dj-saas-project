@@ -28,16 +28,6 @@ config = {
             "facility": logging.handlers.SysLogHandler.LOG_LOCAL7,
             "level": logging.DEBUG,
         },
-        "django.server": {
-            "level": "INFO",
-            "class": "logging.StreamHandler",
-            "formatter": "django.server",
-        },
-        "mail_admins": {
-            "level": "ERROR",
-            "filters": ["require_debug_false"],
-            "class": "django.utils.log.AdminEmailHandler",
-        },
     },
     "loggers": {
         "d": {
