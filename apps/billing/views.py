@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from .models import Plan, Subscription, Invoice
 from .serializers import (
@@ -89,10 +90,13 @@ class SubscriptionViewSet(viewsets.ReadOnlyModelViewSet):
                 message = ""
                 if action_type == "cancel":
                     StripeService.cancel_subscription(subscription, at_period_end)
-                    message = f"Subscription {'will be canceled at period end' if at_period_end else 'has been canceled immediately'}"
+                    if at_period_end:
+                        message = str(_("Subscription will be canceled at period end"))
+                    else:
+                        message = str(_("Subscription has been canceled immediately"))
                 elif action_type == "reactivate":
                     StripeService.reactivate_subscription(subscription)
-                    message = "Subscription has been reactivated"
+                    message = str(_("Subscription has been reactivated"))
 
                 subscription.refresh_from_db()
                 return Response(
@@ -118,7 +122,7 @@ class SubscriptionViewSet(viewsets.ReadOnlyModelViewSet):
             return Response(serializer.data)
 
         return Response(
-            {"message": "No active subscription found"},
+            {"message": str(_("No active subscription found"))},
             status=status.HTTP_404_NOT_FOUND,
         )
 

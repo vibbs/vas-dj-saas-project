@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils.translation import gettext_lazy as _
 from .models import Organization
 
 
@@ -15,7 +16,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
     def validate_sub_domain(self, value):
         # Ensure subdomain is unique and valid
         if Organization.objects.filter(sub_domain=value).exists():
-            raise serializers.ValidationError("This subdomain is already taken.")
+            raise serializers.ValidationError(_("This subdomain is already taken."))
         return value
 
 

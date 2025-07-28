@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils.translation import gettext_lazy as _
 from .models import Plan, Subscription, Invoice
 
 
@@ -84,7 +85,7 @@ class CreateCheckoutSessionSerializer(serializers.Serializer):
             plan = Plan.objects.get(id=value, is_active=True)
             return plan
         except Plan.DoesNotExist:
-            raise serializers.ValidationError("Invalid or inactive plan")
+            raise serializers.ValidationError(_("Invalid or inactive plan"))
 
 
 class SubscriptionActionSerializer(serializers.Serializer):

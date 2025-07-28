@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils.translation import gettext_lazy as _
 from .models import Account, AccountAuthProvider
 
 
@@ -39,7 +40,7 @@ class AccountCreateSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         """Validate that password and password_confirm match."""
         if attrs['password'] != attrs['password_confirm']:
-            raise serializers.ValidationError("Passwords don't match")
+            raise serializers.ValidationError(_("Passwords don't match"))
         return attrs
 
     def create(self, validated_data):

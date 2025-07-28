@@ -7,6 +7,7 @@ from drf_spectacular.types import OpenApiTypes
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from .models import EmailTemplate, EmailLog
 from .serializers import (
     EmailTemplateSerializer,
@@ -320,10 +321,10 @@ class EmailLogViewSet(viewsets.ReadOnlyModelViewSet):
             success = email_service.retry_failed_email(email_log.id)
 
             if success:
-                return Response({"message": "Email retry initiated"})
+                return Response({"message": str(_("Email retry initiated"))})
             else:
                 return Response(
-                    {"error": "Failed to initiate email retry"},
+                    {"error": str(_("Failed to initiate email retry"))},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 

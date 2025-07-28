@@ -1,0 +1,107 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Django SaaS Project\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-28 00:00+0000\n"
+"PO-Revision-Date: 2025-07-28 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: English <en@li.org>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "English"
+msgstr "English"
+
+# Sample translations for common terms
+msgid "Welcome"
+msgstr "Welcome"
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Settings"
+msgstr "Settings"
+
+msgid "Account"
+msgstr "Account"
+
+msgid "Organization"
+msgstr "Organization"
+
+msgid "Billing"
+msgstr "Billing"
+
+msgid "Users"
+msgstr "Users"
+
+msgid "Save"
+msgstr "Save"
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Delete"
+msgstr "Delete"
+
+msgid "Edit"
+msgstr "Edit"
+
+msgid "Add"
+msgstr "Add"
+
+msgid "Create"
+msgstr "Create"
+
+msgid "Update"
+msgstr "Update"
+
+msgid "Success"
+msgstr "Success"
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Warning"
+msgstr "Warning"
+
+msgid "Information"
+msgstr "Information"
+
+# Billing messages
+msgid "Subscription will be canceled at period end"
+msgstr "Subscription will be canceled at period end"
+
+msgid "Subscription has been canceled immediately"
+msgstr "Subscription has been canceled immediately"
+
+msgid "Subscription has been reactivated"
+msgstr "Subscription has been reactivated"
+
+msgid "No active subscription found"
+msgstr "No active subscription found"
+
+msgid "Invalid or inactive plan"
+msgstr "Invalid or inactive plan"
+
+# Email service messages
+msgid "Email retry initiated"
+msgstr "Email retry initiated"
+
+msgid "Failed to initiate email retry"
+msgstr "Failed to initiate email retry"
+
+# Organization messages
+msgid "This subdomain is already taken."
+msgstr "This subdomain is already taken."
+
+# Account messages
+msgid "Passwords don't match"
+msgstr "Passwords don't match"
