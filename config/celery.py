@@ -2,9 +2,10 @@ import os
 import django
 from django.conf import settings
 from celery import Celery
+from decouple import config
 
 # Set the default Django settings module for the 'celery' program.
-if os.environ.get("APP_ENV") == "prod":
+if config("APP_ENV", default="dev") == "prod":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
 else:
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
