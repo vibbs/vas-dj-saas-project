@@ -3,6 +3,8 @@
 import os
 import sys
 
+from config import log_settings  # noqa
+
 
 def main():
     """Run administrative tasks."""

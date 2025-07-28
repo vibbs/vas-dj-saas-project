@@ -1,6 +1,9 @@
+import logging
 from django.db import models
 from django.conf import settings
 from apps.core.models import BaseFields
+
+log = logging.getLogger(f"{settings.LOG_APP_PREFIX}.email_service.models")
 
 
 class EmailTemplateCategory(models.TextChoices):
@@ -23,37 +26,29 @@ class EmailStatus(models.TextChoices):
 class EmailTemplate(BaseFields):
     slug = models.SlugField(
         max_length=100,
-        help_text="Unique identifier for the template within organization"
+        help_text="Unique identifier for the template within organization",
     )
-    name = models.CharField(
-        max_length=200,
-        help_text="Human-readable template name"
-    )
+    name = models.CharField(max_length=200, help_text="Human-readable template name")
     subject = models.CharField(
-        max_length=255,
-        help_text="Email subject line with template variables"
+        max_length=255, help_text="Email subject line with template variables"
     )
-    html_content = models.TextField(
-        help_text="HTML email body with template variables"
-    )
+    html_content = models.TextField(help_text="HTML email body with template variables")
     text_content = models.TextField(
-        blank=True,
-        help_text="Plain text email body with template variables"
+        blank=True, help_text="Plain text email body with template variables"
     )
     category = models.CharField(
         max_length=20,
         choices=EmailTemplateCategory.choices,
         default=EmailTemplateCategory.NOTIFICATIONS,
-        help_text="Template category for organization"
+        help_text="Template category for organization",
     )
     is_active = models.BooleanField(
-        default=True,
-        help_text="Whether this template is active and can be used"
+        default=True, help_text="Whether this template is active and can be used"
     )
     metadata = models.JSONField(
         default=dict,
         blank=True,
-        help_text="Additional template configuration and settings"
+        help_text="Additional template configuration and settings",
     )
 
     class Meta:
@@ -79,73 +74,52 @@ class EmailLog(BaseFields):
         null=True,
         blank=True,
         related_name="email_logs",
-        help_text="Template used for this email"
+        help_text="Template used for this email",
     )
     template_slug = models.CharField(
         max_length=100,
-        help_text="Template slug at time of sending (preserved even if template deleted)"
+        help_text="Template slug at time of sending (preserved even if template deleted)",
     )
-    recipient_email = models.EmailField(
-        help_text="Email address of the recipient"
-    )
+    recipient_email = models.EmailField(help_text="Email address of the recipient")
     recipient_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="received_emails",
-        help_text="User account of recipient (if applicable)"
+        help_text="User account of recipient (if applicable)",
     )
-    subject = models.CharField(
-        max_length=255,
-        help_text="Rendered email subject"
-    )
-    html_content = models.TextField(
-        blank=True,
-        help_text="Rendered HTML content"
-    )
-    text_content = models.TextField(
-        blank=True,
-        help_text="Rendered text content"
-    )
+    subject = models.CharField(max_length=255, help_text="Rendered email subject")
+    html_content = models.TextField(blank=True, help_text="Rendered HTML content")
+    text_content = models.TextField(blank=True, help_text="Rendered text content")
     status = models.CharField(
         max_length=20,
         choices=EmailStatus.choices,
         default=EmailStatus.PENDING,
-        help_text="Current status of the email"
+        help_text="Current status of the email",
     )
     sent_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="When the email was successfully sent"
+        null=True, blank=True, help_text="When the email was successfully sent"
     )
     delivered_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="When the email was delivered"
+        null=True, blank=True, help_text="When the email was delivered"
     )
     error_message = models.TextField(
-        blank=True,
-        help_text="Error details if sending failed"
+        blank=True, help_text="Error details if sending failed"
     )
     retry_count = models.PositiveIntegerField(
-        default=0,
-        help_text="Number of retry attempts"
+        default=0, help_text="Number of retry attempts"
     )
     provider_message_id = models.CharField(
-        max_length=255,
-        blank=True,
-        help_text="Message ID from email provider"
+        max_length=255, blank=True, help_text="Message ID from email provider"
     )
     context_data = models.JSONField(
-        default=dict,
-        blank=True,
-        help_text="Template context data used for rendering"
+        default=dict, blank=True, help_text="Template context data used for rendering"
     )
     metadata = models.JSONField(
         default=dict,
         blank=True,
-        help_text="Additional email metadata and tracking information"
+        help_text="Additional email metadata and tracking information",
     )
 
     class Meta:
@@ -169,7 +143,11 @@ class EmailLog(BaseFields):
 
     @property
     def is_failed(self):
-        return self.status in [EmailStatus.FAILED, EmailStatus.BOUNCED, EmailStatus.COMPLAINED]
+        return self.status in [
+            EmailStatus.FAILED,
+            EmailStatus.BOUNCED,
+            EmailStatus.COMPLAINED,
+        ]
 
     @property
     def can_retry(self):

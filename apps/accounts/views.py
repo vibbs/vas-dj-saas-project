@@ -1,8 +1,10 @@
+import logging
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from .models import Account, AccountAuthProvider
 from .serializers import (
     AccountSerializer,
@@ -10,6 +12,7 @@ from .serializers import (
     AccountAuthProviderSerializer,
 )
 
+log = logging.getLogger(f"{settings.LOG_APP_PREFIX}.accounts.views")
 User = get_user_model()
 
 

@@ -1,7 +1,9 @@
+import logging
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from django.conf import settings
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from .models import Plan, Subscription, Invoice
 from .serializers import (
@@ -13,6 +15,8 @@ from .serializers import (
     BillingOverviewSerializer,
 )
 from .services import StripeService, BillingService
+
+log = logging.getLogger(f"{settings.LOG_APP_PREFIX}.billing.views")
 from .webhooks import StripeWebhookView
 
 
