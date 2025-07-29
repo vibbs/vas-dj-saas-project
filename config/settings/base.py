@@ -209,6 +209,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PAGINATION_CLASS": "apps.core.middleware.CustomPaginationClass",
     "PAGE_SIZE": 20,
+    "EXCEPTION_HANDLER": "apps.core.exceptions.handler.custom_exception_handler",
 }
 
 # drf-spectacular settings
@@ -224,6 +225,7 @@ SPECTACULAR_SETTINGS = {
     "SERVE_AUTHENTICATION": None,
     "POSTPROCESSING_HOOKS": [
         "apps.core.schema_hooks.wrap_responses_in_data",
+        "apps.core.schema_hooks.add_common_error_responses",
         "drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields",
     ],
     "ENUM_NAME_OVERRIDES": {

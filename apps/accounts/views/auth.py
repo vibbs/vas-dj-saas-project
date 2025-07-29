@@ -11,6 +11,12 @@ from rest_framework import serializers
 
 from apps.accounts.models import Account
 from apps.accounts.serializers import AccountSerializer
+from apps.core.exceptions import (
+    MissingRequiredFieldException,
+    InvalidCredentialsException,
+    AccountDisabledException,
+    InvalidRefreshTokenException,
+)
 
 
 # Serializers for documentation purposes
@@ -47,8 +53,6 @@ class TokenVerifyResponseSerializer(serializers.Serializer):
     user = AccountSerializer(help_text="User information if token is valid", required=False)
 
 
-class ErrorResponseSerializer(serializers.Serializer):
-    error = serializers.CharField(help_text="Error message")
 
 
 @extend_schema(
@@ -57,8 +61,6 @@ class ErrorResponseSerializer(serializers.Serializer):
     request=LoginRequestSerializer,
     responses={
         200: LoginResponseSerializer,
-        400: ErrorResponseSerializer,
-        401: ErrorResponseSerializer,
     },
     examples=[
         OpenApiExample(
@@ -103,24 +105,18 @@ def login(request):
     password = request.data.get('password')
     
     if not email or not password:
-        return Response(
-            {'error': 'Email and password are required'},
-            status=status.HTTP_400_BAD_REQUEST
+        raise MissingRequiredFieldException(
+            detail="Email and password are required",
+            extra_data={"missing_fields": ["email", "password"]}
         )
     
     user = authenticate(email=email, password=password)
     
     if user is None:
-        return Response(
-            {'error': 'Invalid credentials'},
-            status=status.HTTP_401_UNAUTHORIZED
-        )
+        raise InvalidCredentialsException()
     
     if not user.is_active:
-        return Response(
-            {'error': 'Account is disabled'},
-            status=status.HTTP_401_UNAUTHORIZED
-        )
+        raise AccountDisabledException()
     
     # Generate tokens
     refresh = RefreshToken.for_user(user)
@@ -151,8 +147,6 @@ def login(request):
     request=RefreshTokenRequestSerializer,
     responses={
         200: RefreshTokenResponseSerializer,
-        400: ErrorResponseSerializer,
-        401: ErrorResponseSerializer,
     },
     examples=[
         OpenApiExample(
@@ -187,9 +181,9 @@ def refresh_token(request):
     refresh_token = request.data.get('refresh')
     
     if not refresh_token:
-        return Response(
-            {'error': 'Refresh token is required'},
-            status=status.HTTP_400_BAD_REQUEST
+        raise MissingRequiredFieldException(
+            detail="Refresh token is required",
+            extra_data={"missing_fields": ["refresh"]}
         )
     
     try:
@@ -209,10 +203,7 @@ def refresh_token(request):
         }, status=status.HTTP_200_OK)
         
     except Exception:
-        return Response(
-            {'error': 'Invalid refresh token'},
-            status=status.HTTP_401_UNAUTHORIZED
-        )
+        raise InvalidRefreshTokenException()
 
 
 @extend_schema(
@@ -221,7 +212,6 @@ def refresh_token(request):
     request=LogoutRequestSerializer,
     responses={
         200: LogoutResponseSerializer,
-        400: ErrorResponseSerializer,
     },
     examples=[
         OpenApiExample(
@@ -254,9 +244,9 @@ def logout(request):
     refresh_token = request.data.get('refresh')
     
     if not refresh_token:
-        return Response(
-            {'error': 'Refresh token is required'},
-            status=status.HTTP_400_BAD_REQUEST
+        raise MissingRequiredFieldException(
+            detail="Refresh token is required",
+            extra_data={"missing_fields": ["refresh"]}
         )
     
     try:
@@ -268,10 +258,7 @@ def logout(request):
             status=status.HTTP_200_OK
         )
     except Exception:
-        return Response(
-            {'error': 'Invalid refresh token'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        raise InvalidRefreshTokenException()
 
 
 @extend_schema(
@@ -280,7 +267,6 @@ def logout(request):
     request=None,
     responses={
         200: TokenVerifyResponseSerializer,
-        401: ErrorResponseSerializer,
     },
     examples=[
         OpenApiExample(
