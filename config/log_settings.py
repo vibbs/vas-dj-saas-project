@@ -114,6 +114,18 @@ config = {
             "propagate": True,
             "filters": ["transaction_id_filter"],
         },
+        "*": {
+            "handlers": ["console", "syslog"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+            "filters": ["transaction_id_filter"],
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": LOG_LEVEL,
+        "propagate": True,
+        "filters": ["transaction_id_filter"],
     },
 }
 

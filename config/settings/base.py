@@ -68,6 +68,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # Custom middleware
+    "apps.core.middleware.RequestTimingMiddleware",
     "apps.core.middleware.TransactionIDMiddleware",
     "apps.organizations.middleware.TenantMiddleware",
 ]
