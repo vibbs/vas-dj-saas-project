@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from django.contrib.auth import get_user_model
 from django.conf import settings
-from .models import Account, AccountAuthProvider
-from .serializers import (
+from apps.accounts.models import Account, AccountAuthProvider
+from apps.accounts.serializers import (
     AccountSerializer,
     AccountCreateSerializer,
     AccountAuthProviderSerializer,

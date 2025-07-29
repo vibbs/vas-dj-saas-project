@@ -1,7 +1,9 @@
 from django.urls import path, include
 
 urlpatterns = [
-    # Authentication URLs
+    # JWT Authentication URLs
+    path("auth/", include("apps.accounts.urls.auth")),
+    # DRF Authentication URLs (for browsable API)
     path("auth/", include("rest_framework.urls", namespace="rest_framework_v1")),
     # Accounts API endpoints
     path("accounts/", include("apps.accounts.urls.api_v1")),

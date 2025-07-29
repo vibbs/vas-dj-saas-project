@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Third party apps
     "rest_framework",
+    "rest_framework_simplejwt",
     "drf_spectacular",
     "djangorestframework_camel_case",
     # Local apps
@@ -190,6 +191,7 @@ AUTH_USER_MODEL = "accounts.Account"
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
     ],
@@ -228,3 +230,7 @@ SPECTACULAR_SETTINGS = {
         "ValidationErrorEnum": "drf_spectacular.types.ErrorDetail",
     },
 }
+
+# JWT Configuration
+from apps.core.jwt_config import get_jwt_settings
+SIMPLE_JWT = get_jwt_settings(SECRET_KEY)
