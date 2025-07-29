@@ -136,30 +136,18 @@ make check-status
 
 ## 🌐 API Documentation
 
-### Interactive Documentation
-- **Swagger UI**: http://localhost:8000/api/docs/
-- **ReDoc**: http://localhost:8000/api/redoc/
-- **Schema JSON**: http://localhost:8000/api/schema/
+The project provides comprehensive, interactive API documentation that automatically stays up-to-date with your codebase:
 
-### Available Endpoints
+- **Swagger UI**: http://localhost:8000/api/docs/ - Interactive API testing interface
+- **ReDoc**: http://localhost:8000/api/redoc/ - Clean, comprehensive documentation
+- **Schema JSON**: http://localhost:8000/api/schema/ - Raw OpenAPI schema for integration
 
-#### Accounts API (`/api/v1/accounts/`)
-- `GET /users/` - List user accounts
-- `POST /users/` - Create new user account
-- `GET /users/{id}/` - Get user details
-- `PATCH /users/{id}/` - Update user account
-- `DELETE /users/{id}/` - Delete user account
-- `GET /users/me/` - Get current user profile
-- `PATCH /users/update_profile/` - Update current user profile
-- `GET /users/{id}/auth_providers/` - Get user's authentication providers
-
-#### Organizations API (`/api/v1/organizations/`)
-- `GET /` - List organizations
-- `POST /` - Create new organization
-- `GET /{id}/` - Get organization details
-- `PATCH /{id}/` - Update organization
-- `DELETE /{id}/` - Delete organization
-- `GET /{id}/stats/` - Get organization statistics
+### API Features
+- **Full CRUD Operations**: Complete resource management for users and organizations
+- **Authentication Required**: Secure endpoints with session/token authentication
+- **Pagination Support**: Efficient handling of large datasets
+- **Comprehensive Filtering**: Query parameters for data filtering and searching
+- **Real-time Documentation**: Auto-generated from code annotations and serializers
 
 ## 🏗 Architecture Overview
 
