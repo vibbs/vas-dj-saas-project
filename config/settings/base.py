@@ -195,8 +195,8 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_RENDERER_CLASSES": (
-        "djangorestframework_camel_case.render.CamelCaseJSONRenderer",
-        "rest_framework.renderers.JSONRenderer",
+        "apps.core.renderers.ConsistentDataRenderer",
+        "apps.core.renderers.ConsistentDataJSONRenderer",
     ),
     "DEFAULT_PARSER_CLASSES": (
         "djangorestframework_camel_case.parser.CamelCaseJSONParser",
@@ -219,7 +219,8 @@ SPECTACULAR_SETTINGS = {
     "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
     "SERVE_AUTHENTICATION": None,
     "POSTPROCESSING_HOOKS": [
-        "drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields"
+        "apps.core.schema_hooks.wrap_responses_in_data",
+        "drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields",
     ],
     "ENUM_NAME_OVERRIDES": {
         "ValidationErrorEnum": "drf_spectacular.types.ErrorDetail",
