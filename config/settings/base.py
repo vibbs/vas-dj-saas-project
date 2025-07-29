@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     # Third party apps
     "rest_framework",
     "drf_spectacular",
+    "djangorestframework_camel_case",
     # Local apps
     "apps.core",
     "apps.organizations",
@@ -135,9 +136,7 @@ USE_L10N = True
 USE_TZ = True
 
 # Locale paths
-LOCALE_PATHS = [
-    BASE_DIR / path for path in LOCALE_PATHS_RELATIVE
-]
+LOCALE_PATHS = [BASE_DIR / path for path in LOCALE_PATHS_RELATIVE]
 
 
 # Static files (CSS, JavaScript, Images)
@@ -195,7 +194,16 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_RENDERER_CLASSES": (
+        "djangorestframework_camel_case.render.CamelCaseJSONRenderer",
+        "rest_framework.renderers.JSONRenderer",
+    ),
+    "DEFAULT_PARSER_CLASSES": (
+        "djangorestframework_camel_case.parser.CamelCaseJSONParser",
+        "djangorestframework_camel_case.parser.CamelCaseFormParser",
+        "djangorestframework_camel_case.parser.CamelCaseMultiPartParser",
+    ),
+    "DEFAULT_PAGINATION_CLASS": "apps.core.middleware.pagination_middleware.DPaginationClass",
     "PAGE_SIZE": 20,
 }
 
@@ -210,4 +218,10 @@ SPECTACULAR_SETTINGS = {
     "SORT_OPERATIONS": False,
     "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
     "SERVE_AUTHENTICATION": None,
+    "POSTPROCESSING_HOOKS": [
+        "drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields"
+    ],
+    "ENUM_NAME_OVERRIDES": {
+        "ValidationErrorEnum": "drf_spectacular.types.ErrorDetail",
+    },
 }
