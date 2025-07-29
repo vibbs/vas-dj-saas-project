@@ -55,11 +55,7 @@ def wrap_responses_in_data(result, generator, request, public):
                 for content_type, content in response["content"].items():
                     if "schema" not in content:
                         continue
-
-                    print("Checking if schema should be wrapped in data...")
-                    print(content_type)
                     schema = content["schema"]
-                    print(schema)
 
                     # Wrap schema if needed
                     if should_wrap_in_data(schema):

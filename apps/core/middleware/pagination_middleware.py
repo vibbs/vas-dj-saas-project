@@ -14,7 +14,7 @@ class CustomPaginationSerializer(serializers.Serializer):
     data = serializers.ListField()
 
 
-class DPaginationClass(PageNumberPagination):
+class CustomPaginationClass(PageNumberPagination):
     page_size_query_param = "perPage"
     page_query_param = "page"
     page_size = 20

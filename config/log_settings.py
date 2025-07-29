@@ -8,6 +8,8 @@ import logging.handlers
 
 from django.conf import settings
 
+from apps.lib.log_utils import TransactionIDFilter
+
 APP_ENV = settings.APP_ENV.lower()
 LOG_LEVEL = settings.LOG_LEVEL.upper()
 LOG_APP_PREFIX = settings.LOG_APP_PREFIX.lower()
@@ -19,11 +21,12 @@ if APP_ENV == "prod":
 
         json_formatter = {
             "()": jsonlogger.JsonFormatter,
-            "fmt": "%(asctime)s %(levelname)s %(name)s %(message)s",
+            "fmt": "%(asctime)s %(levelname)s %(name)s %(transaction_id)s %(message)s",
             "rename_fields": {
                 "asctime": "timestamp",
                 "levelname": "level",
                 "name": "logger",
+                "transaction_id": "transaction_id",
                 "message": "message",
             },
         }
@@ -62,6 +65,11 @@ config = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": formatter_config,
+    "filters": {
+        "transaction_id_filter": {
+            "()": TransactionIDFilter,
+        },
+    },
     "handlers": {
         "console": {
             "level": LOG_LEVEL,
@@ -76,30 +84,35 @@ config = {
         },
     },
     "loggers": {
-        "d": {
-            "handlers": ["console"],
-            "level": LOG_LEVEL,
-            "propagate": True,
-        },
+        # "d": {
+        #     "handlers": ["console"],
+        #     "level": LOG_LEVEL,
+        #     "propagate": True,
+        #     "filters": ["transaction_id_filter"],
+        # },
         LOG_APP_PREFIX: {
             "handlers": ["console"],
             "level": LOG_LEVEL,
             "propagate": False,
+            "filters": ["transaction_id_filter"],
         },
         "django": {
             "handlers": ["console"],
             "level": LOG_LEVEL,
             "propagate": True,
+            "filters": ["transaction_id_filter"],
         },
         "django.server": {
             "handlers": ["console"],
             "level": LOG_LEVEL,
             "propagate": False,
+            "filters": ["transaction_id_filter"],
         },
         "django.request": {
             "handlers": ["console"],
             "level": LOG_LEVEL,
             "propagate": True,
+            "filters": ["transaction_id_filter"],
         },
     },
 }

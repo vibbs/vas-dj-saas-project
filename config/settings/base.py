@@ -68,6 +68,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # Custom middleware
+    "apps.core.middleware.TransactionIDMiddleware",
     "apps.organizations.middleware.TenantMiddleware",
 ]
 
@@ -203,7 +204,7 @@ REST_FRAMEWORK = {
         "djangorestframework_camel_case.parser.CamelCaseFormParser",
         "djangorestframework_camel_case.parser.CamelCaseMultiPartParser",
     ),
-    "DEFAULT_PAGINATION_CLASS": "apps.core.middleware.pagination_middleware.DPaginationClass",
+    "DEFAULT_PAGINATION_CLASS": "apps.core.middleware.CustomPaginationClass",
     "PAGE_SIZE": 20,
 }
 
