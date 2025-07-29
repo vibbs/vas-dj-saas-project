@@ -38,9 +38,31 @@ class PlanViewSet(viewsets.ReadOnlyModelViewSet):
 
 @extend_schema_view(
     list=extend_schema(tags=["Billing"]),
-    retrieve=extend_schema(tags=["Billing"]),
+    retrieve=extend_schema(
+        tags=["Billing"],
+        parameters=[
+            {
+                'name': 'id',
+                'in': 'path',
+                'required': True,
+                'description': 'Subscription UUID',
+                'schema': {'type': 'string', 'format': 'uuid'}
+            }
+        ]
+    ),
     create_checkout_session=extend_schema(tags=["Billing"]),
-    manage_subscription=extend_schema(tags=["Billing"]),
+    manage_subscription=extend_schema(
+        tags=["Billing"],
+        parameters=[
+            {
+                'name': 'id',
+                'in': 'path',
+                'required': True,
+                'description': 'Subscription UUID',
+                'schema': {'type': 'string', 'format': 'uuid'}
+            }
+        ]
+    ),
     current=extend_schema(tags=["Billing"]),
     overview=extend_schema(tags=["Billing"]),
 )
@@ -171,7 +193,18 @@ class SubscriptionViewSet(viewsets.ReadOnlyModelViewSet):
 
 @extend_schema_view(
     list=extend_schema(tags=["Billing"]),
-    retrieve=extend_schema(tags=["Billing"]),
+    retrieve=extend_schema(
+        tags=["Billing"],
+        parameters=[
+            {
+                'name': 'id',
+                'in': 'path',
+                'required': True,
+                'description': 'Invoice UUID',
+                'schema': {'type': 'string', 'format': 'uuid'}
+            }
+        ]
+    ),
 )
 class InvoiceViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = InvoiceSerializer

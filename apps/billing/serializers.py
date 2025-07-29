@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.utils.translation import gettext_lazy as _
+from drf_spectacular.utils import extend_schema_field
 from .models import Plan, Subscription, Invoice
 
 
@@ -23,6 +24,21 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     plan_name = serializers.CharField(source='plan.name', read_only=True)
     plan_details = PlanSerializer(source='plan', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
+    is_active = serializers.SerializerMethodField()
+    is_trialing = serializers.SerializerMethodField()
+    is_canceled = serializers.SerializerMethodField()
+    
+    @extend_schema_field(serializers.BooleanField)
+    def get_is_active(self, obj):
+        return obj.is_active
+    
+    @extend_schema_field(serializers.BooleanField)
+    def get_is_trialing(self, obj):
+        return obj.is_trialing
+    
+    @extend_schema_field(serializers.BooleanField)
+    def get_is_canceled(self, obj):
+        return obj.is_canceled
     
     class Meta:
         model = Subscription
@@ -51,6 +67,11 @@ class InvoiceSerializer(serializers.ModelSerializer):
     account_email = serializers.CharField(source='account.email', read_only=True)
     subscription_plan = serializers.CharField(source='subscription.plan.name', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
+    is_paid = serializers.SerializerMethodField()
+    
+    @extend_schema_field(serializers.BooleanField)
+    def get_is_paid(self, obj):
+        return obj.is_paid
     
     class Meta:
         model = Invoice

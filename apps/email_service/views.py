@@ -351,11 +351,6 @@ class EmailLogViewSet(viewsets.ReadOnlyModelViewSet):
         },
         tags=["Email Service"],
     ),
-    list=extend_schema(exclude=True),  # Hide list endpoint
-    retrieve=extend_schema(exclude=True),  # Hide retrieve endpoint
-    update=extend_schema(exclude=True),  # Hide update endpoint
-    partial_update=extend_schema(exclude=True),  # Hide partial_update endpoint
-    destroy=extend_schema(exclude=True),  # Hide destroy endpoint
 )
 class SendEmailViewSet(viewsets.GenericViewSet):
     """ViewSet for sending emails via API"""
