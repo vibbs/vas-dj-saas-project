@@ -1,0 +1,106 @@
+import { Meta, Story, Canvas, Controls } from '@storybook/blocks';
+import * as ButtonStories from './Button.stories';
+
+<Meta of={ButtonStories} />
+
+# Cross-Platform Button Component
+
+A unified Button component that automatically renders the appropriate implementation based on the platform.
+
+## Features
+- **Automatic Platform Detection**: Uses React Native's `Platform.OS` to select the correct implementation
+- **Consistent API**: Same props work on both web and React Native
+- **Theme Integration**: Uses unified design tokens for consistent styling
+- **Loading States**: Built-in loading spinner with platform-appropriate animations
+- **Accessibility**: Proper ARIA attributes and React Native accessibility props
+
+## Platform Implementations
+- **Web**: HTML `<button>` with CSS-based styling and hover effects
+- **React Native**: `TouchableOpacity` with `ActivityIndicator` for loading states
+
+## Interactive Playground
+
+<Canvas of={ButtonStories.Interactive} />
+<Controls of={ButtonStories.Interactive} />
+
+## Examples
+
+### All Variants
+<Canvas of={ButtonStories.AllVariants} />
+
+### All Sizes
+<Canvas of={ButtonStories.AllSizes} />
+
+### Button States
+<Canvas of={ButtonStories.States} />
+
+### Platform Comparison
+<Canvas of={ButtonStories.PlatformComparison} />
+
+### Theme Comparison
+<Canvas of={ButtonStories.ThemeComparison} />
+
+## Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `'primary' \| 'secondary' \| 'outline' \| 'ghost' \| 'destructive'` | `'primary'` | Visual style variant |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Button size |
+| `disabled` | `boolean` | `false` | Disable button interactions |
+| `loading` | `boolean` | `false` | Show loading spinner |
+| `onPress` | `() => void` | - | React Native press handler |
+| `onClick` | `() => void` | - | Web click handler |
+| `className` | `string` | - | Web-only CSS class |
+| `style` | `object` | - | React Native-only style object |
+| `testID` | `string` | - | Cross-platform test identifier |
+
+## Usage Examples
+
+### Basic Usage
+```tsx
+import { Button } from '@vas-dj-saas/ui';
+
+<Button variant="primary" size="md">
+  Click me
+</Button>
+```
+
+### With Theme Provider
+```tsx
+import { Button, ThemeProvider } from '@vas-dj-saas/ui';
+
+<ThemeProvider defaultTheme="dark">
+  <Button variant="primary">Themed Button</Button>
+</ThemeProvider>
+```
+
+### Platform-Specific Handlers
+```tsx
+// React Native
+<Button onPress={() => alert('Native press')}>
+  Native Button
+</Button>
+
+// Web
+<Button onClick={() => alert('Web click')}>
+  Web Button
+</Button>
+```
+
+## How It Works
+
+1. **Import Resolution**: When you import `Button`, it goes through `Button.ts`
+2. **Platform Detection**: Uses `createPlatformComponent` utility with `Platform.OS`
+3. **Dynamic Export**: Exports the appropriate implementation via HOC pattern
+4. **Theme Integration**: Both implementations use the same theme tokens
+5. **Type Safety**: TypeScript knows about all props across platforms
+6. **Reusable Pattern**: Uses shared `PlatformUtils` for consistency
+
+## Benefits
+
+✅ **Single Import** - One import works everywhere  
+✅ **Automatic Platform Detection** - No manual platform checks  
+✅ **Consistent API** - Same props work on both platforms  
+✅ **Theme Consistency** - Unified design system  
+✅ **Type Safety** - Full TypeScript support  
+✅ **Performance** - Platform-optimized rendering  

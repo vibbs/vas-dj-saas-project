@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '../../utils/cn';
+import { useTheme } from '../../theme/ThemeProvider';
 import { ButtonProps } from './types';
 
 export const Button: React.FC<ButtonProps> = ({
@@ -10,39 +10,136 @@ export const Button: React.FC<ButtonProps> = ({
   size = 'md',
   loading = false,
   onClick,
+  style,
   ...props
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
-  
-  const variantStyles = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
-    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500',
-    outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-blue-500',
-    ghost: 'text-gray-700 hover:bg-gray-100 focus:ring-gray-500',
-    destructive: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
+  const { theme } = useTheme();
+
+  const getVariantStyles = () => {
+    switch (variant) {
+      case 'primary':
+        return {
+          backgroundColor: disabled ? theme.colors.muted : theme.colors.primary,
+          color: theme.colors.primaryForeground,
+          border: 'none',
+        };
+      case 'secondary':
+        return {
+          backgroundColor: disabled ? theme.colors.muted : theme.colors.secondary,
+          color: theme.colors.secondaryForeground,
+          border: 'none',
+        };
+      case 'outline':
+        return {
+          backgroundColor: 'transparent',
+          color: theme.colors.foreground,
+          border: `${theme.borders.width.thin}px solid ${theme.colors.border}`,
+        };
+      case 'ghost':
+        return {
+          backgroundColor: 'transparent',
+          color: theme.colors.foreground,
+          border: 'none',
+        };
+      case 'destructive':
+        return {
+          backgroundColor: disabled ? theme.colors.muted : theme.colors.destructive,
+          color: theme.colors.destructiveForeground,
+          border: 'none',
+        };
+      default:
+        return {
+          backgroundColor: theme.colors.primary,
+          color: theme.colors.primaryForeground,
+          border: 'none',
+        };
+    }
   };
-  
-  const sizeStyles = {
-    sm: 'h-8 px-3 text-sm',
-    md: 'h-10 px-4 py-2 text-base',
-    lg: 'h-12 px-6 text-lg',
+
+  const getSizeStyles = () => {
+    switch (size) {
+      case 'sm':
+        return {
+          height: '32px',
+          paddingLeft: theme.spacing.sm + 4,
+          paddingRight: theme.spacing.sm + 4,
+          fontSize: theme.typography.fontSize.sm,
+        };
+      case 'md':
+        return {
+          height: '40px',
+          paddingLeft: theme.spacing.md,
+          paddingRight: theme.spacing.md,
+          fontSize: theme.typography.fontSize.base,
+        };
+      case 'lg':
+        return {
+          height: '48px',
+          paddingLeft: theme.spacing.lg,
+          paddingRight: theme.spacing.lg,
+          fontSize: theme.typography.fontSize.lg,
+        };
+      default:
+        return {
+          height: '40px',
+          paddingLeft: theme.spacing.md,
+          paddingRight: theme.spacing.md,
+          fontSize: theme.typography.fontSize.base,
+        };
+    }
+  };
+
+  const baseStyles: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: theme.borders.radius.md,
+    fontFamily: theme.typography.fontFamily,
+    fontWeight: theme.typography.fontWeight.medium,
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    opacity: disabled ? 0.5 : 1,
+    transition: 'all 0.2s ease-in-out',
+    outline: 'none',
+    boxShadow: 'none',
+    ...getSizeStyles(),
+    ...getVariantStyles(),
+  };
+
+  const hoverStyles: React.CSSProperties = {
+    filter: disabled ? 'none' : 'brightness(0.9)',
   };
 
   return (
     <button
-      className={cn(
-        baseStyles,
-        variantStyles[variant],
-        sizeStyles[size],
-        disabled && 'opacity-50 cursor-not-allowed',
-        className
-      )}
+      className={className}
+      style={{
+        ...baseStyles,
+        ...style,
+      }}
       disabled={disabled || loading}
       onClick={onClick}
+      onMouseEnter={(e) => {
+        if (!disabled) {
+          Object.assign(e.currentTarget.style, hoverStyles);
+        }
+      }}
+      onMouseLeave={(e) => {
+        Object.assign(e.currentTarget.style, baseStyles, style);
+      }}
       {...props}
     >
       {loading && (
-        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+        <div
+          style={{
+            marginRight: theme.spacing.xs + 4,
+            width: '16px',
+            height: '16px',
+            border: '2px solid currentColor',
+            borderTopColor: 'transparent',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+          }}
+        />
       )}
       {children}
     </button>

@@ -1,5 +1,6 @@
 import React from 'react';
-import { TouchableOpacity, Text, View, StyleSheet, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, Text, View, ActivityIndicator } from 'react-native';
+import { useTheme } from '../../theme/ThemeProvider';
 import { ButtonProps } from './types';
 
 export const Button: React.FC<ButtonProps> = ({
@@ -12,37 +13,65 @@ export const Button: React.FC<ButtonProps> = ({
   onPress,
   ...props
 }) => {
+  const { theme } = useTheme();
+
   const getVariantStyles = () => {
     switch (variant) {
       case 'primary':
         return {
-          container: styles.primaryContainer,
-          text: styles.primaryText,
+          container: {
+            backgroundColor: disabled ? theme.colors.muted : theme.colors.primary,
+          },
+          text: {
+            color: theme.colors.primaryForeground,
+          },
         };
       case 'secondary':
         return {
-          container: styles.secondaryContainer,
-          text: styles.secondaryText,
+          container: {
+            backgroundColor: disabled ? theme.colors.muted : theme.colors.secondary,
+          },
+          text: {
+            color: theme.colors.secondaryForeground,
+          },
         };
       case 'outline':
         return {
-          container: styles.outlineContainer,
-          text: styles.outlineText,
+          container: {
+            backgroundColor: 'transparent',
+            borderWidth: theme.borders.width.thin,
+            borderColor: theme.colors.border,
+          },
+          text: {
+            color: theme.colors.foreground,
+          },
         };
       case 'ghost':
         return {
-          container: styles.ghostContainer,
-          text: styles.ghostText,
+          container: {
+            backgroundColor: 'transparent',
+          },
+          text: {
+            color: theme.colors.foreground,
+          },
         };
       case 'destructive':
         return {
-          container: styles.destructiveContainer,
-          text: styles.destructiveText,
+          container: {
+            backgroundColor: disabled ? theme.colors.muted : theme.colors.destructive,
+          },
+          text: {
+            color: theme.colors.destructiveForeground,
+          },
         };
       default:
         return {
-          container: styles.primaryContainer,
-          text: styles.primaryText,
+          container: {
+            backgroundColor: theme.colors.primary,
+          },
+          text: {
+            color: theme.colors.primaryForeground,
+          },
         };
     }
   };
@@ -51,23 +80,47 @@ export const Button: React.FC<ButtonProps> = ({
     switch (size) {
       case 'sm':
         return {
-          container: styles.smallContainer,
-          text: styles.smallText,
+          container: {
+            paddingHorizontal: theme.spacing.sm + 4,
+            paddingVertical: theme.spacing.xs + 4,
+            minHeight: 32,
+          },
+          text: {
+            fontSize: theme.typography.fontSize.sm,
+          },
         };
       case 'md':
         return {
-          container: styles.mediumContainer,
-          text: styles.mediumText,
+          container: {
+            paddingHorizontal: theme.spacing.md,
+            paddingVertical: theme.spacing.xs + 2,
+            minHeight: 40,
+          },
+          text: {
+            fontSize: theme.typography.fontSize.base,
+          },
         };
       case 'lg':
         return {
-          container: styles.largeContainer,
-          text: styles.largeText,
+          container: {
+            paddingHorizontal: theme.spacing.lg,
+            paddingVertical: theme.spacing.sm + 4,
+            minHeight: 48,
+          },
+          text: {
+            fontSize: theme.typography.fontSize.lg,
+          },
         };
       default:
         return {
-          container: styles.mediumContainer,
-          text: styles.mediumText,
+          container: {
+            paddingHorizontal: theme.spacing.md,
+            paddingVertical: theme.spacing.xs + 2,
+            minHeight: 40,
+          },
+          text: {
+            fontSize: theme.typography.fontSize.base,
+          },
         };
     }
   };
@@ -75,29 +128,51 @@ export const Button: React.FC<ButtonProps> = ({
   const variantStyles = getVariantStyles();
   const sizeStyles = getSizeStyles();
 
+  const baseStyles = {
+    borderRadius: theme.borders.radius.md,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    opacity: disabled ? 0.5 : 1,
+  };
+
+  const textStyles = {
+    fontFamily: theme.typography.fontFamily,
+    fontWeight: theme.typography.fontWeight.medium as any,
+    textAlign: 'center' as const,
+  };
+
   return (
     <TouchableOpacity
       style={[
-        styles.base,
+        baseStyles,
         variantStyles.container,
         sizeStyles.container,
-        disabled && styles.disabled,
         style,
       ]}
       disabled={disabled || loading}
       onPress={onPress}
       {...props}
     >
-      <View style={styles.content}>
+      <View style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
         {loading && (
           <ActivityIndicator
             color={variantStyles.text.color}
             size="small"
-            style={styles.loader}
+            style={{ marginRight: theme.spacing.xs + 4 }}
           />
         )}
         {typeof children === 'string' ? (
-          <Text style={[variantStyles.text, sizeStyles.text]}>{children}</Text>
+          <Text style={[
+            textStyles,
+            variantStyles.text,
+            sizeStyles.text,
+          ]}>
+            {children}
+          </Text>
         ) : (
           children
         )}
@@ -105,93 +180,3 @@ export const Button: React.FC<ButtonProps> = ({
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  base: {
-    borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  loader: {
-    marginRight: 8,
-  },
-  
-  // Variant styles
-  primaryContainer: {
-    backgroundColor: '#007AFF',
-  },
-  primaryText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-  },
-  
-  secondaryContainer: {
-    backgroundColor: '#F2F2F7',
-  },
-  secondaryText: {
-    color: '#000000',
-    fontWeight: '600',
-  },
-  
-  outlineContainer: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: '#C7C7CC',
-  },
-  outlineText: {
-    color: '#007AFF',
-    fontWeight: '600',
-  },
-  
-  ghostContainer: {
-    backgroundColor: 'transparent',
-  },
-  ghostText: {
-    color: '#007AFF',
-    fontWeight: '600',
-  },
-  
-  destructiveContainer: {
-    backgroundColor: '#FF3B30',
-  },
-  destructiveText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-  },
-  
-  // Size styles
-  smallContainer: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    minHeight: 36,
-  },
-  smallText: {
-    fontSize: 14,
-  },
-  
-  mediumContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    minHeight: 40,
-  },
-  mediumText: {
-    fontSize: 16,
-  },
-  
-  largeContainer: {
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    minHeight: 44,
-  },
-  largeText: {
-    fontSize: 18,
-  },
-});
