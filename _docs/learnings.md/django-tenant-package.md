@@ -14,4 +14,4 @@ But while implementing this package, I found some limitations and challenges:
 - The package requires careful management of migrations, as each tenant's schema needs to be kept in sync with the base schema.
 - There are some performance considerations when dealing with a large number of tenants, as each tenant's schema adds overhead to database operations.
 
-Also the whole point of building this django-saas-project is to have a boilerplate for building SaaS applications, and I wanted to keep it as simple as possible. So I decided to implement a custom multi-tenancy solution using middleware and organization-aware models instead of using django-tenants.
+Also the whole point of building this vas-dj-saas-project is to have a boilerplate for building SaaS applications, and I wanted to keep it as simple as possible. So I decided to implement a custom multi-tenancy solution using middleware and organization-aware models instead of using django-tenants.
