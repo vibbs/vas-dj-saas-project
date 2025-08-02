@@ -107,3 +107,7 @@ backend-sanity:
 	@echo "🐳 Running backend-specific sanity checks..."
 	@cd backend && make check-system
 	@echo "🐳 Backend sanity check completed!"
+
+storybook:
+	@echo "📖 Starting Storybook..."
+	pnpm --filter @vas-dj-saas/ui storybook

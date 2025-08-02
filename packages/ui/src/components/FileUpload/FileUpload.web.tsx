@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { FileUploadProps } from './types';
 import { useTheme } from '../../theme/ThemeProvider';
+import { Icon } from '../Icon';
 
 export const FileUpload: React.FC<FileUploadProps> = ({
     children,
@@ -28,6 +29,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 }) => {
     const { theme } = useTheme();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [file, setFile] = useState<File | null>(null);
 
     // Define variant styles using theme tokens
     const variantStyles = {
@@ -77,7 +79,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         },
     };
 
-    const baseStyles = {
+    const baseStyles: React.CSSProperties = {
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -115,6 +117,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     }, []);
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = e.target.files?.[0];
+        if (selectedFile) {
+            setFile(selectedFile);
+        }
         if (onFileSelect) {
             onFileSelect(e.target.files);
         }
@@ -126,9 +132,28 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             if (fileInputRef.current) {
                 fileInputRef.current.click();
             }
-            onClick?.(e);
+            onClick?.();
         }
     };
+
+    const handleClear = () => {
+        setFile(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    if (file) {
+        return (
+            <div style={{ ...baseStyles, justifyContent: 'space-between', ...style }}>
+                <Icon name="File" size={20} color={variantStyles[variant].color} />
+                <span style={{ flex: 1, marginLeft: theme.spacing.sm }}>{file.name}</span>
+                <button onClick={handleClear} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                    <Icon name="X" size={20} color={variantStyles[variant].color} />
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div>

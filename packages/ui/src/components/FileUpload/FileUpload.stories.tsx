@@ -163,183 +163,108 @@ export const Interactive: Story = {
     },
 };
 
-// Platform comparison stories
-export const PlatformComparison: Story = {
-    name: '📱 Platform Comparison',
-    render: (args) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-            <div style={{
-                padding: '16px',
-                backgroundColor: '#f8f9fa',
-                borderRadius: '8px',
-                textAlign: 'center',
-                width: '100%',
-                maxWidth: '600px'
-            }}>
-                <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: 600 }}>
-                    Side-by-Side Platform Comparison
-                </h3>
-                <p style={{ margin: '0', fontSize: '12px', color: '#6b7280' }}>
-                    The same component props render different platform implementations
-                </p>
-            </div>
-
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '32px',
-                width: '100%',
-                maxWidth: '600px',
-                alignItems: 'start'
-            }}>
-                {/* Web Implementation */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
-                    <div style={{
-                        padding: '12px 16px',
-                        backgroundColor: '#e3f2fd',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: '#1976d2',
-                        textAlign: 'center',
-                        width: '100%'
-                    }}>
-                        🌐 Web Platform
-                    </div>
-                    <WebFileUpload {...args} />
-                    <div style={{
-                        fontSize: '11px',
-                        color: '#666',
-                        textAlign: 'center',
-                        lineHeight: '1.4'
-                    }}>
-                        HTML element with CSS styling<br />
-                        Hover effects & transitions
-                    </div>
-                </div>
-
-                {/* React Native Implementation */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
-                    <div style={{
-                        padding: '12px 16px',
-                        backgroundColor: '#f3e5f5',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: '#7b1fa2',
-                        textAlign: 'center',
-                        width: '100%'
-                    }}>
-                        📱 React Native Platform
-                    </div>
-                    <NativeFileUpload {...args} />
-                    <div style={{
-                        fontSize: '11px',
-                        color: '#666',
-                        textAlign: 'center',
-                        lineHeight: '1.4'
-                    }}>
-                        TouchableOpacity with native styling<br />
-                        Platform-appropriate touch feedback
-                    </div>
-                </div>
-            </div>
-
-            <div style={{
-                fontSize: '12px',
-                color: '#6b7280',
-                textAlign: 'center',
-                maxWidth: '500px',
-                lineHeight: '1.5',
-                fontStyle: 'italic'
-            }}>
-                ✨ Both implementations use the same props and theme system, but render with platform-optimized components and interactions.
-            </div>
-        </div>
-    ),
+// Story to explicitly render the Native implementation
+export const NativeImplementation: Story = {
+    name: '📱 Native Implementation',
+    render: (args) => <NativeFileUpload {...args} />,
     args: {
-        children: 'Cross-Platform FileUpload',
-        variant: 'primary',
-        size: 'md',
+        children: 'Native FileUpload',
+        onPress: () => console.log('Native FileUpload pressed!'),
     },
     parameters: {
         docs: {
             description: {
-                story: 'This story shows both web and React Native implementations side by side, demonstrating how the same props create platform-optimized components.',
+                story: 'This story explicitly renders the `FileUpload.native` component to isolate and test its behavior.',
             },
         },
     },
 };
 
-// All variants showcase
-export const AllVariants: Story = {
-    name: '🎨 All Variants',
-    render: () => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-            <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>FileUpload Variants - Side by Side</h3>
+// Story to explicitly render the Web implementation
+export const WebImplementation: Story = {
+    name: '🌐 Web Implementation',
+    render: (args) => <WebFileUpload {...args} />,
+    args: {
+        children: 'Web FileUpload',
+        onClick: () => console.log('Web FileUpload clicked!'),
+    },
+    parameters: {
+        docs: {
+            description: {
+                story: 'This story explicitly renders the `FileUpload.web` component to isolate and test its behavior.',
+            },
+        },
+    },
+};
 
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '32px',
-                width: '100%',
-                maxWidth: '800px'
-            }}>
-                {/* Web Variants */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
-                    <div style={{
-                        padding: '8px 16px',
-                        backgroundColor: '#e3f2fd',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: '#1976d2'
-                    }}>
-                        🌐 Web Platform
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', alignItems: 'center' }}>
-                        <WebFileUpload variant="primary">Primary</WebFileUpload>
-                        <WebFileUpload variant="secondary">Secondary</WebFileUpload>
-                        <WebFileUpload variant="outline">Outline</WebFileUpload>
-                        <WebFileUpload variant="ghost">Ghost</WebFileUpload>
-                        <WebFileUpload variant="destructive">Destructive</WebFileUpload>
-                    </div>
-                </div>
+// Story to showcase the loading state
+export const Loading: Story = {
+    name: '⏳ Loading State',
+    args: {
+        children: 'Loading...',
+        loading: true,
+    },
+    parameters: {
+        docs: {
+            description: {
+                story: 'The FileUpload in a loading state. Interactions are disabled and a spinner is shown.',
+            },
+        },
+    },
+};
 
-                {/* React Native Variants */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
-                    <div style={{
-                        padding: '8px 16px',
-                        backgroundColor: '#f3e5f5',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: '#7b1fa2'
-                    }}>
-                        📱 React Native Platform
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', alignItems: 'center' }}>
-                        <NativeFileUpload variant="primary">Primary</NativeFileUpload>
-                        <NativeFileUpload variant="secondary">Secondary</NativeFileUpload>
-                        <NativeFileUpload variant="outline">Outline</NativeFileUpload>
-                        <NativeFileUpload variant="ghost">Ghost</NativeFileUpload>
-                        <NativeFileUpload variant="destructive">Destructive</NativeFileUpload>
-                    </div>
-                </div>
-            </div>
+// Story to showcase the disabled state
+export const Disabled: Story = {
+    name: '🚫 Disabled State',
+    args: {
+        children: 'Disabled FileUpload',
+        disabled: true,
+    },
+    parameters: {
+        docs: {
+            description: {
+                story: 'The FileUpload in a disabled state. Interactions are disabled.',
+            },
+        },
+    },
+};
+
+// Story to showcase all variants
+export const Variants: Story = {
+    name: '🎨 Variants',
+    render: (args) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <FileUpload {...args} variant="primary">Primary</FileUpload>
+            <FileUpload {...args} variant="secondary">Secondary</FileUpload>
+            <FileUpload {...args} variant="outline">Outline</FileUpload>
+            <FileUpload {...args} variant="ghost">Ghost</FileUpload>
+            <FileUpload {...args} variant="destructive">Destructive</FileUpload>
         </div>
     ),
     parameters: {
         docs: {
             description: {
-                story: 'All available FileUpload variants shown side by side for web and React Native platforms using the unified theme system.',
+                story: 'All available style variants of the FileUpload component.',
             },
         },
     },
 };
 
-// All sizes showcase
-export const AllSizes: Story = {
-    name: '📏 All Sizes',
-    render: () => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
+// Story to showcase all sizes
+export const Sizes: Story = {
+    name: '📏 Sizes',
+    render: (args) => (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '16px' }}>
+            <FileUpload {...args} size="sm">Small</FileUpload>
+            <FileUpload {...args} size="md">Medium</FileUpload>
+            <FileUpload {...args} size="lg">Large</FileUpload>
+        </div>
+    ),
+    parameters: {
+        docs: {
+            description: {
+                story: 'All available sizes of the FileUpload component.',
+            },
+        },
+    },
+};
