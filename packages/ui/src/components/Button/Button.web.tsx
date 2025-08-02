@@ -11,6 +11,12 @@ export const Button: React.FC<ButtonProps> = ({
   loading = false,
   onClick,
   style,
+  accessibilityLabel,
+  'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
+  'aria-pressed': ariaPressed,
+  role = 'button',
+  type = 'button',
   ...props
 }) => {
   const { theme } = useTheme();
@@ -105,6 +111,22 @@ export const Button: React.FC<ButtonProps> = ({
     ...getVariantStyles(),
   };
 
+  // Add spin animation styles to document if not already present
+  React.useEffect(() => {
+    const styleId = 'button-spin-animation';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = `
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }, []);
+
   const hoverStyles: React.CSSProperties = {
     filter: disabled ? 'none' : 'brightness(0.9)',
   };
@@ -126,6 +148,20 @@ export const Button: React.FC<ButtonProps> = ({
       onMouseLeave={(e) => {
         Object.assign(e.currentTarget.style, baseStyles, style);
       }}
+      onKeyDown={(e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && !disabled && !loading) {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
+      type={type}
+      role={role}
+      aria-label={ariaLabel || accessibilityLabel}
+      aria-describedby={ariaDescribedBy}
+      aria-pressed={ariaPressed}
+      aria-disabled={disabled || loading}
+      aria-busy={loading}
+      tabIndex={disabled ? -1 : 0}
       {...props}
     >
       {loading && (
@@ -139,6 +175,7 @@ export const Button: React.FC<ButtonProps> = ({
             borderRadius: '50%',
             animation: 'spin 1s linear infinite',
           }}
+          aria-hidden="true"
         />
       )}
       {children}

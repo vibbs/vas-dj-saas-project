@@ -11,6 +11,17 @@ export const Button: React.FC<ButtonProps> = ({
   size = 'md',
   loading = false,
   onPress,
+  accessibilityLabel,
+  accessibilityHint,
+  accessibilityRole = 'button' as const,
+  // Filter out web-specific props
+  className,
+  onClick,
+  'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
+  'aria-pressed': ariaPressed,
+  role,
+  type,
   ...props
 }) => {
   const { theme } = useTheme();
@@ -151,6 +162,14 @@ export const Button: React.FC<ButtonProps> = ({
       ]}
       disabled={disabled || loading}
       onPress={onPress}
+      accessible={true}
+      accessibilityLabel={accessibilityLabel || (typeof children === 'string' ? children : 'Button')}
+      accessibilityHint={accessibilityHint}
+      accessibilityRole={accessibilityRole}
+      accessibilityState={{
+        disabled: disabled || loading,
+        busy: loading,
+      }}
       {...props}
     >
       <View style={{
@@ -163,6 +182,8 @@ export const Button: React.FC<ButtonProps> = ({
             color={variantStyles.text.color}
             size="small"
             style={{ marginRight: theme.spacing.xs + 4 }}
+            accessibilityElementsHidden={true}
+            importantForAccessibility="no-hide-descendants"
           />
         )}
         {typeof children === 'string' ? (

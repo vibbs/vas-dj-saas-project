@@ -44,7 +44,7 @@ esac
 mkdir -p packages/ui/src/components/{{component_name|title}}
 ```
 
-### 3. Create TypeScript Interface
+### 3. Create TypeScript Interface with Accessibility Support
 ```typescript
 # Write to packages/ui/src/components/{{component_name|title}}/types.ts
 export interface {{component_name|title}}Props {
@@ -60,10 +60,20 @@ export interface {{component_name|title}}Props {
   className?: string;    // Web only
   style?: any;          // React Native only
   testID?: string;      // Cross-platform testing
+  
+  // Accessibility props (WCAG 2.1 AA compliant)
+  accessibilityLabel?: string;     // React Native: Accessible name
+  accessibilityHint?: string;      // React Native: Additional context
+  accessibilityRole?: 'button' | 'link' | 'none' | 'menuitem'; // React Native: Element role
+  'aria-label'?: string;           // Web: Accessible name
+  'aria-describedby'?: string;     // Web: References to describing elements
+  'aria-pressed'?: boolean;        // Web: Toggle button state
+  role?: string;                   // Web: Element role
+  type?: 'button' | 'submit' | 'reset'; // Web: Button type
 }
 ```
 
-### 4. Create Web Implementation with Theme Integration
+### 4. Create Web Implementation with Theme Integration and Accessibility
 ```typescript
 # Write to packages/ui/src/components/{{component_name|title}}/{{component_name|title}}.web.tsx
 import React from 'react';
@@ -79,6 +89,14 @@ export const {{component_name|title}}: React.FC<{{component_name|title}}Props> =
   onClick,
   className,
   testID,
+  // Accessibility props
+  accessibilityLabel,
+  'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
+  'aria-pressed': ariaPressed,
+  role = 'button',
+  type = 'button',
+  style,
   ...props
 }) => {
   const { theme } = useTheme();
@@ -152,13 +170,45 @@ export const {{component_name|title}}: React.FC<{{component_name|title}}Props> =
     },
   } : {};
 
+  // Add CSS animations for loading states
+  React.useEffect(() => {
+    const styleId = '{{component_name}}-animations';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = `
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }, []);
+
   return (
     <button
-      style={baseStyles}
-      onClick={disabled ? undefined : onClick}
-      disabled={disabled}
+      style={{...baseStyles, ...style}}
+      onClick={disabled || loading ? undefined : onClick}
+      disabled={disabled || loading}
       data-testid={testID}
       className={className}
+      // Accessibility attributes (WCAG 2.1 AA compliant)
+      type={type}
+      role={role}
+      aria-label={ariaLabel || accessibilityLabel}
+      aria-describedby={ariaDescribedBy}
+      aria-pressed={ariaPressed}
+      aria-disabled={disabled || loading}
+      aria-busy={loading}
+      tabIndex={disabled ? -1 : 0}
+      // Keyboard navigation support
+      onKeyDown={(e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && !disabled && !loading) {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
       {...props}
     >
       {loading && (
@@ -173,6 +223,7 @@ export const {{component_name|title}}: React.FC<{{component_name|title}}Props> =
             animation: 'spin 1s linear infinite',
             marginRight: theme.spacing.xs,
           }}
+          aria-hidden="true"
         />
       )}
       {children}
@@ -181,7 +232,7 @@ export const {{component_name|title}}: React.FC<{{component_name|title}}Props> =
 };
 ```
 
-### 5. Create React Native Implementation with Theme Integration
+### 5. Create React Native Implementation with Theme Integration and Accessibility
 ```typescript
 # Write to packages/ui/src/components/{{component_name|title}}/{{component_name|title}}.native.tsx
 import React from 'react';
@@ -198,6 +249,18 @@ export const {{component_name|title}}: React.FC<{{component_name|title}}Props> =
   onPress,
   style,
   testID,
+  // Accessibility props
+  accessibilityLabel,
+  accessibilityHint,
+  accessibilityRole = 'button' as const,
+  // Filter out web-specific props
+  className,
+  onClick,
+  'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
+  'aria-pressed': ariaPressed,
+  role,
+  type,
   ...props
 }) => {
   const { theme } = useTheme();
@@ -279,10 +342,19 @@ export const {{component_name|title}}: React.FC<{{component_name|title}}Props> =
   return (
     <TouchableOpacity
       style={[baseStyles, style]}
-      onPress={disabled ? undefined : onPress}
+      onPress={disabled || loading ? undefined : onPress}
       disabled={disabled || loading}
       testID={testID}
       activeOpacity={0.8}
+      // React Native accessibility (WCAG 2.1 AA compliant)
+      accessible={true}
+      accessibilityLabel={accessibilityLabel || (typeof children === 'string' ? children : '{{component_name|title}}')}
+      accessibilityHint={accessibilityHint}
+      accessibilityRole={accessibilityRole}
+      accessibilityState={{
+        disabled: disabled || loading,
+        busy: loading,
+      }}
       {...props}
     >
       {loading && (
@@ -290,6 +362,8 @@ export const {{component_name|title}}: React.FC<{{component_name|title}}Props> =
           size="small"
           color={variantTextStyles[variant].color}
           style={{ marginRight: theme.spacing.xs }}
+          accessibilityElementsHidden={true}
+          importantForAccessibility="no-hide-descendants"
         />
       )}
       <Text style={textStyles}>{children}</Text>
@@ -1079,6 +1153,32 @@ claude code create-ui-component card
 # Create an input component
 claude code create-ui-component input
 ```
+
+## Accessibility Requirements (WCAG 2.1 AA Compliant)
+
+All UI components created with this template must include comprehensive accessibility support:
+
+### ✅ **Web Accessibility (WCAG 2.1 AA)**
+- **Semantic HTML**: Use proper HTML elements and roles
+- **ARIA Labels**: Provide accessible names and descriptions
+- **Keyboard Navigation**: Support Enter and Spacebar activation
+- **Focus Management**: Proper tab order and focus indicators  
+- **Screen Reader Support**: Descriptive labels and state information
+- **Color Contrast**: Ensure 4.5:1 minimum contrast ratio
+- **Touch Targets**: Minimum 44px touch target size
+
+### ✅ **React Native Accessibility**
+- **Accessibility Props**: accessibilityLabel, accessibilityHint, accessibilityRole
+- **State Information**: accessibilityState for disabled/loading states
+- **Screen Reader Support**: TalkBack (Android) and VoiceOver (iOS) compatible
+- **Touch Accessibility**: Proper touch target sizes and feedback
+- **Focus Management**: Accessible navigation patterns
+
+### ✅ **Cross-Platform Consistency**
+- **Unified API**: Same accessibility props work on both platforms
+- **Consistent Behavior**: Similar user experience across web and mobile
+- **Testing Support**: testID for automated accessibility testing
+- **Documentation**: Clear accessibility guidelines and examples
 
 ## Key Improvements from Button Component Implementation
 
