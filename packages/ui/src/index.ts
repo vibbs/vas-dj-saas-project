@@ -70,6 +70,9 @@ export type { SkeletonProps } from "./components/Skeleton";
 export { Progress } from "./components/Progress";
 export type { ProgressProps } from "./components/Progress";
 
+export { FileUpload } from "./components/FileUpload";
+export type { FileUploadProps } from "./components/FileUpload";
+
 // Theme system exports
 export { ThemeProvider, useTheme } from "./theme/ThemeProvider";
 export { defaultTheme, darkTheme, themes } from "./theme/tokens";
