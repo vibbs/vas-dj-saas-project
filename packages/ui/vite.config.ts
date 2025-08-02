@@ -6,6 +6,7 @@ export default defineConfig({
   resolve: {
     alias: {
       'react-native': 'react-native-web',
+      'react-native-svg': 'react-native-svg-web',
     },
     extensions: ['.web.js', '.web.jsx', '.web.ts', '.web.tsx', '.js', '.jsx', '.ts', '.tsx', '.json'],
   },

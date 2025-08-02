@@ -29,8 +29,9 @@ This is a turborepo-powered monorepo containing:
 - `pnpm install` - Install all dependencies
 - `pnpm dev` - Start all applications in development mode
 - `pnpm build` - Build all applications
-- `pnpm lint` - Lint all packages
-- `pnpm type-check` - Type check all TypeScript
+- `pnpm lint` - Lint all packages (ESLint 9 standardized)
+- `pnpm type-check` - Type check all TypeScript (TS 5.8.3 standardized)
+- `pnpm clean` - Clean all build artifacts
 
 ### Sanity Checks
 - `make sanity-check` - Comprehensive monorepo health check
@@ -77,15 +78,15 @@ The Django backend provides:
 ## Frontend Architecture
 
 ### Shared Packages
-- **@vas-dj-saas/ui**: Reusable UI components for web and mobile
-- **@vas-dj-saas/auth**: Authentication logic and state management
-- **@vas-dj-saas/api-client**: Type-safe API client for Django backend
+- **@vas-dj-saas/ui**: Reusable UI components for web and mobile (Storybook, cross-platform)
+- **@vas-dj-saas/auth**: Authentication logic and state management (JWT tokens)
+- **@vas-dj-saas/api-client**: Type-safe API client for Django backend (Axios-based)
 - **@vas-dj-saas/utils**: Shared utility functions
-- **@vas-dj-saas/types**: TypeScript type definitions
+- **@vas-dj-saas/types**: TypeScript type definitions (shared across all packages)
 
 ### Applications
-- **@vas-dj-saas/web**: Next.js web application
-- **@vas-dj-saas/mobile**: React Native mobile application (Expo-based)
+- **@vas-dj-saas/web**: Next.js 15.4.5 web application (React 19, Tailwind CSS 4)
+- **@vas-dj-saas/mobile**: React Native 0.79.5 mobile application (Expo 53, React 19)
 
 ## API Documentation
 
@@ -117,8 +118,10 @@ The Django backend provides:
 
 ### Prerequisites
 - Docker and Docker Compose
-- Node.js 18+ and pnpm
+- Node.js 18+ and pnpm 9.0.0
 - Python 3.11+ (for local Django development)
+- Expo CLI (for mobile development)
+- iOS Simulator or Android emulator (for mobile testing)
 
 ### Getting Started
 1. `pnpm install` - Install all dependencies
@@ -137,8 +140,10 @@ The Django backend provides:
 
 ### Frontend Development
 - Uses pnpm workspaces for dependency management
-- Turborepo for build orchestration and caching
+- Turborepo 2.3.0 for build orchestration and caching
 - Shared packages are published internally within the monorepo
+- React 19.0.0 and TypeScript 5.8.3 standardized across all packages
+- ESLint 9.25.0 for consistent code quality
 
 ### Mobile Development
 - Expo-based React Native application
@@ -166,13 +171,63 @@ The Django backend provides:
 ### Common Issues
 1. **Build failures**: Run `make sanity-fix` to auto-resolve dependency issues
 2. **iOS Simulator crashes**: Delete corrupted devices with `xcrun simctl delete <device-id>`
-3. **Type errors**: Ensure all packages have proper TypeScript configuration
+3. **Type errors**: All packages now use TypeScript 5.8.3 with standardized configurations
 4. **Workspace dependency issues**: Run `pnpm install` and `make sanity-check`
+5. **ESLint errors**: All packages standardized to ESLint 9.25.0
+6. **React version conflicts**: All packages now use React 19.0.0 consistently
 
 ### Health Checks
 Run `make sanity-check` regularly to ensure monorepo health. This validates:
 - Workspace structure and dependencies
 - Build process for all packages
-- TypeScript configuration
-- Mobile app configuration
+- TypeScript configuration (standardized to TS 5.8.3)
+- Mobile app configuration (React Native 0.79.5)
 - Backend system status
+- ESLint configuration consistency
+- React version alignment (React 19.0.0)
+
+## Code Quality Standards
+
+### TypeScript Configuration
+All packages use standardized TypeScript 5.8.3 with:
+- ES2020 target and lib
+- ESNext module system
+- Strict mode enabled
+- Consistent declaration generation
+
+### Dependency Management
+- React 19.0.0 across all packages
+- TypeScript 5.8.3 standardized
+- ESLint 9.25.0 for linting
+- Consistent peer dependencies
+- Workspace protocol (`workspace:*`) for internal packages
+
+### Package Structure Standards
+Each package follows this structure:
+```
+├── src/                 # Source code
+├── dist/               # Built output (git-ignored)
+├── package.json        # Package configuration
+├── tsconfig.json       # TypeScript config
+├── tsconfig.build.json # Build-specific TS config (if needed)
+└── README.md          # Package documentation
+```
+
+### UI Package Features
+- Cross-platform components (React Native + Web)
+- Comprehensive Storybook setup
+- Theme system with design tokens
+- Icon system with Lucide icons
+- Accessibility support built-in
+
+### Authentication Package
+- JWT token management
+- Secure token storage patterns
+- Authentication state management
+- API integration ready
+
+### API Client Package
+- Type-safe axios wrapper
+- Django REST framework integration
+- Error handling utilities
+- Request/response interceptors ready

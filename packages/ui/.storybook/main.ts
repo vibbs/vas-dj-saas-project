@@ -13,6 +13,30 @@ const config: StorybookConfig = {
     name: '@storybook/react-vite',
     options: {},
   },
+  viteFinal: async (config) => {
+    config.resolve = config.resolve || {};
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'react-native': 'react-native-web',
+      'react-native-svg': 'react-native-svg-web',
+    };
+    config.resolve.extensions = [
+      '.web.js',
+      '.web.jsx', 
+      '.web.ts',
+      '.web.tsx',
+      '.js',
+      '.jsx',
+      '.ts',
+      '.tsx',
+      '.json'
+    ];
+    config.define = {
+      ...config.define,
+      __DEV__: process.env.NODE_ENV !== 'production',
+    };
+    return config;
+  },
   typescript: {
     check: false,
     reactDocgen: 'react-docgen',

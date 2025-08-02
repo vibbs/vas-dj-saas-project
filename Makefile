@@ -111,3 +111,8 @@ backend-sanity:
 storybook:
 	@echo "📖 Starting Storybook..."
 	pnpm --filter @vas-dj-saas/ui storybook
+
+# anything running on port 6006
+kill-storybook:
+	@echo "🔫 Killing Storybook on port 6006..."
+	@lsof -i :6006 | awk 'NR!=1 {print $2}' | xargs kill -9 || echo "❌ No Storybook process found"

@@ -93,8 +93,8 @@ import { Icon, ThemeProvider } from '@vas-dj-saas/ui';
   argTypes: {
     name: {
       control: { type: 'select' },
-      options: ['home', 'user', 'settings', 'search', 'bell', 'heart', 'star', 'plus', 'minus', 'check', 'x', 'chevron-right', 'chevron-left', 'chevron-up', 'chevron-down'],
-      description: 'Predefined icon name',
+      options: ['Home', 'User', 'Settings', 'Search', 'Bell', 'Heart', 'Star', 'Plus', 'Minus', 'Check', 'X', 'ChevronRight', 'ChevronLeft', 'ChevronUp', 'ChevronDown'],
+      description: 'Lucide icon name (PascalCase)',
     },
     size: {
       control: { type: 'select' },
@@ -131,7 +131,7 @@ import { Icon, ThemeProvider } from '@vas-dj-saas/ui';
     },
   },
   args: {
-    name: 'home',
+    name: 'Home',
     size: 'md',
     strokeWidth: 1.5,
   },
@@ -144,7 +144,7 @@ type Story = StoryObj<IconProps>;
 export const Interactive: Story = {
   name: '🎮 Interactive Playground',
   args: {
-    name: 'star',
+    name: 'Star',
     onPress: () => console.log('Icon pressed!'),
     onClick: () => console.log('Icon clicked!'),
   },
@@ -162,9 +162,9 @@ export const PlatformComparison: Story = {
   name: '📱 Platform Comparison',
   render: (args) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-      <div style={{ 
-        padding: '16px', 
-        backgroundColor: '#f8f9fa', 
+      <div style={{
+        padding: '16px',
+        backgroundColor: '#f8f9fa',
         borderRadius: '8px',
         textAlign: 'center',
         width: '100%',
@@ -177,12 +177,12 @@ export const PlatformComparison: Story = {
           The same component props render different platform implementations
         </p>
       </div>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '600px',
         alignItems: 'start'
       }}>
@@ -207,7 +207,7 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            SVG element with vector graphics<br/>
+            SVG element with vector graphics<br />
             Scalable and customizable paths
           </div>
         </div>
@@ -233,16 +233,16 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            Text-based emoji icons<br/>
+            Text-based emoji icons<br />
             Consistent cross-platform rendering
           </div>
         </div>
       </div>
-      
-      <div style={{ 
-        fontSize: '12px', 
-        color: '#6b7280', 
-        textAlign: 'center', 
+
+      <div style={{
+        fontSize: '12px',
+        color: '#6b7280',
+        textAlign: 'center',
         maxWidth: '500px',
         lineHeight: '1.5',
         fontStyle: 'italic'
@@ -252,7 +252,7 @@ export const PlatformComparison: Story = {
     </div>
   ),
   args: {
-    name: 'heart',
+    name: 'Heart',
     size: 'lg',
     color: '#ef4444',
   },
@@ -269,17 +269,17 @@ export const PlatformComparison: Story = {
 export const AllIcons: Story = {
   name: '🎨 All Available Icons',
   render: () => {
-    const iconNames = ['home', 'user', 'settings', 'search', 'bell', 'heart', 'star', 'plus', 'minus', 'check', 'x', 'chevron-right', 'chevron-left', 'chevron-up', 'chevron-down'];
-    
+    const iconNames = ['Home', 'User', 'Settings', 'Search', 'Bell', 'Heart', 'Star', 'Plus', 'Minus', 'Check', 'X', 'ChevronRight', 'ChevronLeft', 'ChevronUp', 'ChevronDown'];
+
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
         <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>All Available Icons - Side by Side</h3>
-        
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: '1fr 1fr', 
-          gap: '32px', 
-          width: '100%', 
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '32px',
+          width: '100%',
           maxWidth: '900px'
         }}>
           {/* Web Icons */}
@@ -294,10 +294,10 @@ export const AllIcons: Story = {
             }}>
               🌐 Web Platform (SVG)
             </div>
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(5, 1fr)', 
-              gap: '16px', 
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(5, 1fr)',
+              gap: '16px',
               width: '100%',
               justifyItems: 'center'
             }}>
@@ -322,10 +322,10 @@ export const AllIcons: Story = {
             }}>
               📱 React Native Platform (Emoji)
             </div>
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(5, 1fr)', 
-              gap: '16px', 
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(5, 1fr)',
+              gap: '16px',
               width: '100%',
               justifyItems: 'center'
             }}>
@@ -353,91 +353,94 @@ export const AllIcons: Story = {
 // All sizes showcase
 export const AllSizes: Story = {
   name: '📏 All Sizes',
-  render: () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-      <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Icon Sizes - Side by Side</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
-        maxWidth: '600px'
-      }}>
-        {/* Web Sizes */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
-          <div style={{
-            padding: '8px 16px',
-            backgroundColor: '#e3f2fd',
-            borderRadius: '6px',
-            fontSize: '14px',
-            fontWeight: '600',
-            color: '#1976d2'
-          }}>
-            🌐 Web Platform
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <WebIcon name="star" size="xs" />
-              <span style={{ fontSize: '12px' }}>XS (12px)</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <WebIcon name="star" size="sm" />
-              <span style={{ fontSize: '12px' }}>SM (16px)</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <WebIcon name="star" size="md" />
-              <span style={{ fontSize: '12px' }}>MD (20px)</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <WebIcon name="star" size="lg" />
-              <span style={{ fontSize: '12px' }}>LG (24px)</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <WebIcon name="star" size="xl" />
-              <span style={{ fontSize: '12px' }}>XL (32px)</span>
-            </div>
-          </div>
-        </div>
+  render: () => {
+    const iconName = 'Star';
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
+        <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Icon Sizes - Side by Side</h3>
 
-        {/* React Native Sizes */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
-          <div style={{
-            padding: '8px 16px',
-            backgroundColor: '#f3e5f5',
-            borderRadius: '6px',
-            fontSize: '14px',
-            fontWeight: '600',
-            color: '#7b1fa2'
-          }}>
-            📱 React Native Platform
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '32px',
+          width: '100%',
+          maxWidth: '600px'
+        }}>
+          {/* Web Sizes */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
+            <div style={{
+              padding: '8px 16px',
+              backgroundColor: '#e3f2fd',
+              borderRadius: '6px',
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#1976d2'
+            }}>
+              🌐 Web Platform
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <WebIcon name={iconName} size="xs" />
+                <span style={{ fontSize: '12px' }}>XS (12px)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <WebIcon name={iconName} size="sm" />
+                <span style={{ fontSize: '12px' }}>SM (16px)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <WebIcon name={iconName} size="md" />
+                <span style={{ fontSize: '12px' }}>MD (20px)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <WebIcon name={iconName} size="lg" />
+                <span style={{ fontSize: '12px' }}>LG (24px)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <WebIcon name={iconName} size="xl" />
+                <span style={{ fontSize: '12px' }}>XL (32px)</span>
+              </div>
+            </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <NativeIcon name="star" size="xs" />
-              <span style={{ fontSize: '12px' }}>XS (12px)</span>
+
+          {/* React Native Sizes */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
+            <div style={{
+              padding: '8px 16px',
+              backgroundColor: '#f3e5f5',
+              borderRadius: '6px',
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#7b1fa2'
+            }}>
+              📱 React Native Platform
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <NativeIcon name="star" size="sm" />
-              <span style={{ fontSize: '12px' }}>SM (16px)</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <NativeIcon name="star" size="md" />
-              <span style={{ fontSize: '12px' }}>MD (20px)</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <NativeIcon name="star" size="lg" />
-              <span style={{ fontSize: '12px' }}>LG (24px)</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <NativeIcon name="star" size="xl" />
-              <span style={{ fontSize: '12px' }}>XL (32px)</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <NativeIcon name={iconName} size="xs" />
+                <span style={{ fontSize: '12px' }}>XS (12px)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <NativeIcon name={iconName} size="sm" />
+                <span style={{ fontSize: '12px' }}>SM (16px)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <NativeIcon name={iconName} size="md" />
+                <span style={{ fontSize: '12px' }}>MD (20px)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <NativeIcon name={iconName} size="lg" />
+                <span style={{ fontSize: '12px' }}>LG (24px)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <NativeIcon name={iconName} size="xl" />
+                <span style={{ fontSize: '12px' }}>XL (32px)</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  ),
+    )
+  },
   parameters: {
     docs: {
       description: {
@@ -453,12 +456,12 @@ export const CustomSVG: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Custom SVG Icons (Web Only)</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(4, 1fr)', 
-        gap: '24px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '24px',
+        width: '100%',
         maxWidth: '600px',
         justifyItems: 'center'
       }}>
@@ -468,21 +471,21 @@ export const CustomSVG: Story = {
           </WebIcon>
           <span style={{ fontSize: '10px', color: '#666' }}>Custom Star</span>
         </div>
-        
+
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
           <WebIcon size="xl" color="#ef4444" fill="#ef4444">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </WebIcon>
           <span style={{ fontSize: '10px', color: '#666' }}>Custom Heart</span>
         </div>
-        
+
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
           <WebIcon size="xl" color="#10b981">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </WebIcon>
           <span style={{ fontSize: '10px', color: '#666' }}>Custom Check</span>
         </div>
-        
+
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
           <WebIcon size="xl" color="#f59e0b">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
@@ -490,11 +493,11 @@ export const CustomSVG: Story = {
           <span style={{ fontSize: '10px', color: '#666' }}>Custom Warning</span>
         </div>
       </div>
-      
-      <div style={{ 
-        fontSize: '12px', 
-        color: '#6b7280', 
-        textAlign: 'center', 
+
+      <div style={{
+        fontSize: '12px',
+        color: '#6b7280',
+        textAlign: 'center',
         maxWidth: '500px',
         lineHeight: '1.5',
         fontStyle: 'italic'
@@ -518,17 +521,17 @@ export const ThemeComparison: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Theme Comparison - Side by Side</h3>
-      
+
       {/* Default Theme */}
       <div style={{ width: '100%', maxWidth: '800px' }}>
         <h4 style={{ margin: '0 0 16px 0', fontSize: '14px', fontWeight: 600, textAlign: 'center' }}>
           ☀️ Default Theme
         </h4>
         <ThemeProvider defaultTheme="default">
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: '1fr 1fr', 
-            gap: '24px', 
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '24px',
             padding: '20px',
             backgroundColor: '#f8f9fa',
             borderRadius: '8px'
@@ -566,10 +569,10 @@ export const ThemeComparison: Story = {
                 📱 React Native
               </div>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <NativeIcon name="home" size="lg" />
-                <NativeIcon name="user" size="lg" />
-                <NativeIcon name="settings" size="lg" />
-                <NativeIcon name="star" size="lg" />
+                <NativeIcon name="Home" size="lg" />
+                <NativeIcon name="User" size="lg" />
+                <NativeIcon name="Settings" size="lg" />
+                <NativeIcon name="Star" size="lg" />
               </div>
             </div>
           </div>
@@ -582,10 +585,10 @@ export const ThemeComparison: Story = {
           🌙 Dark Theme
         </h4>
         <ThemeProvider defaultTheme="dark">
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: '1fr 1fr', 
-            gap: '24px', 
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '24px',
             padding: '20px',
             backgroundColor: '#1f2937',
             borderRadius: '8px'
@@ -623,10 +626,10 @@ export const ThemeComparison: Story = {
                 📱 React Native
               </div>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <NativeIcon name="home" size="lg" />
-                <NativeIcon name="user" size="lg" />
-                <NativeIcon name="settings" size="lg" />
-                <NativeIcon name="star" size="lg" />
+                <NativeIcon name="Home" size="lg" />
+                <NativeIcon name="User" size="lg" />
+                <NativeIcon name="Settings" size="lg" />
+                <NativeIcon name="Star" size="lg" />
               </div>
             </div>
           </div>
