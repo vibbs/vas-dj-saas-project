@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTheme } from '../../theme/ThemeProvider';
 import { ButtonProps } from './types';
+import { Spinner } from '../Spinner';
 
 export const Button: React.FC<ButtonProps> = ({
   children,
@@ -165,18 +166,9 @@ export const Button: React.FC<ButtonProps> = ({
       {...props}
     >
       {loading && (
-        <div
-          style={{
-            marginRight: theme.spacing.xs + 4,
-            width: '16px',
-            height: '16px',
-            border: '2px solid currentColor',
-            borderTopColor: 'transparent',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-          }}
-          aria-hidden="true"
-        />
+        <div style={{ marginRight: theme.spacing.xs + 4 }}>
+          <Spinner size="sm" color="currentColor" />
+        </div>
       )}
       {children}
     </button>

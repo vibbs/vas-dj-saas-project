@@ -1,7 +1,8 @@
 import React from 'react';
-import { TouchableOpacity, Text, View, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, Text, View } from 'react-native';
 import { useTheme } from '../../theme/ThemeProvider';
 import { ButtonProps } from './types';
+import { Spinner } from '../Spinner';
 
 export const Button: React.FC<ButtonProps> = ({
   children,
@@ -178,13 +179,12 @@ export const Button: React.FC<ButtonProps> = ({
         justifyContent: 'center',
       }}>
         {loading && (
-          <ActivityIndicator
-            color={variantStyles.text.color}
-            size="small"
-            style={{ marginRight: theme.spacing.xs + 4 }}
-            accessibilityElementsHidden={true}
-            importantForAccessibility="no-hide-descendants"
-          />
+          <View style={{ marginRight: theme.spacing.xs + 4 }}>
+            <Spinner 
+              size="sm" 
+              color={variantStyles.text.color}
+            />
+          </View>
         )}
         {typeof children === 'string' ? (
           <Text style={[

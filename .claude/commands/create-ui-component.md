@@ -25,21 +25,7 @@ Create comprehensive cross-platform UI components for both React (web) and React
 
 ## Steps
 
-### 1. Validate Component Name
-```bash
-case "{{component_name}}" in
-  "button"|"card"|"input"|"modal"|"avatar"|"badge"|"checkbox"|"switch"|"slider"|"progress"|"alert"|"spinner"|"tabs"|"accordion")
-    echo "Creating {{component_name}} component..."
-    ;;
-  *)
-    echo "Error: '{{component_name}}' is not a supported component type."
-    echo "Supported components: button, card, input, modal, avatar, badge, checkbox, switch, slider, progress, alert, spinner, tabs, accordion"
-    exit 1
-    ;;
-esac
-```
-
-### 2. Create Component Directory Structure
+### 1. Create Component Directory Structure
 ```bash
 mkdir -p packages/ui/src/components/{{component_name|title}}
 ```
