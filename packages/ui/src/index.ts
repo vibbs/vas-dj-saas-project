@@ -7,6 +7,9 @@ export type { CardProps } from "./components/Card";
 export { Spinner } from "./components/Spinner";
 export type { SpinnerProps } from "./components/Spinner";
 
+export { Modal } from "./components/Modal";
+export type { ModalProps } from "./components/Modal";
+
 // Theme system exports
 export { ThemeProvider, useTheme } from "./theme/ThemeProvider";
 export { defaultTheme, darkTheme, themes } from "./theme/tokens";

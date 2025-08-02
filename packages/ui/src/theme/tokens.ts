@@ -10,6 +10,8 @@ export interface ColorTokens {
   destructiveForeground: string;
   muted: string;
   mutedForeground: string;
+  card: string;
+  cardForeground: string;
   border: string;
   input: string;
   ring: string;
@@ -89,6 +91,8 @@ export const defaultTheme: Theme = {
     destructiveForeground: '#ffffff',
     muted: '#f8fafc',
     mutedForeground: '#64748b',
+    card: '#ffffff',
+    cardForeground: '#0f172a',
     border: '#e2e8f0',
     input: '#e2e8f0',
     ring: '#3b82f6',
@@ -156,6 +160,8 @@ export const darkTheme: Theme = {
     destructiveForeground: '#ffffff',
     muted: '#0f172a',
     mutedForeground: '#94a3b8',
+    card: '#1e293b',
+    cardForeground: '#f8fafc',
     border: '#334155',
     input: '#334155',
     ring: '#3b82f6',
