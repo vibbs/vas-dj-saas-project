@@ -32,7 +32,7 @@ const countryOptions = [
 ];
 
 const meta: Meta<SelectProps> = {
-  title: 'Form Components/Select',
+  title: 'Form/Select',
   component: SelectStoryComponent,
   parameters: {
     layout: 'centered',
@@ -189,9 +189,9 @@ export const PlatformComparison: Story = {
   name: '📱 Platform Comparison',
   render: (args) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-      <div style={{ 
-        padding: '16px', 
-        backgroundColor: '#f8f9fa', 
+      <div style={{
+        padding: '16px',
+        backgroundColor: '#f8f9fa',
         borderRadius: '8px',
         textAlign: 'center',
         width: '100%',
@@ -204,12 +204,12 @@ export const PlatformComparison: Story = {
           Select components with FormField wrapper across platforms
         </p>
       </div>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '800px',
         alignItems: 'start'
       }}>
@@ -268,7 +268,7 @@ export const Sizes: Story = {
           defaultValue="apple"
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Medium Size</h3>
         <Select
@@ -278,7 +278,7 @@ export const Sizes: Story = {
           defaultValue="banana"
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Large Size</h3>
         <Select
@@ -306,7 +306,7 @@ export const Variants: Story = {
           placeholder="Choose an option..."
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Filled Variant</h3>
         <Select
@@ -316,7 +316,7 @@ export const Variants: Story = {
           placeholder="Choose an option..."
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Flushed Variant</h3>
         <Select
@@ -346,7 +346,7 @@ export const Features: Story = {
           helpText="Type to search for countries"
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Multiple Selection</h3>
         <Select
@@ -364,24 +364,24 @@ export const Features: Story = {
           helpText="You can select multiple skills"
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>With Descriptions</h3>
         <Select
           label="Product"
           options={[
-            { 
-              label: 'Basic Plan', 
+            {
+              label: 'Basic Plan',
               value: 'basic',
               description: '$9/month - Perfect for individuals'
             },
-            { 
-              label: 'Pro Plan', 
+            {
+              label: 'Pro Plan',
               value: 'pro',
               description: '$19/month - Great for small teams'
             },
-            { 
-              label: 'Enterprise Plan', 
+            {
+              label: 'Enterprise Plan',
               value: 'enterprise',
               description: '$49/month - For large organizations'
             },
@@ -413,7 +413,7 @@ export const FormFieldFeatures: Story = {
           clearable
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>With Error</h3>
         <Select
@@ -429,7 +429,7 @@ export const FormFieldFeatures: Story = {
           placeholder="Choose your department..."
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Disabled State</h3>
         <Select
@@ -469,7 +469,7 @@ export const RealWorldExamples: Story = {
           helpText="Choose the most relevant category for your product"
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>User Preferences</h3>
         <Select
@@ -481,11 +481,11 @@ export const RealWorldExamples: Story = {
             { label: 'SMS notifications', value: 'sms' },
             { label: 'In-app notifications', value: 'inapp' },
           ]}
-          defaultValue={['email', 'push']}
+          defaultValue={'email'}
           helpText="Choose how you'd like to receive notifications"
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Team Assignment</h3>
         <Select

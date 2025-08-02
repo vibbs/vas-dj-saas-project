@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RadioProps } from './types';
+import { RadioProps, RadioOption } from './types';
 import { useTheme } from '../../theme/ThemeProvider';
 import { FormField } from '../FormField';
 

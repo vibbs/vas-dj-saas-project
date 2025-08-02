@@ -49,14 +49,14 @@ export const Badge: React.FC<BadgeProps> = ({
       border: `1px solid ${theme.colors.destructive}`,
     },
     success: {
-      backgroundColor: '#10b981',
-      color: '#ffffff',
-      border: '1px solid #10b981',
+      backgroundColor: theme.colors.success,
+      color: theme.colors.successForeground,
+      border: `1px solid ${theme.colors.success}`,
     },
     warning: {
-      backgroundColor: '#f59e0b',
-      color: '#ffffff',
-      border: '1px solid #f59e0b',
+      backgroundColor: theme.colors.warning,
+      color: theme.colors.warningForeground,
+      border: `1px solid ${theme.colors.warning}`,
     },
   };
 

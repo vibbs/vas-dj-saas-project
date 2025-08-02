@@ -49,12 +49,12 @@ export const Badge: React.FC<BadgeProps> = ({
       borderColor: theme.colors.destructive,
     },
     success: {
-      backgroundColor: '#10b981',
-      borderColor: '#10b981',
+      backgroundColor: theme.colors.success,
+      borderColor: theme.colors.success,
     },
     warning: {
-      backgroundColor: '#f59e0b',
-      borderColor: '#f59e0b',
+      backgroundColor: theme.colors.warning,
+      borderColor: theme.colors.warning,
     },
   };
 
@@ -64,8 +64,8 @@ export const Badge: React.FC<BadgeProps> = ({
     outline: { color: theme.colors.primary },
     ghost: { color: theme.colors.foreground },
     destructive: { color: theme.colors.destructiveForeground },
-    success: { color: '#ffffff' },
-    warning: { color: '#ffffff' },
+    success: { color: theme.colors.successForeground },
+    warning: { color: theme.colors.warningForeground },
   };
 
   // Define size styles using theme tokens

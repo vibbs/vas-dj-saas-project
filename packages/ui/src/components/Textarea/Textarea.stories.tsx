@@ -13,7 +13,7 @@ const TextareaStoryComponent = React.forwardRef<any, TextareaProps>((props, _ref
 TextareaStoryComponent.displayName = 'Textarea';
 
 const meta: Meta<TextareaProps> = {
-  title: 'Form Components/Textarea',
+  title: 'Form/Textarea',
   component: TextareaStoryComponent,
   parameters: {
     layout: 'centered',
@@ -165,9 +165,9 @@ export const PlatformComparison: Story = {
   name: '📱 Platform Comparison',
   render: (args) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-      <div style={{ 
-        padding: '16px', 
-        backgroundColor: '#f8f9fa', 
+      <div style={{
+        padding: '16px',
+        backgroundColor: '#f8f9fa',
         borderRadius: '8px',
         textAlign: 'center',
         width: '100%',
@@ -180,12 +180,12 @@ export const PlatformComparison: Story = {
           Textarea components with FormField wrapper across platforms
         </p>
       </div>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '800px',
         alignItems: 'start'
       }}>
@@ -244,7 +244,7 @@ export const Sizes: Story = {
           rows={2}
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Medium Size</h3>
         <Textarea
@@ -254,7 +254,7 @@ export const Sizes: Story = {
           rows={3}
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Large Size</h3>
         <Textarea
@@ -281,7 +281,7 @@ export const Variants: Story = {
           placeholder="Default textarea with border..."
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Filled Variant</h3>
         <Textarea
@@ -290,7 +290,7 @@ export const Variants: Story = {
           placeholder="Filled textarea with background..."
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Flushed Variant</h3>
         <Textarea
@@ -317,7 +317,7 @@ export const ResizeOptions: Story = {
           rows={3}
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Vertical Resize</h3>
         <WebTextarea
@@ -327,7 +327,7 @@ export const ResizeOptions: Story = {
           rows={3}
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Horizontal Resize</h3>
         <WebTextarea
@@ -337,7 +337,7 @@ export const ResizeOptions: Story = {
           rows={3}
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Both Resize</h3>
         <WebTextarea
@@ -366,7 +366,7 @@ export const FormFieldFeatures: Story = {
           maxLength={500}
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>With Error</h3>
         <Textarea
@@ -377,7 +377,7 @@ export const FormFieldFeatures: Story = {
           rows={3}
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Disabled State</h3>
         <Textarea
@@ -388,7 +388,7 @@ export const FormFieldFeatures: Story = {
           rows={2}
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Read-Only State</h3>
         <Textarea
@@ -420,7 +420,7 @@ export const RealWorldExamples: Story = {
           variant="filled"
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Code Editor</h3>
         <Textarea
@@ -436,7 +436,7 @@ export const RealWorldExamples: Story = {
           style={{ fontFamily: 'Monaco, Consolas, monospace' }}
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Social Media Post</h3>
         <Textarea

@@ -20,7 +20,7 @@ const sampleOptions = [
 ];
 
 const meta: Meta<RadioProps> = {
-  title: 'Form Components/Radio',
+  title: 'Form/Radio',
   component: RadioStoryComponent,
   parameters: {
     layout: 'centered',
@@ -161,9 +161,9 @@ export const PlatformComparison: Story = {
   name: '📱 Platform Comparison',
   render: (args) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-      <div style={{ 
-        padding: '16px', 
-        backgroundColor: '#f8f9fa', 
+      <div style={{
+        padding: '16px',
+        backgroundColor: '#f8f9fa',
         borderRadius: '8px',
         textAlign: 'center',
         width: '100%',
@@ -176,12 +176,12 @@ export const PlatformComparison: Story = {
           Radio components with FormField wrapper across platforms
         </p>
       </div>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '800px',
         alignItems: 'start'
       }}>
@@ -240,7 +240,7 @@ export const Layouts: Story = {
           defaultValue="option1"
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Horizontal Layout</h3>
         <Radio
@@ -268,7 +268,7 @@ export const Sizes: Story = {
           defaultValue="option1"
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Medium Size</h3>
         <Radio
@@ -278,7 +278,7 @@ export const Sizes: Story = {
           defaultValue="option1"
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Large Size</h3>
         <Radio
@@ -306,7 +306,7 @@ export const Variants: Story = {
           defaultValue="option1"
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Card Variant</h3>
         <Radio
@@ -337,7 +337,7 @@ export const FormFieldFeatures: Story = {
           ]}
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>With Error</h3>
         <Radio
@@ -351,7 +351,7 @@ export const FormFieldFeatures: Story = {
           ]}
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Disabled State</h3>
         <Radio
@@ -378,25 +378,25 @@ export const RealWorldExamples: Story = {
           helpText="Select your preferred shipping option"
           variant="card"
           options={[
-            { 
-              label: 'Standard Shipping', 
+            {
+              label: 'Standard Shipping',
               value: 'standard',
               description: '5-7 business days • Free'
             },
-            { 
-              label: 'Express Shipping', 
+            {
+              label: 'Express Shipping',
               value: 'express',
               description: '2-3 business days • $9.99'
             },
-            { 
-              label: 'Overnight Shipping', 
+            {
+              label: 'Overnight Shipping',
               value: 'overnight',
               description: 'Next business day • $24.99'
             },
           ]}
         />
       </div>
-      
+
       <div>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Account Type</h3>
         <Radio

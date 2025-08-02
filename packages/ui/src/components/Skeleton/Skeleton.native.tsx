@@ -14,7 +14,13 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   // Accessibility props
   accessibilityLabel,
   accessibilityHint,
-  accessibilityRole = 'progressbar',
+  accessibilityRole = 'none',
+  // Filter out web-specific props
+  className: _className,
+  'aria-label': _ariaLabel,
+  'aria-describedby': _ariaDescribedBy,
+  'aria-busy': _ariaBusy,
+  role: _role,
   ...props
 }) => {
   const { theme } = useTheme();
@@ -59,15 +65,11 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   }, [animation, waveAnim]);
 
   const getBaseStyles = (): ViewStyle => {
-    const baseWidth = typeof width === 'string' && width.includes('%') 
-      ? width 
-      : typeof width === 'number' 
+    const baseWidth = typeof width === 'number' 
         ? width 
-        : undefined;
+        : '100%';
     
-    const baseHeight = typeof height === 'string' && height.includes('%') 
-      ? height 
-      : typeof height === 'number' 
+    const baseHeight = typeof height === 'number' 
         ? height 
         : 16;
 
@@ -85,7 +87,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 
   const getTextLineStyles = (lineIndex: number): ViewStyle => {
     // Vary the width of text lines for more realistic appearance
-    let lineWidthPercent = '100%';
+    let lineWidthPercent: string | number = '100%';
     if (lines > 1) {
       if (lineIndex === lines - 1) {
         lineWidthPercent = '60%'; // Last line is shorter
