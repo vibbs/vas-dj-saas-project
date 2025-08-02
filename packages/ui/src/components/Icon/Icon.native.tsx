@@ -3,6 +3,7 @@ import Svg from 'react-native-svg';
 import * as LucideIcons from 'lucide-react-native';
 import { IconProps } from './types';
 import { useTheme } from '../../theme/ThemeProvider';
+import { TouchableOpacity, ViewStyle } from 'react-native';
 
 type LucideIconName = keyof typeof LucideIcons;
 
