@@ -73,6 +73,30 @@ export type { ProgressProps } from "./components/Progress";
 export { FileUpload } from "./components/FileUpload";
 export type { FileUploadProps } from "./components/FileUpload";
 
+export { Divider } from "./components/Divider";
+export type { DividerProps } from "./components/Divider";
+
+export { Collapse } from "./components/Collapse";
+export type { CollapseProps } from "./components/Collapse";
+
+export { ScrollArea } from "./components/ScrollArea";
+export type { ScrollAreaProps } from "./components/ScrollArea";
+
+export { Dialog } from "./components/Dialog";
+export type { DialogProps } from "./components/Dialog";
+
+export { Table } from "./components/Table";
+export type { TableProps, TableColumn } from "./components/Table";
+
+export { Tag } from "./components/Tag";
+export type { TagProps } from "./components/Tag";
+
+export { ListItem } from "./components/ListItem";
+export type { ListItemProps } from "./components/ListItem";
+
+export { EmptyState } from "./components/EmptyState";
+export type { EmptyStateProps } from "./components/EmptyState";
+
 export { DateTimePicker } from "./components/DateTimePicker";
 export type { 
   DateTimePickerProps, 
@@ -85,6 +109,26 @@ export type {
   NativeDateTimePickerMode,
   NativeDateTimePickerDisplay
 } from "./components/DateTimePicker";
+
+// Navigation components
+export { Pagination } from "./components/Pagination";
+export type { PaginationProps, PaginationItemProps } from "./components/Pagination";
+
+export { Breadcrumbs } from "./components/Breadcrumbs";
+export type { BreadcrumbsProps, BreadcrumbItem, BreadcrumbItemComponentProps } from "./components/Breadcrumbs";
+
+export { Stepper } from "./components/Stepper";
+export type { StepperProps, StepperStep, StepperStepComponentProps } from "./components/Stepper";
+
+export { Sidebar } from "./components/Sidebar";
+export type { SidebarProps, SidebarItem, SidebarItemComponentProps } from "./components/Sidebar";
+
+export { AppBar } from "./components/AppBar";
+export type { AppBarProps, AppBarAction, AppBarActionComponentProps } from "./components/AppBar";
+
+// Media components
+export { Image } from "./components/Image";
+export type { ImageProps, ImageSource, ProcessedImageSource } from "./components/Image";
 
 // Theme system exports
 export { ThemeProvider, useTheme } from "./theme/ThemeProvider";
