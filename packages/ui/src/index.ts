@@ -73,6 +73,19 @@ export type { ProgressProps } from "./components/Progress";
 export { FileUpload } from "./components/FileUpload";
 export type { FileUploadProps } from "./components/FileUpload";
 
+export { DateTimePicker } from "./components/DateTimePicker";
+export type { 
+  DateTimePickerProps, 
+  DateTimeMode, 
+  CalendarViewProps, 
+  TimeSelectorProps,
+  DateRange,
+  TimeValue,
+  NativeDateTimePickerEvent,
+  NativeDateTimePickerMode,
+  NativeDateTimePickerDisplay
+} from "./components/DateTimePicker";
+
 // Theme system exports
 export { ThemeProvider, useTheme } from "./theme/ThemeProvider";
 export { defaultTheme, darkTheme, themes } from "./theme/tokens";
