@@ -5,12 +5,12 @@ import { TimeSelector } from './TimeSelector';
 import { Input } from '../Input';
 import { Button } from '../Button';
 import { Icon } from '../Icon';
-import { 
-  formatDateForDisplay, 
-  parseDateFromInput, 
-  combineDateTime, 
+import {
+  formatDateForDisplay,
+  parseDateFromInput,
+  combineDateTime,
   validateDateRange,
-  roundTimeToStep 
+  roundTimeToStep
 } from './utils';
 import './DateTimePicker.css';
 
@@ -54,7 +54,7 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
   const [inputValue, setInputValue] = useState('');
   const [currentView, setCurrentView] = useState<'calendar' | 'time'>('calendar');
   const [tempValue, setTempValue] = useState<Date | [Date, Date] | [Date, null] | null>(value || null);
-  
+
   const containerRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLDivElement>(null);
@@ -111,7 +111,7 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
 
   const handleInputChange = (text: string) => {
     setInputValue(text);
-    
+
     if (!text.trim()) {
       onChange(null);
       return;
@@ -123,7 +123,7 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
       if (parts.length === 2) {
         const start = parseDateFromInput(parts[0], mode, dateFormat, timeFormat, locale);
         const end = parseDateFromInput(parts[1], mode, dateFormat, timeFormat, locale);
-        
+
         if (start && end) {
           const validation = validateDateRange([start, end], minDate, maxDate);
           if (validation.isValid) {
@@ -162,35 +162,38 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
 
   const handleDateChange = useCallback((newValue: Date | [Date, Date] | [Date, null]) => {
     setTempValue(newValue);
-    
+
     if (mode === 'date') {
-      // For date-only mode, commit immediately
+      // For range mode, don't commit immediately - wait for Apply button
+      if (range) {
+        // Just update temp value, don't close or commit
+        return;
+      }
+      
+      // For single date mode, commit immediately
       onChange(newValue);
       if (closeOnSelect) {
-        if (!range) {
-          // Close immediately for single date selection
-          handlePopoverClose();
-        } else if (Array.isArray(newValue) && newValue[1]) {
-          // Close when range is complete (both dates selected)
-          handlePopoverClose();
-        }
+        handlePopoverClose();
       }
     } else if (mode === 'datetime') {
       // For datetime mode, update the date part but keep existing time or set default
       if (Array.isArray(newValue)) {
         const [start, end] = newValue;
-        const startWithTime = value && Array.isArray(value) && value[0] ? 
+        const startWithTime = value && Array.isArray(value) && value[0] ?
           combineDateTime(start, value[0]) : start;
-        const endWithTime = end && value && Array.isArray(value) && value[1] ? 
+        const endWithTime = end && value && Array.isArray(value) && value[1] ?
           combineDateTime(end, value[1]) : end;
         setTempValue([startWithTime, endWithTime]);
       } else {
-        const withTime = value && !Array.isArray(value) ? 
+        const withTime = value && !Array.isArray(value) ?
           combineDateTime(newValue, value) : newValue;
         setTempValue(withTime);
       }
     }
   }, [mode, value, onChange, closeOnSelect, range]);
+
+  // Check if we're in a partial range selection state
+  const isPartialRange = range && tempValue && Array.isArray(tempValue) && tempValue[0] && !tempValue[1];
 
   const handleTimeChange = useCallback((newTime: Date) => {
     if (mode === 'time') {
@@ -226,7 +229,7 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
 
   const handleToday = () => {
     const today = new Date();
-    
+
     if (mode === 'time') {
       const roundedTime = roundTimeToStep(today, timeStep);
       onChange(roundedTime);
@@ -241,7 +244,7 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
     } else {
       onChange(today);
     }
-    
+
     if (closeOnSelect && mode === 'date' && !range) {
       handlePopoverClose();
     }
@@ -283,7 +286,7 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
               Time
             </Button>
           </div>
-          
+
           {currentView === 'calendar' ? (
             <CalendarView
               value={tempValue}
@@ -329,7 +332,7 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
 
   const getPlaceholder = () => {
     if (placeholder) return placeholder;
-    
+
     // Use date-fns format as placeholder hint
     switch (mode) {
       case 'date':
@@ -366,18 +369,46 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
           {...ariaProps}
         />
       </div>
-      
+
       {isOpen && (
-        <div 
-          className="datetime-picker-popover" 
+        <div
+          className="datetime-picker-popover"
           ref={popoverRef}
           role="dialog"
           aria-label={range ? `Select ${mode} range` : `Select ${mode}`}
         >
+          {/* Selection Summary for Range Mode */}
+          {range && (
+            <div className="datetime-picker-selection-summary">
+              <div className="selection-header">
+                <Icon name="Calendar" size="sm" />
+                <span>Selected Range</span>
+              </div>
+              <div className="selection-display">
+                <div className="selection-item">
+                  <span className="selection-label">Start Date:</span>
+                  <span className="selection-value">
+                    {tempValue && Array.isArray(tempValue) && tempValue[0]
+                      ? formatDateForDisplay(tempValue[0], mode, dateFormat, timeFormat, locale)
+                      : 'Not selected'}
+                  </span>
+                </div>
+                <div className="selection-item">
+                  <span className="selection-label">End Date:</span>
+                  <span className="selection-value">
+                    {tempValue && Array.isArray(tempValue) && tempValue[1]
+                      ? formatDateForDisplay(tempValue[1], mode, dateFormat, timeFormat, locale)
+                      : 'Not selected'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div className="datetime-picker-content">
             {getModalContent()}
           </div>
-          
+
           <div className="datetime-picker-actions">
             <div className="datetime-picker-action-group">
               {showClearButton && (
@@ -389,7 +420,7 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
                   Clear
                 </Button>
               )}
-              
+
               {showTodayButton && mode !== 'time' && (
                 <Button
                   variant="ghost"
@@ -400,8 +431,9 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
                 </Button>
               )}
             </div>
-            
-            {(mode === 'datetime' || mode === 'time') && (
+
+            {/* Show Apply button for range selection or datetime/time modes */}
+            {(mode === 'datetime' || mode === 'time' || range) && (
               <div className="datetime-picker-primary-actions">
                 <Button
                   variant="outline"
@@ -410,11 +442,12 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
                 >
                   Cancel
                 </Button>
-                
+
                 <Button
                   variant="primary"
                   size="sm"
                   onClick={handleApply}
+                  disabled={range && (!tempValue || (Array.isArray(tempValue) && !tempValue[0]))}
                 >
                   Apply
                 </Button>
