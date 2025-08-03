@@ -5,6 +5,7 @@ import { Table as WebTable } from './Table.web';
 import { Table as NativeTable } from './Table.native';
 import { TableProps, TableColumn } from './types';
 import { ThemeProvider } from '../../theme/ThemeProvider';
+import { Button } from '../Button';
 
 // Sample data for stories
 const sampleData = [
@@ -62,7 +63,7 @@ const TableStoryComponent = React.forwardRef<any, TableProps>((props, _ref) => {
 TableStoryComponent.displayName = 'Table';
 
 const meta: Meta<TableProps> = {
-  title: 'Components/Table',
+  title: 'Components/Data Display/Table',
   component: TableStoryComponent,
   parameters: {
     layout: 'centered',
@@ -241,9 +242,9 @@ export const PlatformComparison: Story = {
   name: '📱 Platform Comparison',
   render: (args) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-      <div style={{ 
-        padding: '16px', 
-        backgroundColor: '#f8f9fa', 
+      <div style={{
+        padding: '16px',
+        backgroundColor: '#f8f9fa',
         borderRadius: '8px',
         textAlign: 'center',
         width: '100%',
@@ -256,12 +257,12 @@ export const PlatformComparison: Story = {
           The same component props render different platform implementations
         </p>
       </div>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '1200px',
         alignItems: 'start'
       }}>
@@ -288,7 +289,7 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            HTML table with semantic structure<br/>
+            HTML table with semantic structure<br />
             Hover effects & proper accessibility
           </div>
         </div>
@@ -316,16 +317,16 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            Card-based layout with key-value pairs<br/>
+            Card-based layout with key-value pairs<br />
             Touch interactions & optimized for mobile
           </div>
         </div>
       </div>
-      
-      <div style={{ 
-        fontSize: '12px', 
-        color: '#6b7280', 
-        textAlign: 'center', 
+
+      <div style={{
+        fontSize: '12px',
+        color: '#6b7280',
+        textAlign: 'center',
         maxWidth: '600px',
         lineHeight: '1.5',
         fontStyle: 'italic'
@@ -392,7 +393,7 @@ export const MobileCardLayout: Story = {
             Pending: { bg: '#fef3c7', text: '#92400e' },
           };
           const color = colors[value as keyof typeof colors] || colors.Pending;
-          
+
           return (
             <span style={{
               padding: '4px 12px',
@@ -412,30 +413,12 @@ export const MobileCardLayout: Story = {
         title: 'Actions',
         render: () => (
           <div style={{ display: 'flex', gap: '8px', flexDirection: 'row' }}>
-            <button style={{
-              padding: '6px 12px',
-              border: 'none',
-              borderRadius: '6px',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              cursor: 'pointer',
-              fontSize: '12px',
-              fontWeight: '500'
-            }}>
+            <Button variant="primary" size="sm">
               View
-            </button>
-            <button style={{
-              padding: '6px 12px',
-              border: 'none',
-              borderRadius: '6px',
-              backgroundColor: '#ef4444',
-              color: 'white',
-              cursor: 'pointer',
-              fontSize: '12px',
-              fontWeight: '500'
-            }}>
+            </Button>
+            <Button variant="destructive" size="sm">
               Edit
-            </button>
+            </Button>
           </div>
         ),
       },
@@ -451,7 +434,7 @@ export const MobileCardLayout: Story = {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
         <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Mobile-Optimized Card Layout</h3>
-        
+
         <div style={{ width: '100%', maxWidth: '400px' }}>
           <NativeTable
             data={mobileData}
@@ -461,20 +444,20 @@ export const MobileCardLayout: Story = {
             onRowPress={(record) => console.log('Pressed:', record)}
           />
         </div>
-        
-        <div style={{ 
-          fontSize: '12px', 
-          color: '#6b7280', 
-          textAlign: 'center', 
+
+        <div style={{
+          fontSize: '12px',
+          color: '#6b7280',
+          textAlign: 'center',
           maxWidth: '600px',
           lineHeight: '1.5',
           fontStyle: 'italic'
         }}>
           📋 Native table displays as mobile-friendly cards with:
-          <br/>• Primary field prominently shown in the header
-          <br/>• Actions positioned in the top-right corner  
-          <br/>• Secondary fields displayed as labeled key-value pairs
-          <br/>• Touch-optimized spacing and interactions
+          <br />• Primary field prominently shown in the header
+          <br />• Actions positioned in the top-right corner
+          <br />• Secondary fields displayed as labeled key-value pairs
+          <br />• Touch-optimized spacing and interactions
         </div>
       </div>
     );
@@ -494,12 +477,12 @@ export const TableStates: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Different Table States</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '24px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '24px',
+        width: '100%',
         maxWidth: '1000px'
       }}>
         {/* Loading State */}
@@ -559,12 +542,12 @@ export const TableSizes: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Table Size Options</h3>
-      
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        gap: '24px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '24px',
+        width: '100%',
         maxWidth: '800px'
       }}>
         {/* Small Size */}
@@ -670,7 +653,7 @@ export const CustomRendering: Story = {
             Pending: { bg: '#fef3c7', text: '#92400e' },
           };
           const color = colors[value as keyof typeof colors] || colors.Pending;
-          
+
           return (
             <span style={{
               padding: '4px 12px',
@@ -691,27 +674,12 @@ export const CustomRendering: Story = {
         align: 'center',
         render: () => (
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-            <button style={{
-              padding: '4px 8px',
-              border: '1px solid #d1d5db',
-              borderRadius: '4px',
-              backgroundColor: 'white',
-              cursor: 'pointer',
-              fontSize: '12px'
-            }}>
+            <Button variant="outline" size="sm">
               Edit
-            </button>
-            <button style={{
-              padding: '4px 8px',
-              border: '1px solid #ef4444',
-              borderRadius: '4px',
-              backgroundColor: '#ef4444',
-              color: 'white',
-              cursor: 'pointer',
-              fontSize: '12px'
-            }}>
+            </Button>
+            <Button variant="destructive" size="sm">
               Delete
-            </button>
+            </Button>
           </div>
         ),
       },
@@ -720,7 +688,7 @@ export const CustomRendering: Story = {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
         <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Custom Cell Rendering</h3>
-        
+
         <div style={{ width: '100%', maxWidth: '800px' }}>
           <WebTable
             data={sampleData}
@@ -728,11 +696,11 @@ export const CustomRendering: Story = {
             hoverable={true}
           />
         </div>
-        
-        <div style={{ 
-          fontSize: '12px', 
-          color: '#6b7280', 
-          textAlign: 'center', 
+
+        <div style={{
+          fontSize: '12px',
+          color: '#6b7280',
+          textAlign: 'center',
           maxWidth: '600px',
           lineHeight: '1.5',
           fontStyle: 'italic'
@@ -757,14 +725,14 @@ export const ThemeComparison: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Theme Comparison</h3>
-      
+
       {/* Default Theme */}
       <div style={{ width: '100%', maxWidth: '800px' }}>
         <h4 style={{ margin: '0 0 16px 0', fontSize: '14px', fontWeight: 600, textAlign: 'center' }}>
           ☀️ Default Theme
         </h4>
         <ThemeProvider defaultTheme="default">
-          <div style={{ 
+          <div style={{
             padding: '20px',
             backgroundColor: '#f8f9fa',
             borderRadius: '8px'
@@ -784,7 +752,7 @@ export const ThemeComparison: Story = {
           🌙 Dark Theme
         </h4>
         <ThemeProvider defaultTheme="dark">
-          <div style={{ 
+          <div style={{
             padding: '20px',
             backgroundColor: '#1f2937',
             borderRadius: '8px'

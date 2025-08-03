@@ -13,7 +13,7 @@ const TagStoryComponent = React.forwardRef<any, TagProps>((props, _ref) => {
 TagStoryComponent.displayName = 'Tag';
 
 const meta: Meta<TagProps> = {
-  title: 'Components/Tag',
+  title: 'Components/Data Display/Tag',
   component: TagStoryComponent,
   parameters: {
     layout: 'centered',
@@ -187,9 +187,9 @@ export const PlatformComparison: Story = {
   name: '📱 Platform Comparison',
   render: (args) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-      <div style={{ 
-        padding: '16px', 
-        backgroundColor: '#f8f9fa', 
+      <div style={{
+        padding: '16px',
+        backgroundColor: '#f8f9fa',
         borderRadius: '8px',
         textAlign: 'center',
         width: '100%',
@@ -202,12 +202,12 @@ export const PlatformComparison: Story = {
           The same component props render different platform implementations
         </p>
       </div>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '600px',
         alignItems: 'start'
       }}>
@@ -236,7 +236,7 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            Inline span with CSS styling<br/>
+            Inline span with CSS styling<br />
             Hover effects & smooth transitions
           </div>
         </div>
@@ -266,16 +266,16 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            View-based layout<br/>
+            View-based layout<br />
             TouchableOpacity interactions
           </div>
         </div>
       </div>
-      
-      <div style={{ 
-        fontSize: '12px', 
-        color: '#6b7280', 
-        textAlign: 'center', 
+
+      <div style={{
+        fontSize: '12px',
+        color: '#6b7280',
+        textAlign: 'center',
         maxWidth: '500px',
         lineHeight: '1.5',
         fontStyle: 'italic'
@@ -304,12 +304,12 @@ export const AllVariants: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Tag Variants</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '800px'
       }}>
         {/* Filled Variants */}
@@ -357,12 +357,12 @@ export const AllSizes: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Tag Sizes</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '600px'
       }}>
         {/* Web Sizes */}
@@ -413,22 +413,22 @@ export const InteractiveFeatures: Story = {
 
     const addTag = () => {
       const newId = Math.max(...tags.map(t => t.id), 0) + 1;
-      setTags([...tags, { 
-        id: newId, 
-        text: `Tag ${newId}`, 
-        variant: 'default' as const 
+      setTags([...tags, {
+        id: newId,
+        text: `Tag ${newId}`,
+        variant: 'default' as const
       }]);
     };
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
         <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Interactive Tag Features</h3>
-        
-        <div style={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          gap: '24px', 
-          width: '100%', 
+
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '24px',
+          width: '100%',
           maxWidth: '600px'
         }}>
           {/* Closable Tags */}
@@ -446,7 +446,7 @@ export const InteractiveFeatures: Story = {
                 </WebTag>
               ))}
             </div>
-            <button 
+            <button
               onClick={addTag}
               style={{
                 padding: '6px 12px',
@@ -466,20 +466,20 @@ export const InteractiveFeatures: Story = {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
             <h4 style={{ margin: '0', fontSize: '14px' }}>Clickable Tags</h4>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
-              <WebTag 
-                variant="primary" 
+              <WebTag
+                variant="primary"
                 onClick={() => alert('Primary tag clicked!')}
               >
                 Click me
               </WebTag>
-              <WebTag 
-                variant="success" 
+              <WebTag
+                variant="success"
                 onClick={() => alert('Success tag clicked!')}
               >
                 Interactive
               </WebTag>
-              <WebTag 
-                variant="info" 
+              <WebTag
+                variant="info"
                 onClick={() => alert('Info tag clicked!')}
               >
                 Clickable
@@ -526,14 +526,14 @@ export const ThemeComparison: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Theme Comparison</h3>
-      
+
       {/* Default Theme */}
       <div style={{ width: '100%', maxWidth: '600px' }}>
         <h4 style={{ margin: '0 0 16px 0', fontSize: '14px', fontWeight: 600, textAlign: 'center' }}>
           ☀️ Default Theme
         </h4>
         <ThemeProvider defaultTheme="default">
-          <div style={{ 
+          <div style={{
             padding: '20px',
             backgroundColor: '#f8f9fa',
             borderRadius: '8px',
@@ -559,7 +559,7 @@ export const ThemeComparison: Story = {
           🌙 Dark Theme
         </h4>
         <ThemeProvider defaultTheme="dark">
-          <div style={{ 
+          <div style={{
             padding: '20px',
             backgroundColor: '#1f2937',
             borderRadius: '8px',

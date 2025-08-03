@@ -13,7 +13,7 @@ const CardStoryComponent = React.forwardRef<any, CardProps>((props, _ref) => {
 CardStoryComponent.displayName = 'Card';
 
 const meta: Meta<CardProps> = {
-  title: 'Components/Card',
+  title: 'Components/Data Display/Card',
   component: CardStoryComponent,
   parameters: {
     layout: 'centered',
@@ -177,9 +177,9 @@ export const PlatformComparison: Story = {
   name: '📱 Platform Comparison',
   render: (args) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-      <div style={{ 
-        padding: '16px', 
-        backgroundColor: '#f8f9fa', 
+      <div style={{
+        padding: '16px',
+        backgroundColor: '#f8f9fa',
         borderRadius: '8px',
         textAlign: 'center',
         width: '100%',
@@ -192,12 +192,12 @@ export const PlatformComparison: Story = {
           The same component props render different platform implementations
         </p>
       </div>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '600px',
         alignItems: 'start'
       }}>
@@ -224,7 +224,7 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            HTML div/button with CSS styling<br/>
+            HTML div/button with CSS styling<br />
             Hover effects & box shadows
           </div>
         </div>
@@ -252,16 +252,16 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            View/TouchableOpacity with native styling<br/>
+            View/TouchableOpacity with native styling<br />
             Platform-appropriate shadows & elevation
           </div>
         </div>
       </div>
-      
-      <div style={{ 
-        fontSize: '12px', 
-        color: '#6b7280', 
-        textAlign: 'center', 
+
+      <div style={{
+        fontSize: '12px',
+        color: '#6b7280',
+        textAlign: 'center',
         maxWidth: '500px',
         lineHeight: '1.5',
         fontStyle: 'italic'
@@ -297,12 +297,12 @@ export const AllVariants: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Card Variants - Side by Side</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '800px'
       }}>
         {/* Web Variants */}
@@ -394,12 +394,12 @@ export const AllSizes: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Card Sizes - Side by Side</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '600px'
       }}>
         {/* Web Sizes */}
@@ -469,12 +469,12 @@ export const States: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Card States - Side by Side</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '700px'
       }}>
         {/* Web States */}
@@ -566,17 +566,17 @@ export const ThemeComparison: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Theme Comparison - Side by Side</h3>
-      
+
       {/* Default Theme */}
       <div style={{ width: '100%', maxWidth: '800px' }}>
         <h4 style={{ margin: '0 0 16px 0', fontSize: '14px', fontWeight: 600, textAlign: 'center' }}>
           ☀️ Default Theme
         </h4>
         <ThemeProvider defaultTheme="default">
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: '1fr 1fr', 
-            gap: '24px', 
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '24px',
             padding: '20px',
             backgroundColor: '#f8f9fa',
             borderRadius: '8px'
@@ -652,10 +652,10 @@ export const ThemeComparison: Story = {
           🌙 Dark Theme
         </h4>
         <ThemeProvider defaultTheme="dark">
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: '1fr 1fr', 
-            gap: '24px', 
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '24px',
             padding: '20px',
             backgroundColor: '#1f2937',
             borderRadius: '8px'

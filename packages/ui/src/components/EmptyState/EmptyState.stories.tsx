@@ -5,6 +5,7 @@ import { EmptyState as WebEmptyState } from './EmptyState.web';
 import { EmptyState as NativeEmptyState } from './EmptyState.native';
 import { EmptyStateProps } from './types';
 import { ThemeProvider } from '../../theme/ThemeProvider';
+import { Button } from '../Button';
 
 // Create a simple wrapper for Storybook to avoid renderer issues
 const EmptyStateStoryComponent = React.forwardRef<any, EmptyStateProps>((props, _ref) => {
@@ -145,16 +146,9 @@ export const Interactive: Story = {
   name: '🎮 Interactive Playground',
   args: {
     action: (
-      <button style={{
-        padding: '8px 16px',
-        backgroundColor: '#3b82f6',
-        color: 'white',
-        border: 'none',
-        borderRadius: '6px',
-        cursor: 'pointer'
-      }}>
+      <Button variant="primary">
         Add Item
-      </button>
+      </Button>
     ),
   },
   parameters: {
@@ -268,17 +262,9 @@ export const PlatformComparison: Story = {
     title: 'No notifications',
     description: 'When you have new notifications, they will appear here',
     action: (
-      <button style={{
-        padding: '6px 12px',
-        backgroundColor: '#10b981',
-        color: 'white',
-        border: 'none',
-        borderRadius: '4px',
-        cursor: 'pointer',
-        fontSize: '12px'
-      }}>
+      <Button variant="primary" size="sm">
         Enable Notifications
-      </button>
+      </Button>
     ),
   },
   parameters: {
@@ -313,17 +299,9 @@ export const AllVariants: Story = {
               title="No items found"
               description="Your list is currently empty"
               action={
-                <button style={{
-                  padding: '6px 12px',
-                  backgroundColor: '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '12px'
-                }}>
+                <Button variant="primary" size="sm">
                   Add Item
-                </button>
+                </Button>
               }
             />
           </div>
@@ -350,17 +328,9 @@ export const AllVariants: Story = {
               title="Welcome!"
               description="This is your dashboard. Add content to see it here."
               action={
-                <button style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#10b981',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '12px'
-                }}>
+                <Button variant="primary" size="sm">
                   Get Started
-                </button>
+                </Button>
               }
             />
           </div>
@@ -400,17 +370,9 @@ export const AllSizes: Story = {
               title="No results"
               description="Try a different search term"
               action={
-                <button style={{
-                  padding: '4px 8px',
-                  backgroundColor: '#6b7280',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '11px'
-                }}>
+                <Button variant="secondary" size="sm">
                   Clear
-                </button>
+                </Button>
               }
             />
           </div>
@@ -425,17 +387,9 @@ export const AllSizes: Story = {
               title="No messages"
               description="Your inbox is empty. New messages will appear here when they arrive."
               action={
-                <button style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '12px'
-                }}>
+                <Button variant="primary" size="sm">
                   Compose
-                </button>
+                </Button>
               }
             />
           </div>
@@ -451,29 +405,12 @@ export const AllSizes: Story = {
               description="This is where you'll manage all your projects and see important updates. Get started by creating your first project or importing existing data."
               action={
                 <div style={{ display: 'flex', gap: '12px' }}>
-                  <button style={{
-                    padding: '12px 24px',
-                    backgroundColor: '#3b82f6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: '600'
-                  }}>
+                  <Button variant="primary" size="lg">
                     Create Project
-                  </button>
-                  <button style={{
-                    padding: '12px 24px',
-                    backgroundColor: 'transparent',
-                    color: '#3b82f6',
-                    border: '1px solid #3b82f6',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    fontSize: '14px'
-                  }}>
+                  </Button>
+                  <Button variant="outline" size="lg">
                     Import Data
-                  </button>
+                  </Button>
                 </div>
               }
             />
@@ -528,17 +465,9 @@ export const CustomContent: Story = {
               title="No search results"
               description="Try adjusting your search criteria"
               action={
-                <button style={{
-                  padding: '6px 12px',
-                  backgroundColor: '#ef4444',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '12px'
-                }}>
+                <Button variant="destructive" size="sm">
                   Clear Search
-                </button>
+                </Button>
               }
             />
           </div>
@@ -568,17 +497,9 @@ export const CustomContent: Story = {
               title="No analytics data"
               description="Connect your accounts to start seeing analytics"
               action={
-                <button style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#8b5cf6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '12px'
-                }}>
+                <Button variant="primary" size="sm">
                   Connect Account
-                </button>
+                </Button>
               }
             />
           </div>
@@ -593,30 +514,12 @@ export const CustomContent: Story = {
               description="Get started by creating a new project or importing from another platform"
               action={
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
-                  <button style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#10b981',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    minWidth: '120px'
-                  }}>
+                  <Button variant="primary" size="sm">
                     New Project
-                  </button>
-                  <button style={{
-                    padding: '6px 12px',
-                    backgroundColor: 'transparent',
-                    color: '#6b7280',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '11px',
-                    minWidth: '120px'
-                  }}>
+                  </Button>
+                  <Button variant="outline" size="sm">
                     Import Project
-                  </button>
+                  </Button>
                 </div>
               }
             />
@@ -642,18 +545,9 @@ export const CustomContent: Story = {
                 <p style={{ margin: '0 0 16px 0', fontSize: '14px', opacity: 0.9 }}>
                   Your project is configured and ready to go!
                 </p>
-                <button style={{
-                  padding: '10px 20px',
-                  backgroundColor: 'white',
-                  color: '#667eea',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '600'
-                }}>
+                <Button variant="secondary">
                   Deploy Now
-                </button>
+                </Button>
               </div>
             </WebEmptyState>
           </div>
@@ -694,17 +588,9 @@ export const UseCases: Story = {
               title="No items found"
               description="Add your first item to get started"
               action={
-                <button style={{
-                  padding: '6px 12px',
-                  backgroundColor: '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '11px'
-                }}>
+                <Button variant="primary" size="sm">
                   Add Item
-                </button>
+                </Button>
               }
             />
           </div>
@@ -734,17 +620,9 @@ export const UseCases: Story = {
               title="No results found"
               description="Try different keywords or filters"
               action={
-                <button style={{
-                  padding: '4px 8px',
-                  backgroundColor: 'transparent',
-                  color: '#f59e0b',
-                  border: '1px solid #f59e0b',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '11px'
-                }}>
+                <Button variant="outline" size="sm">
                   Clear Search
-                </button>
+                </Button>
               }
             />
           </div>
@@ -773,17 +651,9 @@ export const UseCases: Story = {
               title="Something went wrong"
               description="We couldn't load your data. Please try again."
               action={
-                <button style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#ef4444',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '12px'
-                }}>
+                <Button variant="destructive" size="sm">
                   Try Again
-                </button>
+                </Button>
               }
             />
           </div>
@@ -798,18 +668,9 @@ export const UseCases: Story = {
               title="Welcome!"
               description="Let's set up your account and get you started"
               action={
-                <button style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#10b981',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '600'
-                }}>
+                <Button variant="primary">
                   Get Started
-                </button>
+                </Button>
               }
             />
           </div>
@@ -850,28 +711,12 @@ export const ThemeComparison: Story = {
                 description="Start by adding your first project or connecting your existing tools to see insights and analytics here."
                 action={
                   <div style={{ display: 'flex', gap: '12px' }}>
-                    <button style={{
-                      padding: '8px 16px',
-                      backgroundColor: '#3b82f6',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '12px'
-                    }}>
+                    <Button variant="primary" size="sm">
                       Add Project
-                    </button>
-                    <button style={{
-                      padding: '8px 16px',
-                      backgroundColor: 'transparent',
-                      color: '#6b7280',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '12px'
-                    }}>
+                    </Button>
+                    <Button variant="outline" size="sm">
                       Connect Tools
-                    </button>
+                    </Button>
                   </div>
                 }
               />
@@ -897,28 +742,12 @@ export const ThemeComparison: Story = {
                 description="Start by adding your first project or connecting your existing tools to see insights and analytics here."
                 action={
                   <div style={{ display: 'flex', gap: '12px' }}>
-                    <button style={{
-                      padding: '8px 16px',
-                      backgroundColor: '#7c3aed',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '12px'
-                    }}>
+                    <Button variant="primary" size="sm">
                       Add Project
-                    </button>
-                    <button style={{
-                      padding: '8px 16px',
-                      backgroundColor: 'transparent',
-                      color: '#9ca3af',
-                      border: '1px solid #4b5563',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '12px'
-                    }}>
+                    </Button>
+                    <Button variant="outline" size="sm">
                       Connect Tools
-                    </button>
+                    </Button>
                   </div>
                 }
               />

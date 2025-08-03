@@ -5,6 +5,7 @@ import { Dialog as WebDialog } from './Dialog.web';
 import { Dialog as NativeDialog } from './Dialog.native';
 import { DialogProps } from './types';
 import { ThemeProvider } from '../../theme/ThemeProvider';
+import { Button } from '../Button';
 
 // Create a simple wrapper for Storybook to avoid renderer issues
 const DialogStoryComponent = React.forwardRef<any, DialogProps & { trigger?: React.ReactNode }>((props, _ref) => {
@@ -15,19 +16,12 @@ const DialogStoryComponent = React.forwardRef<any, DialogProps & { trigger?: Rea
 
   return (
     <div>
-      <button 
+      <Button 
         onClick={handleOpen}
-        style={{
-          padding: '8px 16px',
-          backgroundColor: '#3b82f6',
-          color: 'white',
-          border: 'none',
-          borderRadius: '6px',
-          cursor: 'pointer'
-        }}
+        variant="primary"
       >
         {props.trigger || 'Open Dialog'}
-      </button>
+      </Button>
       <Dialog {...props} isOpen={isOpen} onClose={handleClose} />
     </div>
   );
@@ -258,19 +252,12 @@ export const PlatformComparison: Story = {
             }}>
               🌐 Web Platform
             </div>
-            <button 
+            <Button 
               onClick={() => setWebOpen(true)}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer'
-              }}
+              variant="primary"
             >
               Open Web Dialog
-            </button>
+            </Button>
             <div style={{
               fontSize: '11px',
               color: '#666',
@@ -296,19 +283,12 @@ export const PlatformComparison: Story = {
             }}>
               📱 React Native Platform
             </div>
-            <button 
+            <Button 
               onClick={() => setNativeOpen(true)}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#7c3aed',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer'
-              }}
+              variant="primary"
             >
               Open Native Dialog
-            </button>
+            </Button>
             <div style={{
               fontSize: '11px',
               color: '#666',
@@ -405,21 +385,14 @@ export const Sizes: Story = {
         }}>
           {sizes.map(({ key, label, color }) => (
             <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
-              <button 
+              <Button 
                 onClick={() => toggleSize(key)}
-                style={{
-                  padding: '8px 12px',
-                  backgroundColor: color,
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '12px',
-                  width: '100%'
-                }}
+                variant="primary"
+                size="sm"
+                style={{ backgroundColor: color, width: '100%' }}
               >
                 {label}
-              </button>
+              </Button>
               <WebDialog
                 isOpen={openSizes[key] || false}
                 onClose={() => toggleSize(key)}
@@ -474,19 +447,13 @@ export const Positions: Story = {
         }}>
           {positions.map(({ key, label, color }) => (
             <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
-              <button 
+              <Button 
                 onClick={() => togglePosition(key)}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: color,
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer'
-                }}
+                variant="primary"
+                style={{ backgroundColor: color }}
               >
                 {label}
-              </button>
+              </Button>
               <WebDialog
                 isOpen={openPositions[key] || false}
                 onClose={() => togglePosition(key)}
@@ -544,21 +511,14 @@ export const Backdrops: Story = {
         }}>
           {backdrops.map(({ key, label, color }) => (
             <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
-              <button 
+              <Button 
                 onClick={() => toggleBackdrop(key)}
-                style={{
-                  padding: '8px 12px',
-                  backgroundColor: color,
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '12px',
-                  width: '100%'
-                }}
+                variant="primary"
+                size="sm"
+                style={{ backgroundColor: color, width: '100%' }}
               >
                 {label}
-              </button>
+              </Button>
               <WebDialog
                 isOpen={openBackdrops[key] || false}
                 onClose={() => toggleBackdrop(key)}
@@ -616,19 +576,12 @@ export const ThemeComparison: Story = {
                 borderRadius: '8px',
                 textAlign: 'center'
               }}>
-                <button 
+                <Button 
                   onClick={() => setDefaultOpen(true)}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#3b82f6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer'
-                  }}
+                  variant="primary"
                 >
                   Open Default Dialog
-                </button>
+                </Button>
                 <WebDialog
                   isOpen={defaultOpen}
                   onClose={() => setDefaultOpen(false)}
@@ -657,19 +610,12 @@ export const ThemeComparison: Story = {
                 borderRadius: '8px',
                 textAlign: 'center'
               }}>
-                <button 
+                <Button 
                   onClick={() => setDarkOpen(true)}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#7c3aed',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer'
-                  }}
+                  variant="primary"
                 >
                   Open Dark Dialog
-                </button>
+                </Button>
                 <WebDialog
                   isOpen={darkOpen}
                   onClose={() => setDarkOpen(false)}

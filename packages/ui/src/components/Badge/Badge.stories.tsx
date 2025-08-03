@@ -13,7 +13,7 @@ const BadgeStoryComponent = React.forwardRef<any, BadgeProps>((props, _ref) => {
 BadgeStoryComponent.displayName = 'Badge';
 
 const meta: Meta<BadgeProps> = {
-  title: 'Components/Badge',
+  title: 'Components/Data Display/Badge',
   component: BadgeStoryComponent,
   parameters: {
     layout: 'centered',
@@ -154,9 +154,9 @@ export const PlatformComparison: Story = {
   name: '📱 Platform Comparison',
   render: (args) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-      <div style={{ 
-        padding: '16px', 
-        backgroundColor: '#f8f9fa', 
+      <div style={{
+        padding: '16px',
+        backgroundColor: '#f8f9fa',
         borderRadius: '8px',
         textAlign: 'center',
         width: '100%',
@@ -169,12 +169,12 @@ export const PlatformComparison: Story = {
           The same component props render different platform implementations
         </p>
       </div>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '600px',
         alignItems: 'start'
       }}>
@@ -199,7 +199,7 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            HTML span/button element<br/>
+            HTML span/button element<br />
             CSS styling & hover effects
           </div>
         </div>
@@ -225,16 +225,16 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            View/TouchableOpacity<br/>
+            View/TouchableOpacity<br />
             Platform-appropriate styling
           </div>
         </div>
       </div>
-      
-      <div style={{ 
-        fontSize: '12px', 
-        color: '#6b7280', 
-        textAlign: 'center', 
+
+      <div style={{
+        fontSize: '12px',
+        color: '#6b7280',
+        textAlign: 'center',
         maxWidth: '500px',
         lineHeight: '1.5',
         fontStyle: 'italic'
@@ -263,12 +263,12 @@ export const AllVariants: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Badge Variants - Side by Side</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '800px'
       }}>
         {/* Web Variants */}
@@ -334,12 +334,12 @@ export const AllSizes: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Badge Sizes - Side by Side</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '600px'
       }}>
         {/* Web Sizes */}
@@ -397,12 +397,12 @@ export const InteractiveVsStatic: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Interactive vs Static Badges</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '700px'
       }}>
         {/* Web Implementation */}
@@ -422,7 +422,7 @@ export const InteractiveVsStatic: Story = {
             <WebBadge variant="success">Online</WebBadge>
             <WebBadge variant="warning">Pending</WebBadge>
             <WebBadge variant="destructive">Offline</WebBadge>
-            
+
             <div style={{ fontSize: '12px', fontWeight: 600, color: '#666', marginTop: '8px' }}>Interactive Badges (button)</div>
             <WebBadge variant="primary" onClick={() => alert('Filter applied!')}>Filter</WebBadge>
             <WebBadge variant="outline" onClick={() => alert('Tag clicked!')}>Tag</WebBadge>
@@ -447,7 +447,7 @@ export const InteractiveVsStatic: Story = {
             <NativeBadge variant="success">Online</NativeBadge>
             <NativeBadge variant="warning">Pending</NativeBadge>
             <NativeBadge variant="destructive">Offline</NativeBadge>
-            
+
             <div style={{ fontSize: '12px', fontWeight: 600, color: '#666', marginTop: '8px' }}>Interactive Badges (TouchableOpacity)</div>
             <NativeBadge variant="primary" onPress={() => alert('Filter applied!')}>Filter</NativeBadge>
             <NativeBadge variant="outline" onPress={() => alert('Tag pressed!')}>Tag</NativeBadge>
@@ -472,17 +472,17 @@ export const ThemeComparison: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Theme Comparison - Side by Side</h3>
-      
+
       {/* Default Theme */}
       <div style={{ width: '100%', maxWidth: '800px' }}>
         <h4 style={{ margin: '0 0 16px 0', fontSize: '14px', fontWeight: 600, textAlign: 'center' }}>
           ☀️ Default Theme
         </h4>
         <ThemeProvider defaultTheme="default">
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: '1fr 1fr', 
-            gap: '24px', 
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '24px',
             padding: '20px',
             backgroundColor: '#f8f9fa',
             borderRadius: '8px'
@@ -534,10 +534,10 @@ export const ThemeComparison: Story = {
           🌙 Dark Theme
         </h4>
         <ThemeProvider defaultTheme="dark">
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: '1fr 1fr', 
-            gap: '24px', 
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '24px',
             padding: '20px',
             backgroundColor: '#1f2937',
             borderRadius: '8px'

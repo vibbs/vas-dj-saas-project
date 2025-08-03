@@ -5,6 +5,7 @@ import { ListItem as WebListItem } from './ListItem.web';
 import { ListItem as NativeListItem } from './ListItem.native';
 import { ListItemProps } from './types';
 import { ThemeProvider } from '../../theme/ThemeProvider';
+import { Button } from '../Button';
 
 // Create a simple wrapper for Storybook to avoid renderer issues
 const ListItemStoryComponent = React.forwardRef<any, ListItemProps>((props, _ref) => {
@@ -13,7 +14,7 @@ const ListItemStoryComponent = React.forwardRef<any, ListItemProps>((props, _ref
 ListItemStoryComponent.displayName = 'ListItem';
 
 const meta: Meta<ListItemProps> = {
-  title: 'Components/ListItem',
+  title: 'Components/Data Display/ListItem',
   component: ListItemStoryComponent,
   parameters: {
     layout: 'centered',
@@ -194,9 +195,9 @@ export const PlatformComparison: Story = {
   name: '📱 Platform Comparison',
   render: (args) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-      <div style={{ 
-        padding: '16px', 
-        backgroundColor: '#f8f9fa', 
+      <div style={{
+        padding: '16px',
+        backgroundColor: '#f8f9fa',
         borderRadius: '8px',
         textAlign: 'center',
         width: '100%',
@@ -209,12 +210,12 @@ export const PlatformComparison: Story = {
           The same component props render different platform implementations
         </p>
       </div>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '800px',
         alignItems: 'start'
       }}>
@@ -234,15 +235,15 @@ export const PlatformComparison: Story = {
           </div>
           <div style={{ width: '100%', maxWidth: '300px', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
             <WebListItem {...args} divider />
-            <WebListItem 
-              title="Jane Smith" 
-              subtitle="Designer" 
+            <WebListItem
+              title="Jane Smith"
+              subtitle="Designer"
               description="Creative professional"
-              divider 
+              divider
             />
-            <WebListItem 
-              title="Bob Johnson" 
-              subtitle="Developer" 
+            <WebListItem
+              title="Bob Johnson"
+              subtitle="Developer"
               description="Full-stack engineer"
             />
           </div>
@@ -252,7 +253,7 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            Div-based layout with CSS<br/>
+            Div-based layout with CSS<br />
             Hover effects & semantic HTML
           </div>
         </div>
@@ -273,15 +274,15 @@ export const PlatformComparison: Story = {
           </div>
           <div style={{ width: '100%', maxWidth: '300px', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
             <NativeListItem {...args} divider />
-            <NativeListItem 
-              title="Jane Smith" 
-              subtitle="Designer" 
+            <NativeListItem
+              title="Jane Smith"
+              subtitle="Designer"
               description="Creative professional"
-              divider 
+              divider
             />
-            <NativeListItem 
-              title="Bob Johnson" 
-              subtitle="Developer" 
+            <NativeListItem
+              title="Bob Johnson"
+              subtitle="Developer"
               description="Full-stack engineer"
             />
           </div>
@@ -291,16 +292,16 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            View-based layout<br/>
+            View-based layout<br />
             TouchableOpacity interactions
           </div>
         </div>
       </div>
-      
-      <div style={{ 
-        fontSize: '12px', 
-        color: '#6b7280', 
-        textAlign: 'center', 
+
+      <div style={{
+        fontSize: '12px',
+        color: '#6b7280',
+        textAlign: 'center',
         maxWidth: '600px',
         lineHeight: '1.5',
         fontStyle: 'italic'
@@ -329,12 +330,12 @@ export const ContentVariations: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Different Content Configurations</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '24px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '24px',
+        width: '100%',
         maxWidth: '800px'
       }}>
         {/* Basic Content */}
@@ -343,9 +344,9 @@ export const ContentVariations: Story = {
           <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px' }}>
             <WebListItem title="Title Only" divider />
             <WebListItem title="With Subtitle" subtitle="Secondary text" divider />
-            <WebListItem 
-              title="Full Content" 
-              subtitle="With subtitle" 
+            <WebListItem
+              title="Full Content"
+              subtitle="With subtitle"
               description="And additional description text"
             />
           </div>
@@ -355,7 +356,7 @@ export const ContentVariations: Story = {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <h4 style={{ margin: '0', fontSize: '14px' }}>With Leading Elements</h4>
           <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-            <WebListItem 
+            <WebListItem
               avatar={
                 <div style={{
                   width: '40px',
@@ -375,7 +376,7 @@ export const ContentVariations: Story = {
               subtitle="With Avatar"
               divider
             />
-            <WebListItem 
+            <WebListItem
               leading={
                 <div style={{
                   width: '24px',
@@ -395,7 +396,7 @@ export const ContentVariations: Story = {
               subtitle="Leading icon element"
               divider
             />
-            <WebListItem 
+            <WebListItem
               title="No Leading"
               subtitle="Standard item"
             />
@@ -406,24 +407,17 @@ export const ContentVariations: Story = {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <h4 style={{ margin: '0', fontSize: '14px' }}>With Trailing Elements</h4>
           <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-            <WebListItem 
+            <WebListItem
               title="With Button"
               subtitle="Trailing action"
               trailing={
-                <button style={{
-                  padding: '4px 8px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '4px',
-                  backgroundColor: 'white',
-                  cursor: 'pointer',
-                  fontSize: '12px'
-                }}>
+                <Button variant="outline" size="sm">
                   Edit
-                </button>
+                </Button>
               }
               divider
             />
-            <WebListItem 
+            <WebListItem
               title="With Badge"
               subtitle="Status indicator"
               trailing={
@@ -440,7 +434,7 @@ export const ContentVariations: Story = {
               }
               divider
             />
-            <WebListItem 
+            <WebListItem
               title="With Text"
               subtitle="Right-aligned info"
               trailing={
@@ -529,31 +523,31 @@ export const StatesAndOptions: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Different States and Layout Options</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '24px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '24px',
+        width: '100%',
         maxWidth: '800px'
       }}>
         {/* States */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <h4 style={{ margin: '0', fontSize: '14px' }}>Interactive States</h4>
           <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-            <WebListItem 
+            <WebListItem
               title="Normal State"
               subtitle="Default appearance"
               onClick={() => alert('Clicked!')}
               divider
             />
-            <WebListItem 
+            <WebListItem
               title="Selected State"
               subtitle="Currently selected"
               selected={true}
               divider
             />
-            <WebListItem 
+            <WebListItem
               title="Disabled State"
               subtitle="Cannot be interacted with"
               disabled={true}
@@ -565,18 +559,18 @@ export const StatesAndOptions: Story = {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <h4 style={{ margin: '0', fontSize: '14px' }}>Layout Options</h4>
           <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-            <WebListItem 
+            <WebListItem
               title="Normal Spacing"
               subtitle="Standard padding and height"
               divider
             />
-            <WebListItem 
+            <WebListItem
               title="Dense Layout"
               subtitle="Compact spacing"
               dense={true}
               divider
             />
-            <WebListItem 
+            <WebListItem
               title="Multiline Text Support"
               subtitle="This subtitle can wrap to multiple lines when the multiline prop is enabled, allowing for longer content"
               description="And the description can also wrap to show more detailed information about the item without truncation"
@@ -589,17 +583,17 @@ export const StatesAndOptions: Story = {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <h4 style={{ margin: '0', fontSize: '14px' }}>With Dividers</h4>
           <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-            <WebListItem 
+            <WebListItem
               title="First Item"
               subtitle="With bottom divider"
               divider
             />
-            <WebListItem 
+            <WebListItem
               title="Middle Item"
               subtitle="Also with divider"
               divider
             />
-            <WebListItem 
+            <WebListItem
               title="Last Item"
               subtitle="No divider needed"
             />
@@ -610,7 +604,7 @@ export const StatesAndOptions: Story = {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <h4 style={{ margin: '0', fontSize: '14px' }}>Interactive Example</h4>
           <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-            <WebListItem 
+            <WebListItem
               avatar={
                 <div style={{
                   width: '32px',
@@ -629,26 +623,24 @@ export const StatesAndOptions: Story = {
               title="Bohemian Rhapsody"
               subtitle="Queen • A Night at the Opera"
               trailing={
-                <button style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  border: 'none',
-                  backgroundColor: '#3b82f6',
-                  color: 'white',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    minWidth: '32px'
+                  }}
+                >
                   ▶
-                </button>
+                </Button>
               }
               onClick={() => alert('Playing song!')}
               onLongPress={() => alert('Long pressed for options!')}
               divider
             />
-            <WebListItem 
+            <WebListItem
               avatar={
                 <div style={{
                   width: '32px',
@@ -693,20 +685,20 @@ export const ThemeComparison: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Theme Comparison</h3>
-      
+
       {/* Default Theme */}
       <div style={{ width: '100%', maxWidth: '600px' }}>
         <h4 style={{ margin: '0 0 16px 0', fontSize: '14px', fontWeight: 600, textAlign: 'center' }}>
           ☀️ Default Theme
         </h4>
         <ThemeProvider defaultTheme="default">
-          <div style={{ 
+          <div style={{
             padding: '20px',
             backgroundColor: '#f8f9fa',
             borderRadius: '8px'
           }}>
             <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', backgroundColor: 'white' }}>
-              <WebListItem 
+              <WebListItem
                 avatar={
                   <div style={{
                     width: '40px',
@@ -732,7 +724,7 @@ export const ThemeComparison: Story = {
                 }
                 divider
               />
-              <WebListItem 
+              <WebListItem
                 title="Settings"
                 subtitle="Configure your preferences"
                 leading={
@@ -763,13 +755,13 @@ export const ThemeComparison: Story = {
           🌙 Dark Theme
         </h4>
         <ThemeProvider defaultTheme="dark">
-          <div style={{ 
+          <div style={{
             padding: '20px',
             backgroundColor: '#1f2937',
             borderRadius: '8px'
           }}>
             <div style={{ border: '1px solid #374151', borderRadius: '8px', overflow: 'hidden' }}>
-              <WebListItem 
+              <WebListItem
                 avatar={
                   <div style={{
                     width: '40px',
@@ -795,7 +787,7 @@ export const ThemeComparison: Story = {
                 }
                 divider
               />
-              <WebListItem 
+              <WebListItem
                 title="Settings"
                 subtitle="Configure your preferences"
                 leading={

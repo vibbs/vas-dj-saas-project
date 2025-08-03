@@ -5,6 +5,7 @@ import { Tooltip as WebTooltip } from './Tooltip.web';
 import { Tooltip as NativeTooltip } from './Tooltip.native';
 import { TooltipProps } from './types';
 import { ThemeProvider } from '../../theme/ThemeProvider';
+import { Button } from '../Button';
 
 // Create a simple wrapper for Storybook to avoid renderer issues
 const TooltipStoryComponent = React.forwardRef<any, TooltipProps>((props, _ref) => {
@@ -43,7 +44,7 @@ A unified tooltip component that automatically renders the appropriate implement
 import { Tooltip } from '@vas-dj-saas/ui';
 
 <Tooltip content="This is a helpful tooltip">
-  <button>Hover me</button>
+  <Button>Hover me</Button>
 </Tooltip>
 \`\`\`
 
@@ -69,9 +70,9 @@ const [visible, setVisible] = useState(false);
   visible={visible}
   trigger="manual"
 >
-  <button onClick={() => setVisible(!visible)}>
+  <Button onClick={() => setVisible(!visible)}>
     Toggle Tooltip
-  </button>
+  </Button>
 </Tooltip>
 \`\`\`
 
@@ -162,23 +163,14 @@ export const Interactive: Story = {
         {...args} 
         visible={args.trigger === 'manual' ? visible : args.visible}
       >
-        <button 
+        <Button 
           onClick={() => args.trigger === 'manual' && setVisible(!visible)}
-          style={{
-            padding: '12px 24px',
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '16px',
-            fontWeight: '500',
-          }}
+          variant="primary"
         >
           {args.trigger === 'hover' ? 'Hover me' : 
            args.trigger === 'focus' ? 'Focus me' :
            args.trigger === 'click' ? 'Click me' : 'Toggle tooltip'}
-        </button>
+        </Button>
       </Tooltip>
     );
   },
@@ -236,9 +228,9 @@ export const PlatformComparison: Story = {
           </div>
           <div style={{ padding: '40px', border: '1px dashed #ccc', borderRadius: '6px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <WebTooltip {...args} content="Web tooltip with hover events">
-              <button style={{ padding: '8px 16px', backgroundColor: '#1976d2', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+              <Button variant="primary">
                 Hover me (Web)
-              </button>
+              </Button>
             </WebTooltip>
           </div>
           <div style={{
@@ -269,9 +261,9 @@ export const PlatformComparison: Story = {
           </div>
           <div style={{ padding: '40px', border: '1px dashed #ccc', borderRadius: '6px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <NativeTooltip {...args} content="Native tooltip with touch events" trigger="click">
-              <button style={{ padding: '8px 16px', backgroundColor: '#7b1fa2', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+              <Button variant="secondary">
                 Touch me (Native)
-              </button>
+              </Button>
             </NativeTooltip>
           </div>
           <div style={{
@@ -320,28 +312,28 @@ export const AllPlacements: Story = {
       }}>
         {/* Top placements */}
         <Tooltip content="Top start placement" placement="top-start">
-          <button style={{ padding: '8px 12px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>
+          <Button variant="primary" size="small">
             Top Start
-          </button>
+          </Button>
         </Tooltip>
         
         <Tooltip content="Top center placement" placement="top">
-          <button style={{ padding: '8px 12px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>
+          <Button variant="primary" size="small">
             Top
-          </button>
+          </Button>
         </Tooltip>
         
         <Tooltip content="Top end placement" placement="top-end">
-          <button style={{ padding: '8px 12px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>
+          <Button variant="primary" size="small">
             Top End
-          </button>
+          </Button>
         </Tooltip>
 
         {/* Side placements */}
         <Tooltip content="Left placement" placement="left">
-          <button style={{ padding: '8px 12px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>
+          <Button variant="secondary" size="small">
             Left
-          </button>
+          </Button>
         </Tooltip>
         
         <div style={{ 
@@ -356,28 +348,28 @@ export const AllPlacements: Story = {
         </div>
         
         <Tooltip content="Right placement" placement="right">
-          <button style={{ padding: '8px 12px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>
+          <Button variant="secondary" size="small">
             Right
-          </button>
+          </Button>
         </Tooltip>
 
         {/* Bottom placements */}
         <Tooltip content="Bottom start placement" placement="bottom-start">
-          <button style={{ padding: '8px 12px', backgroundColor: '#f59e0b', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>
+          <Button variant="secondary" size="small">
             Bottom Start
-          </button>
+          </Button>
         </Tooltip>
         
         <Tooltip content="Bottom center placement" placement="bottom">
-          <button style={{ padding: '8px 12px', backgroundColor: '#f59e0b', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>
+          <Button variant="secondary" size="small">
             Bottom
-          </button>
+          </Button>
         </Tooltip>
         
         <Tooltip content="Bottom end placement" placement="bottom-end">
-          <button style={{ padding: '8px 12px', backgroundColor: '#f59e0b', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>
+          <Button variant="secondary" size="small">
             Bottom End
-          </button>
+          </Button>
         </Tooltip>
       </div>
     </div>
@@ -412,17 +404,9 @@ export const TriggerTypes: Story = {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
             <div style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>Hover Trigger</div>
             <Tooltip content="Appears on mouse hover" trigger="hover" placement="top">
-              <button style={{ 
-                padding: '12px 16px', 
-                backgroundColor: '#3b82f6', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '6px', 
-                cursor: 'pointer',
-                fontSize: '14px'
-              }}>
+              <Button variant="primary">
                 Hover me
-              </button>
+              </Button>
             </Tooltip>
             <div style={{ fontSize: '11px', color: '#6b7280', textAlign: 'center' }}>
               Default behavior<br/>Mouse enter/leave
@@ -433,17 +417,9 @@ export const TriggerTypes: Story = {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
             <div style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>Focus Trigger</div>
             <Tooltip content="Appears on keyboard focus" trigger="focus" placement="top">
-              <button style={{ 
-                padding: '12px 16px', 
-                backgroundColor: '#10b981', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '6px', 
-                cursor: 'pointer',
-                fontSize: '14px'
-              }}>
+              <Button variant="secondary">
                 Focus me
-              </button>
+              </Button>
             </Tooltip>
             <div style={{ fontSize: '11px', color: '#6b7280', textAlign: 'center' }}>
               Keyboard accessible<br/>Tab to focus
@@ -454,17 +430,9 @@ export const TriggerTypes: Story = {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
             <div style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>Click Trigger</div>
             <Tooltip content="Toggles on click" trigger="click" placement="bottom">
-              <button style={{ 
-                padding: '12px 16px', 
-                backgroundColor: '#f59e0b', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '6px', 
-                cursor: 'pointer',
-                fontSize: '14px'
-              }}>
+              <Button variant="secondary">
                 Click me
-              </button>
+              </Button>
             </Tooltip>
             <div style={{ fontSize: '11px', color: '#6b7280', textAlign: 'center' }}>
               Toggle behavior<br/>Click to show/hide
@@ -475,20 +443,12 @@ export const TriggerTypes: Story = {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
             <div style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>Manual Trigger</div>
             <Tooltip content="Controlled by external state" trigger="manual" visible={manualVisible} placement="bottom">
-              <button 
+              <Button 
                 onClick={() => setManualVisible(!manualVisible)}
-                style={{ 
-                  padding: '12px 16px', 
-                  backgroundColor: '#8b5cf6', 
-                  color: 'white', 
-                  border: 'none', 
-                  borderRadius: '6px', 
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
+                variant="secondary"
               >
                 {manualVisible ? 'Hide' : 'Show'} tooltip
-              </button>
+              </Button>
             </Tooltip>
             <div style={{ fontSize: '11px', color: '#6b7280', textAlign: 'center' }}>
               Controlled visibility<br/>External state management
@@ -547,17 +507,9 @@ export const AccessibilityFeatures: Story = {
             placement="top"
             aria-label="Additional information about this feature"
           >
-            <button style={{ 
-              padding: '12px 16px', 
-              backgroundColor: '#3b82f6', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '6px', 
-              cursor: 'pointer',
-              fontSize: '14px'
-            }}>
+            <Button variant="primary">
               Tab to focus
-            </button>
+            </Button>
           </Tooltip>
           <div style={{ fontSize: '11px', color: '#6b7280', textAlign: 'center', lineHeight: '1.4' }}>
             ✅ Focus visible<br/>
@@ -578,20 +530,12 @@ export const AccessibilityFeatures: Story = {
             accessibilityLabel="Help information"
             aria-describedby="screen-reader-description"
           >
-            <button 
-              style={{ 
-                padding: '12px 16px', 
-                backgroundColor: '#10b981', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '6px', 
-                cursor: 'pointer',
-                fontSize: '14px'
-              }}
+            <Button 
+              variant="secondary"
               aria-label="Settings button with additional help available"
             >
               ⚙️ Settings
-            </button>
+            </Button>
           </Tooltip>
           <div style={{ fontSize: '11px', color: '#6b7280', textAlign: 'center', lineHeight: '1.4' }}>
             ✅ ARIA describedby<br/>

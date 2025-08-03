@@ -5,6 +5,7 @@ import { Toast as WebToast } from './Toast.web';
 import { Toast as NativeToast } from './Toast.native';
 import { ToastProps } from './types';
 import { ThemeProvider } from '../../theme/ThemeProvider';
+import { Button } from '../Button/Button';
 
 // Create a simple wrapper for Storybook to avoid renderer issues
 const ToastStoryComponent = React.forwardRef<any, ToastProps>((props, _ref) => {
@@ -146,20 +147,13 @@ export const Interactive: Story = {
     
     return (
       <div style={{ position: 'relative', height: '300px', width: '100%' }}>
-        <button 
+        <Button 
           onClick={() => setVisible(true)}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: 'var(--color-primary, #3b82f6)',
-            color: 'var(--color-primary-foreground, white)',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            marginBottom: '16px'
-          }}
+          variant="primary"
+          style={{ marginBottom: '16px' }}
         >
           Show Toast
-        </button>
+        </Button>
         <Toast 
           {...args} 
           visible={visible}
@@ -386,24 +380,27 @@ export const AutoDismissDemo: Story = {
         <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Auto-dismiss Timing Demo</h3>
         
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <button 
+          <Button 
             onClick={() => addToast('success', '2s Auto-dismiss', 2000)}
-            style={{ padding: '8px 12px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+            variant="primary"
+            size="sm"
           >
             2s Toast
-          </button>
-          <button 
+          </Button>
+          <Button 
             onClick={() => addToast('info', '5s Auto-dismiss', 5000)}
-            style={{ padding: '8px 12px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+            variant="primary"
+            size="sm"
           >
             5s Toast
-          </button>
-          <button 
+          </Button>
+          <Button 
             onClick={() => addToast('warning', 'Persistent Toast', 0)}
-            style={{ padding: '8px 12px', backgroundColor: '#f59e0b', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+            variant="primary"
+            size="sm"
           >
             Persistent
-          </button>
+          </Button>
         </div>
         
         <div style={{ position: 'relative', height: '300px', width: '100%' }}>

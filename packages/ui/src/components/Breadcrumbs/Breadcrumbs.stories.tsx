@@ -29,7 +29,7 @@ const sampleItemsWithIcons = [
 ];
 
 const meta: Meta<BreadcrumbsProps> = {
-  title: 'Components/Navigation/Breadcrumbs',
+  title: 'Navigation/Breadcrumbs',
   component: BreadcrumbsStoryComponent,
   parameters: {
     layout: 'centered',
@@ -198,9 +198,9 @@ export const PlatformComparison: Story = {
   name: '📱 Platform Comparison',
   render: (args) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-      <div style={{ 
-        padding: '16px', 
-        backgroundColor: '#f8f9fa', 
+      <div style={{
+        padding: '16px',
+        backgroundColor: '#f8f9fa',
         borderRadius: '8px',
         textAlign: 'center',
         width: '100%',
@@ -213,12 +213,12 @@ export const PlatformComparison: Story = {
           The same component props render different platform implementations
         </p>
       </div>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px',
         alignItems: 'start'
       }}>
@@ -243,7 +243,7 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            HTML nav with semantic structure<br/>
+            HTML nav with semantic structure<br />
             Lucide icons & hover effects
           </div>
         </div>
@@ -269,16 +269,16 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            TouchableOpacity with Unicode separators<br/>
+            TouchableOpacity with Unicode separators<br />
             Platform-appropriate touch feedback
           </div>
         </div>
       </div>
-      
-      <div style={{ 
-        fontSize: '12px', 
-        color: '#6b7280', 
-        textAlign: 'center', 
+
+      <div style={{
+        fontSize: '12px',
+        color: '#6b7280',
+        textAlign: 'center',
         maxWidth: '500px',
         lineHeight: '1.5',
         fontStyle: 'italic'
@@ -307,12 +307,12 @@ export const BreadcrumbScenarios: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Different Breadcrumb Scenarios</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '24px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '24px',
+        width: '100%',
         maxWidth: '900px'
       }}>
         {/* Web Scenarios */}
@@ -327,11 +327,11 @@ export const BreadcrumbScenarios: Story = {
           }}>
             🌐 Web Platform
           </div>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Simple Path</div>
-              <WebBreadcrumbs 
+              <WebBreadcrumbs
                 items={[
                   { label: 'Home', href: '/' },
                   { label: 'Products', href: '/products' },
@@ -339,20 +339,20 @@ export const BreadcrumbScenarios: Story = {
                 ]}
               />
             </div>
-            
+
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>With Icons</div>
               <WebBreadcrumbs items={sampleItemsWithIcons} />
             </div>
-            
+
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Long Path (Truncated)</div>
               <WebBreadcrumbs items={sampleItems} maxItems={4} />
             </div>
-            
+
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>With Home Icon</div>
-              <WebBreadcrumbs 
+              <WebBreadcrumbs
                 items={sampleItems.slice(0, 3)}
                 showHomeIcon={true}
               />
@@ -372,11 +372,11 @@ export const BreadcrumbScenarios: Story = {
           }}>
             📱 React Native Platform
           </div>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Simple Path</div>
-              <NativeBreadcrumbs 
+              <NativeBreadcrumbs
                 items={[
                   { label: 'Home', href: '/' },
                   { label: 'Products', href: '/products' },
@@ -384,20 +384,20 @@ export const BreadcrumbScenarios: Story = {
                 ]}
               />
             </div>
-            
+
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>With Icons</div>
               <NativeBreadcrumbs items={sampleItemsWithIcons} />
             </div>
-            
+
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Long Path (Truncated)</div>
               <NativeBreadcrumbs items={sampleItems} maxItems={4} />
             </div>
-            
+
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>With Home Icon</div>
-              <NativeBreadcrumbs 
+              <NativeBreadcrumbs
                 items={sampleItems.slice(0, 3)}
                 showHomeIcon={true}
               />
@@ -422,12 +422,12 @@ export const AllVariants: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Breadcrumbs Variants - Side by Side</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px'
       }}>
         {/* Web Variants */}
@@ -483,12 +483,12 @@ export const AllSizes: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Breadcrumbs Sizes - Side by Side</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px'
       }}>
         {/* Web Sizes */}

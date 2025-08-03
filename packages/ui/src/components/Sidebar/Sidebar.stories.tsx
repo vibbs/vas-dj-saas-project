@@ -22,9 +22,9 @@ const basicItems = [
 
 const nestedItems = [
   { id: 'dashboard', label: 'Dashboard', icon: <Home size={18} />, active: true },
-  { 
-    id: 'content', 
-    label: 'Content', 
+  {
+    id: 'content',
+    label: 'Content',
     icon: <FileText size={18} />,
     children: [
       { id: 'posts', label: 'Posts', href: '/posts' },
@@ -32,10 +32,10 @@ const nestedItems = [
       { id: 'media', label: 'Media Library', href: '/media' },
     ]
   },
-  { 
-    id: 'users', 
-    label: 'Users', 
-    icon: <Users size={18} />, 
+  {
+    id: 'users',
+    label: 'Users',
+    icon: <Users size={18} />,
     badge: '12',
     children: [
       { id: 'all-users', label: 'All Users', href: '/users' },
@@ -56,7 +56,7 @@ const itemsWithStates = [
 ];
 
 const meta: Meta<SidebarProps> = {
-  title: 'Components/Navigation/Sidebar',
+  title: 'Navigation/Sidebar',
   component: SidebarStoryComponent,
   parameters: {
     layout: 'fullscreen',
@@ -251,9 +251,9 @@ export const PlatformComparison: Story = {
   name: '📱 Platform Comparison',
   render: (args) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-      <div style={{ 
-        padding: '16px', 
-        backgroundColor: '#f8f9fa', 
+      <div style={{
+        padding: '16px',
+        backgroundColor: '#f8f9fa',
         borderRadius: '8px',
         textAlign: 'center',
         width: '100%',
@@ -266,12 +266,12 @@ export const PlatformComparison: Story = {
           The same component props render different platform implementations
         </p>
       </div>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px',
         alignItems: 'start'
       }}>
@@ -301,7 +301,7 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            HTML nav with Lucide icons<br/>
+            HTML nav with Lucide icons<br />
             Hover effects & smooth transitions
           </div>
         </div>
@@ -332,16 +332,16 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            ScrollView with TouchableOpacity<br/>
+            ScrollView with TouchableOpacity<br />
             Platform-appropriate touch feedback
           </div>
         </div>
       </div>
-      
-      <div style={{ 
-        fontSize: '12px', 
-        color: '#6b7280', 
-        textAlign: 'center', 
+
+      <div style={{
+        fontSize: '12px',
+        color: '#6b7280',
+        textAlign: 'center',
         maxWidth: '500px',
         lineHeight: '1.5',
         fontStyle: 'italic'
@@ -370,12 +370,12 @@ export const NestedNavigation: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Hierarchical Menu Structure</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px'
       }}>
         {/* Web Nested */}
@@ -391,7 +391,7 @@ export const NestedNavigation: Story = {
             🌐 Web Platform
           </div>
           <div style={{ height: '450px', display: 'flex' }}>
-            <WebSidebar 
+            <WebSidebar
               items={nestedItems}
               width={280}
               header={<div style={{ fontWeight: 600, fontSize: 16 }}>Admin Panel</div>}
@@ -415,7 +415,7 @@ export const NestedNavigation: Story = {
             📱 React Native Platform
           </div>
           <div style={{ height: '450px', display: 'flex' }}>
-            <NativeSidebar 
+            <NativeSidebar
               items={nestedItems}
               width={280}
               header={<Text style={{ fontWeight: '600', fontSize: 16 }}>Admin Panel</Text>}
@@ -443,12 +443,12 @@ export const CollapsedState: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Expanded vs Collapsed States</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px'
       }}>
         {/* Web States */}
@@ -463,11 +463,11 @@ export const CollapsedState: Story = {
           }}>
             🌐 Web Platform
           </div>
-          
+
           <div style={{ display: 'flex', gap: '16px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
               <div style={{ fontSize: '12px', color: '#666' }}>Expanded</div>
-              <WebSidebar 
+              <WebSidebar
                 items={basicItems}
                 collapsed={false}
                 width={200}
@@ -477,7 +477,7 @@ export const CollapsedState: Story = {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
               <div style={{ fontSize: '12px', color: '#666' }}>Collapsed</div>
-              <WebSidebar 
+              <WebSidebar
                 items={basicItems}
                 collapsed={true}
                 collapsedWidth={60}
@@ -500,11 +500,11 @@ export const CollapsedState: Story = {
           }}>
             📱 React Native Platform
           </div>
-          
+
           <div style={{ display: 'flex', gap: '16px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
               <div style={{ fontSize: '12px', color: '#666' }}>Expanded</div>
-              <NativeSidebar 
+              <NativeSidebar
                 items={basicItems}
                 collapsed={false}
                 width={200}
@@ -514,7 +514,7 @@ export const CollapsedState: Story = {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
               <div style={{ fontSize: '12px', color: '#666' }}>Collapsed</div>
-              <NativeSidebar 
+              <NativeSidebar
                 items={basicItems}
                 collapsed={true}
                 collapsedWidth={60}
@@ -542,12 +542,12 @@ export const AllVariants: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Sidebar Variants</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px'
       }}>
         {/* Web Variants */}

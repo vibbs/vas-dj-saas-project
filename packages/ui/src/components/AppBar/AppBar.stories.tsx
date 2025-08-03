@@ -27,7 +27,7 @@ const socialActions = [
 ];
 
 const meta: Meta<AppBarProps> = {
-  title: 'Components/Navigation/AppBar',
+  title: 'Navigation/AppBar',
   component: AppBarStoryComponent,
   parameters: {
     layout: 'fullscreen',
@@ -226,9 +226,9 @@ export const PlatformComparison: Story = {
   name: '📱 Platform Comparison',
   render: (args) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-      <div style={{ 
-        padding: '16px', 
-        backgroundColor: '#f8f9fa', 
+      <div style={{
+        padding: '16px',
+        backgroundColor: '#f8f9fa',
         borderRadius: '8px',
         textAlign: 'center',
         width: '100%',
@@ -241,12 +241,12 @@ export const PlatformComparison: Story = {
           The same component props render different platform implementations
         </p>
       </div>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px',
         alignItems: 'start'
       }}>
@@ -276,7 +276,7 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            HTML header with Lucide icons<br/>
+            HTML header with Lucide icons<br />
             CSS-based shadows & positioning
           </div>
         </div>
@@ -307,16 +307,16 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            React Native View with StatusBar<br/>
+            React Native View with StatusBar<br />
             Platform-appropriate elevation & shadows
           </div>
         </div>
       </div>
-      
-      <div style={{ 
-        fontSize: '12px', 
-        color: '#6b7280', 
-        textAlign: 'center', 
+
+      <div style={{
+        fontSize: '12px',
+        color: '#6b7280',
+        textAlign: 'center',
         maxWidth: '500px',
         lineHeight: '1.5',
         fontStyle: 'italic'
@@ -345,12 +345,12 @@ export const AppBarScenarios: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Different AppBar Scenarios</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '24px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '24px',
+        width: '100%',
         maxWidth: '900px'
       }}>
         {/* Web Scenarios */}
@@ -365,34 +365,34 @@ export const AppBarScenarios: Story = {
           }}>
             🌐 Web Platform
           </div>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Simple Title</div>
               <WebAppBar title="Dashboard" actions={[{ id: 'menu', icon: <Menu size={20} />, label: 'Menu' }]} />
             </div>
-            
+
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>With Back Action</div>
-              <WebAppBar 
+              <WebAppBar
                 title="Settings"
                 backAction={{ label: 'Go back' }}
                 actions={[{ id: 'save', icon: <Settings size={20} />, label: 'Save' }]}
               />
             </div>
-            
+
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Social Media Style</div>
-              <WebAppBar 
+              <WebAppBar
                 title="Photo Gallery"
                 subtitle="124 photos"
                 actions={socialActions}
               />
             </div>
-            
+
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>With Badges</div>
-              <WebAppBar 
+              <WebAppBar
                 title="Messages"
                 actions={[
                   { id: 'search', icon: <Search size={20} />, label: 'Search' },
@@ -415,34 +415,34 @@ export const AppBarScenarios: Story = {
           }}>
             📱 React Native Platform
           </div>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Simple Title</div>
               <NativeAppBar title="Dashboard" actions={[{ id: 'menu', icon: <Menu size={20} />, label: 'Menu' }]} />
             </div>
-            
+
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>With Back Action</div>
-              <NativeAppBar 
+              <NativeAppBar
                 title="Settings"
                 backAction={{ label: 'Go back' }}
                 actions={[{ id: 'save', icon: <Settings size={20} />, label: 'Save' }]}
               />
             </div>
-            
+
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Social Media Style</div>
-              <NativeAppBar 
+              <NativeAppBar
                 title="Photo Gallery"
                 subtitle="124 photos"
                 actions={socialActions}
               />
             </div>
-            
+
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>With Badges</div>
-              <NativeAppBar 
+              <NativeAppBar
                 title="Messages"
                 actions={[
                   { id: 'search', icon: <Search size={20} />, label: 'Search' },
@@ -470,12 +470,12 @@ export const AllVariants: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>AppBar Variants - Side by Side</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px'
       }}>
         {/* Web Variants */}

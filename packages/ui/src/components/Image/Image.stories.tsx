@@ -25,7 +25,7 @@ const sampleImages = {
 };
 
 const meta: Meta<ImageProps> = {
-  title: 'Components/Media/Image',
+  title: 'Media/Image',
   component: ImageStoryComponent,
   parameters: {
     layout: 'centered',
@@ -234,9 +234,9 @@ export const PlatformComparison: Story = {
   name: '📱 Platform Comparison',
   render: (args) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-      <div style={{ 
-        padding: '16px', 
-        backgroundColor: '#f8f9fa', 
+      <div style={{
+        padding: '16px',
+        backgroundColor: '#f8f9fa',
         borderRadius: '8px',
         textAlign: 'center',
         width: '100%',
@@ -249,12 +249,12 @@ export const PlatformComparison: Story = {
           The same component props render different platform implementations
         </p>
       </div>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px',
         alignItems: 'start'
       }}>
@@ -279,7 +279,7 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            HTML img/object with CSS optimizations<br/>
+            HTML img/object with CSS optimizations<br />
             Lazy loading & blur-up support
           </div>
         </div>
@@ -305,16 +305,16 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            React Native Image with ActivityIndicator<br/>
+            React Native Image with ActivityIndicator<br />
             Platform-optimized loading & caching
           </div>
         </div>
       </div>
-      
-      <div style={{ 
-        fontSize: '12px', 
-        color: '#6b7280', 
-        textAlign: 'center', 
+
+      <div style={{
+        fontSize: '12px',
+        color: '#6b7280',
+        textAlign: 'center',
         maxWidth: '500px',
         lineHeight: '1.5',
         fontStyle: 'italic'
@@ -345,12 +345,12 @@ export const ImageFormats: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Supported Image Formats</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '24px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '24px',
+        width: '100%',
         maxWidth: '900px'
       }}>
         {/* Web Formats */}
@@ -365,11 +365,11 @@ export const ImageFormats: Story = {
           }}>
             🌐 Web Platform
           </div>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>JPEG Photo</div>
-              <WebImage 
+              <WebImage
                 source={sampleImages.landscape}
                 alt="JPEG landscape"
                 width={200}
@@ -377,10 +377,10 @@ export const ImageFormats: Story = {
                 borderRadius={8}
               />
             </div>
-            
+
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>SVG Icon</div>
-              <WebImage 
+              <WebImage
                 source={sampleImages.svg}
                 alt="SVG icon"
                 width={64}
@@ -388,10 +388,10 @@ export const ImageFormats: Story = {
                 svg={true}
               />
             </div>
-            
+
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Generated Placeholder</div>
-              <WebImage 
+              <WebImage
                 source={sampleImages.placeholder}
                 alt="Placeholder image"
                 width={200}
@@ -414,11 +414,11 @@ export const ImageFormats: Story = {
           }}>
             📱 React Native Platform
           </div>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>JPEG Photo</div>
-              <NativeImage 
+              <NativeImage
                 source={sampleImages.landscape}
                 alt="JPEG landscape"
                 width={200}
@@ -426,10 +426,10 @@ export const ImageFormats: Story = {
                 borderRadius={8}
               />
             </div>
-            
+
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>SVG (as Image)</div>
-              <NativeImage 
+              <NativeImage
                 source={sampleImages.svg}
                 alt="SVG icon"
                 width={64}
@@ -437,10 +437,10 @@ export const ImageFormats: Story = {
                 svg={true}
               />
             </div>
-            
+
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Generated Placeholder</div>
-              <NativeImage 
+              <NativeImage
                 source={sampleImages.placeholder}
                 alt="Placeholder image"
                 width={200}
@@ -468,12 +468,12 @@ export const AspectRatios: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Different Aspect Ratios</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px'
       }}>
         {/* Web Aspect Ratios */}
@@ -495,11 +495,11 @@ export const AspectRatios: Story = {
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>Landscape (16:9)</div>
-              <WebImage source={sampleImages.landscape} alt="Landscape" aspectRatio={16/9} width={200} borderRadius={8} />
+              <WebImage source={sampleImages.landscape} alt="Landscape" aspectRatio={16 / 9} width={200} borderRadius={8} />
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>Portrait (3:4)</div>
-              <WebImage source={sampleImages.portrait} alt="Portrait" aspectRatio={3/4} width={150} borderRadius={8} />
+              <WebImage source={sampleImages.portrait} alt="Portrait" aspectRatio={3 / 4} width={150} borderRadius={8} />
             </div>
           </div>
         </div>
@@ -523,11 +523,11 @@ export const AspectRatios: Story = {
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>Landscape (16:9)</div>
-              <NativeImage source={sampleImages.landscape} alt="Landscape" aspectRatio={16/9} width={200} borderRadius={8} />
+              <NativeImage source={sampleImages.landscape} alt="Landscape" aspectRatio={16 / 9} width={200} borderRadius={8} />
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>Portrait (3:4)</div>
-              <NativeImage source={sampleImages.portrait} alt="Portrait" aspectRatio={3/4} width={150} borderRadius={8} />
+              <NativeImage source={sampleImages.portrait} alt="Portrait" aspectRatio={3 / 4} width={150} borderRadius={8} />
             </div>
           </div>
         </div>
@@ -549,12 +549,12 @@ export const AvatarUseCase: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Avatar Implementation</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '600px'
       }}>
         {/* Web Avatars */}
@@ -570,7 +570,7 @@ export const AvatarUseCase: Story = {
             🌐 Web Platform
           </div>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <WebImage 
+            <WebImage
               source={sampleImages.avatar}
               alt="User avatar"
               width={64}
@@ -579,7 +579,7 @@ export const AvatarUseCase: Story = {
               borderRadius={32}
               resizeMode="cover"
             />
-            <WebImage 
+            <WebImage
               source={sampleImages.avatar}
               alt="User avatar"
               width={48}
@@ -588,7 +588,7 @@ export const AvatarUseCase: Story = {
               borderRadius={24}
               resizeMode="cover"
             />
-            <WebImage 
+            <WebImage
               source={sampleImages.avatar}
               alt="User avatar"
               width={32}
@@ -613,7 +613,7 @@ export const AvatarUseCase: Story = {
             📱 React Native Platform
           </div>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <NativeImage 
+            <NativeImage
               source={sampleImages.avatar}
               alt="User avatar"
               width={64}
@@ -622,7 +622,7 @@ export const AvatarUseCase: Story = {
               borderRadius={32}
               resizeMode="cover"
             />
-            <NativeImage 
+            <NativeImage
               source={sampleImages.avatar}
               alt="User avatar"
               width={48}
@@ -631,7 +631,7 @@ export const AvatarUseCase: Story = {
               borderRadius={24}
               resizeMode="cover"
             />
-            <NativeImage 
+            <NativeImage
               source={sampleImages.avatar}
               alt="User avatar"
               width={32}
@@ -643,7 +643,7 @@ export const AvatarUseCase: Story = {
           </div>
         </div>
       </div>
-      
+
       <div style={{ fontSize: '12px', color: '#666', textAlign: 'center', maxWidth: '400px' }}>
         Perfect for user avatars with consistent circular cropping and multiple sizes
       </div>
@@ -664,12 +664,12 @@ export const ErrorHandling: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Error Handling & Fallbacks</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px'
       }}>
         {/* Web Error Handling */}
@@ -687,7 +687,7 @@ export const ErrorHandling: Story = {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Broken URL</div>
-              <WebImage 
+              <WebImage
                 source="https://invalid-url.com/nonexistent.jpg"
                 alt="Broken image"
                 width={150}
@@ -695,22 +695,22 @@ export const ErrorHandling: Story = {
                 borderRadius={8}
               />
             </div>
-            
+
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>With Fallback Content</div>
-              <WebImage 
+              <WebImage
                 source="https://invalid-url.com/nonexistent.jpg"
                 alt="Image with fallback"
                 width={150}
                 height={100}
                 borderRadius={8}
                 fallback={
-                  <div style={{ 
-                    width: '100%', 
-                    height: '100%', 
-                    backgroundColor: '#f3f4f6', 
-                    display: 'flex', 
-                    alignItems: 'center', 
+                  <div style={{
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: '#f3f4f6',
+                    display: 'flex',
+                    alignItems: 'center',
                     justifyContent: 'center',
                     borderRadius: '8px'
                   }}>
@@ -719,10 +719,10 @@ export const ErrorHandling: Story = {
                 }
               />
             </div>
-            
+
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>With Error Image</div>
-              <WebImage 
+              <WebImage
                 source="https://invalid-url.com/nonexistent.jpg"
                 alt="Image with error replacement"
                 width={150}
@@ -749,7 +749,7 @@ export const ErrorHandling: Story = {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Broken URL</div>
-              <NativeImage 
+              <NativeImage
                 source="https://invalid-url.com/nonexistent.jpg"
                 alt="Broken image"
                 width={150}
@@ -757,22 +757,22 @@ export const ErrorHandling: Story = {
                 borderRadius={8}
               />
             </div>
-            
+
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>With Fallback Content</div>
-              <NativeImage 
+              <NativeImage
                 source="https://invalid-url.com/nonexistent.jpg"
                 alt="Image with fallback"
                 width={150}
                 height={100}
                 borderRadius={8}
                 fallback={
-                  <div style={{ 
-                    width: 150, 
-                    height: 100, 
-                    backgroundColor: '#f3f4f6', 
-                    display: 'flex', 
-                    alignItems: 'center', 
+                  <div style={{
+                    width: 150,
+                    height: 100,
+                    backgroundColor: '#f3f4f6',
+                    display: 'flex',
+                    alignItems: 'center',
                     justifyContent: 'center',
                     borderRadius: 8
                   }}>
@@ -781,10 +781,10 @@ export const ErrorHandling: Story = {
                 }
               />
             </div>
-            
+
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>With Error Image</div>
-              <NativeImage 
+              <NativeImage
                 source="https://invalid-url.com/nonexistent.jpg"
                 alt="Image with error replacement"
                 width={150}

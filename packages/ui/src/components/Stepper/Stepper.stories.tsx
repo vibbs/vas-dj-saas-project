@@ -42,7 +42,7 @@ const stepsWithStates = [
 ];
 
 const meta: Meta<StepperProps> = {
-  title: 'Components/Navigation/Stepper',
+  title: 'Navigation/Stepper',
   component: StepperStoryComponent,
   parameters: {
     layout: 'centered',
@@ -234,9 +234,9 @@ export const PlatformComparison: Story = {
   name: '📱 Platform Comparison',
   render: (args) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-      <div style={{ 
-        padding: '16px', 
-        backgroundColor: '#f8f9fa', 
+      <div style={{
+        padding: '16px',
+        backgroundColor: '#f8f9fa',
         borderRadius: '8px',
         textAlign: 'center',
         width: '100%',
@@ -249,12 +249,12 @@ export const PlatformComparison: Story = {
           The same component props render different platform implementations
         </p>
       </div>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px',
         alignItems: 'start'
       }}>
@@ -279,7 +279,7 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            HTML elements with Lucide icons<br/>
+            HTML elements with Lucide icons<br />
             Hover effects & transitions
           </div>
         </div>
@@ -305,16 +305,16 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            TouchableOpacity with Unicode symbols<br/>
+            TouchableOpacity with Unicode symbols<br />
             Platform-appropriate touch feedback
           </div>
         </div>
       </div>
-      
-      <div style={{ 
-        fontSize: '12px', 
-        color: '#6b7280', 
-        textAlign: 'center', 
+
+      <div style={{
+        fontSize: '12px',
+        color: '#6b7280',
+        textAlign: 'center',
         maxWidth: '500px',
         lineHeight: '1.5',
         fontStyle: 'italic'
@@ -344,12 +344,12 @@ export const OrientationComparison: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Horizontal vs Vertical Orientations</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px'
       }}>
         {/* Web Orientations */}
@@ -364,20 +364,20 @@ export const OrientationComparison: Story = {
           }}>
             🌐 Web Platform
           </div>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Horizontal</div>
-              <WebStepper 
+              <WebStepper
                 steps={basicSteps}
                 activeStep={1}
                 orientation="horizontal"
               />
             </div>
-            
+
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Vertical</div>
-              <WebStepper 
+              <WebStepper
                 steps={basicSteps}
                 activeStep={1}
                 orientation="vertical"
@@ -398,20 +398,20 @@ export const OrientationComparison: Story = {
           }}>
             📱 React Native Platform
           </div>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Horizontal</div>
-              <NativeStepper 
+              <NativeStepper
                 steps={basicSteps}
                 activeStep={1}
                 orientation="horizontal"
               />
             </div>
-            
+
             <div>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Vertical</div>
-              <NativeStepper 
+              <NativeStepper
                 steps={basicSteps}
                 activeStep={1}
                 orientation="vertical"
@@ -437,12 +437,12 @@ export const StepStates: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Different Step States</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px'
       }}>
         {/* Web States */}
@@ -457,7 +457,7 @@ export const StepStates: Story = {
           }}>
             🌐 Web Platform
           </div>
-          <WebStepper 
+          <WebStepper
             steps={stepsWithStates}
             activeStep={2}
             completedSteps={[0]}
@@ -477,7 +477,7 @@ export const StepStates: Story = {
           }}>
             📱 React Native Platform
           </div>
-          <NativeStepper 
+          <NativeStepper
             steps={stepsWithStates}
             activeStep={2}
             completedSteps={[0]}
@@ -485,7 +485,7 @@ export const StepStates: Story = {
           />
         </div>
       </div>
-      
+
       <div style={{ fontSize: '12px', color: '#666', textAlign: 'center', maxWidth: '500px' }}>
         Shows completed (✓), active, error (!), optional, and disabled step states
       </div>
@@ -506,12 +506,12 @@ export const WithIcons: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Steps with Custom Icons</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px'
       }}>
         {/* Web with Icons */}
@@ -526,7 +526,7 @@ export const WithIcons: Story = {
           }}>
             🌐 Web Platform
           </div>
-          <WebStepper 
+          <WebStepper
             steps={stepsWithIcons}
             activeStep={1}
             completedSteps={[0]}
@@ -547,7 +547,7 @@ export const WithIcons: Story = {
           }}>
             📱 React Native Platform
           </div>
-          <NativeStepper 
+          <NativeStepper
             steps={stepsWithIcons}
             activeStep={1}
             completedSteps={[0]}
@@ -573,12 +573,12 @@ export const AllSizes: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Stepper Sizes - Side by Side</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px'
       }}>
         {/* Web Sizes */}

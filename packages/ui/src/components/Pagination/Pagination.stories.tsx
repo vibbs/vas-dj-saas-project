@@ -13,7 +13,7 @@ const PaginationStoryComponent = React.forwardRef<any, PaginationProps>((props, 
 PaginationStoryComponent.displayName = 'Pagination';
 
 const meta: Meta<PaginationProps> = {
-  title: 'Components/Navigation/Pagination',
+  title: 'Navigation/Pagination',
   component: PaginationStoryComponent,
   parameters: {
     layout: 'centered',
@@ -194,9 +194,9 @@ export const PlatformComparison: Story = {
   name: '📱 Platform Comparison',
   render: (args) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-      <div style={{ 
-        padding: '16px', 
-        backgroundColor: '#f8f9fa', 
+      <div style={{
+        padding: '16px',
+        backgroundColor: '#f8f9fa',
         borderRadius: '8px',
         textAlign: 'center',
         width: '100%',
@@ -209,12 +209,12 @@ export const PlatformComparison: Story = {
           The same component props render different platform implementations
         </p>
       </div>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px',
         alignItems: 'start'
       }}>
@@ -239,7 +239,7 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            HTML nav with Lucide icons<br/>
+            HTML nav with Lucide icons<br />
             Hover effects & transitions
           </div>
         </div>
@@ -265,16 +265,16 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            TouchableOpacity with Unicode symbols<br/>
+            TouchableOpacity with Unicode symbols<br />
             Platform-appropriate touch feedback
           </div>
         </div>
       </div>
-      
-      <div style={{ 
-        fontSize: '12px', 
-        color: '#6b7280', 
-        textAlign: 'center', 
+
+      <div style={{
+        fontSize: '12px',
+        color: '#6b7280',
+        textAlign: 'center',
         maxWidth: '500px',
         lineHeight: '1.5',
         fontStyle: 'italic'
@@ -305,12 +305,12 @@ export const PageScenarios: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Different Page Scenarios</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '24px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '24px',
+        width: '100%',
         maxWidth: '900px'
       }}>
         {/* Web Scenarios */}
@@ -325,26 +325,26 @@ export const PageScenarios: Story = {
           }}>
             🌐 Web Platform
           </div>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', alignItems: 'center' }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Few Pages (5 total)</div>
-              <WebPagination currentPage={2} totalPages={5} onPageChange={() => {}} />
+              <WebPagination currentPage={2} totalPages={5} onPageChange={() => { }} />
             </div>
-            
+
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Many Pages (50 total)</div>
-              <WebPagination currentPage={25} totalPages={50} onPageChange={() => {}} />
+              <WebPagination currentPage={25} totalPages={50} onPageChange={() => { }} />
             </div>
-            
+
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>First Page</div>
-              <WebPagination currentPage={1} totalPages={20} onPageChange={() => {}} />
+              <WebPagination currentPage={1} totalPages={20} onPageChange={() => { }} />
             </div>
-            
+
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Last Page</div>
-              <WebPagination currentPage={20} totalPages={20} onPageChange={() => {}} />
+              <WebPagination currentPage={20} totalPages={20} onPageChange={() => { }} />
             </div>
           </div>
         </div>
@@ -361,26 +361,26 @@ export const PageScenarios: Story = {
           }}>
             📱 React Native Platform
           </div>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', alignItems: 'center' }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Few Pages (5 total)</div>
-              <NativePagination currentPage={2} totalPages={5} onPageChange={() => {}} />
+              <NativePagination currentPage={2} totalPages={5} onPageChange={() => { }} />
             </div>
-            
+
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Many Pages (50 total)</div>
-              <NativePagination currentPage={25} totalPages={50} onPageChange={() => {}} />
+              <NativePagination currentPage={25} totalPages={50} onPageChange={() => { }} />
             </div>
-            
+
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>First Page</div>
-              <NativePagination currentPage={1} totalPages={20} onPageChange={() => {}} />
+              <NativePagination currentPage={1} totalPages={20} onPageChange={() => { }} />
             </div>
-            
+
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Last Page</div>
-              <NativePagination currentPage={20} totalPages={20} onPageChange={() => {}} />
+              <NativePagination currentPage={20} totalPages={20} onPageChange={() => { }} />
             </div>
           </div>
         </div>
@@ -402,12 +402,12 @@ export const AllVariants: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Pagination Variants - Side by Side</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px'
       }}>
         {/* Web Variants */}
@@ -423,9 +423,9 @@ export const AllVariants: Story = {
             🌐 Web Platform
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', alignItems: 'center' }}>
-            <WebPagination variant="default" currentPage={3} totalPages={10} onPageChange={() => {}} />
-            <WebPagination variant="outline" currentPage={3} totalPages={10} onPageChange={() => {}} />
-            <WebPagination variant="minimal" currentPage={3} totalPages={10} onPageChange={() => {}} />
+            <WebPagination variant="default" currentPage={3} totalPages={10} onPageChange={() => { }} />
+            <WebPagination variant="outline" currentPage={3} totalPages={10} onPageChange={() => { }} />
+            <WebPagination variant="minimal" currentPage={3} totalPages={10} onPageChange={() => { }} />
           </div>
         </div>
 
@@ -442,9 +442,9 @@ export const AllVariants: Story = {
             📱 React Native Platform
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', alignItems: 'center' }}>
-            <NativePagination variant="default" currentPage={3} totalPages={10} onPageChange={() => {}} />
-            <NativePagination variant="outline" currentPage={3} totalPages={10} onPageChange={() => {}} />
-            <NativePagination variant="minimal" currentPage={3} totalPages={10} onPageChange={() => {}} />
+            <NativePagination variant="default" currentPage={3} totalPages={10} onPageChange={() => { }} />
+            <NativePagination variant="outline" currentPage={3} totalPages={10} onPageChange={() => { }} />
+            <NativePagination variant="minimal" currentPage={3} totalPages={10} onPageChange={() => { }} />
           </div>
         </div>
       </div>
@@ -465,12 +465,12 @@ export const AllSizes: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
       <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Pagination Sizes - Side by Side</h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '32px', 
-        width: '100%', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '32px',
+        width: '100%',
         maxWidth: '900px'
       }}>
         {/* Web Sizes */}
@@ -486,9 +486,9 @@ export const AllSizes: Story = {
             🌐 Web Platform
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
-            <WebPagination variant="default" size="sm" currentPage={3} totalPages={10} onPageChange={() => {}} />
-            <WebPagination variant="default" size="md" currentPage={3} totalPages={10} onPageChange={() => {}} />
-            <WebPagination variant="default" size="lg" currentPage={3} totalPages={10} onPageChange={() => {}} />
+            <WebPagination variant="default" size="sm" currentPage={3} totalPages={10} onPageChange={() => { }} />
+            <WebPagination variant="default" size="md" currentPage={3} totalPages={10} onPageChange={() => { }} />
+            <WebPagination variant="default" size="lg" currentPage={3} totalPages={10} onPageChange={() => { }} />
           </div>
         </div>
 
@@ -505,9 +505,9 @@ export const AllSizes: Story = {
             📱 React Native Platform
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
-            <NativePagination variant="default" size="sm" currentPage={3} totalPages={10} onPageChange={() => {}} />
-            <NativePagination variant="default" size="md" currentPage={3} totalPages={10} onPageChange={() => {}} />
-            <NativePagination variant="default" size="lg" currentPage={3} totalPages={10} onPageChange={() => {}} />
+            <NativePagination variant="default" size="sm" currentPage={3} totalPages={10} onPageChange={() => { }} />
+            <NativePagination variant="default" size="md" currentPage={3} totalPages={10} onPageChange={() => { }} />
+            <NativePagination variant="default" size="lg" currentPage={3} totalPages={10} onPageChange={() => { }} />
           </div>
         </div>
       </div>
