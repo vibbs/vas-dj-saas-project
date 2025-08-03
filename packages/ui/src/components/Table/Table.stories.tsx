@@ -20,7 +20,6 @@ const sampleColumns: TableColumn[] = [
     key: 'name',
     title: 'Name',
     dataIndex: 'name',
-    sortable: true,
     width: 150,
   },
   {
@@ -34,7 +33,6 @@ const sampleColumns: TableColumn[] = [
     title: 'Age',
     dataIndex: 'age',
     align: 'center',
-    sortable: true,
     width: 80,
   },
   {

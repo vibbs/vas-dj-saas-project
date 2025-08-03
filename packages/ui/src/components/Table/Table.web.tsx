@@ -86,24 +86,31 @@ export const Table: React.FC<TableProps> = ({
     ...(bordered && {
       border: `1px solid ${theme.colors.border}`,
     }),
+    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
   };
 
   const headerCellStyles: React.CSSProperties = {
-    backgroundColor: theme.colors.muted,
-    color: theme.colors.mutedForeground,
-    fontWeight: theme.typography.fontWeight.semibold,
+    backgroundColor: theme.colors.secondary || theme.colors.muted,
+    color: theme.colors.foreground,
+    fontWeight: theme.typography.fontWeight.bold,
     textAlign: 'left',
     borderBottom: `2px solid ${theme.colors.border}`,
     borderRight: bordered ? `1px solid ${theme.colors.border}` : 'none',
+    borderTop: bordered ? `1px solid ${theme.colors.border}` : 'none',
     position: 'sticky',
     top: 0,
-    zIndex: 1,
+    zIndex: 10,
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
     ...sizeStyles,
+    fontSize: sizeStyles.fontSize ? `${parseFloat(sizeStyles.fontSize.toString()) * 0.9}px` : '12px',
     ...headerStyle,
   };
 
   const cellStyles: React.CSSProperties = {
     borderBottom: `1px solid ${theme.colors.border}`,
+    borderRight: bordered ? `1px solid ${theme.colors.border}` : 'none',
     textAlign: 'left',
     ...sizeStyles,
     ...cellStyle,
@@ -211,7 +218,7 @@ export const Table: React.FC<TableProps> = ({
               aria-rowindex={rowIndex + (showHeader ? 2 : 1)}
               style={{
                 ...(striped && rowIndex % 2 === 1 && {
-                  backgroundColor: theme.colors.muted,
+                  backgroundColor: `${theme.colors.muted}40`, // Much lighter opacity
                 }),
                 ...(hoverable && {
                   cursor: onRowPress ? 'pointer' : 'default',
@@ -233,7 +240,7 @@ export const Table: React.FC<TableProps> = ({
               onMouseLeave={(e) => {
                 if (hoverable) {
                   (e.currentTarget as HTMLElement).style.backgroundColor = 
-                    striped && rowIndex % 2 === 1 ? theme.colors.muted : 'transparent';
+                    striped && rowIndex % 2 === 1 ? `${theme.colors.muted}40` : 'transparent';
                 }
               }}
               tabIndex={onRowPress ? 0 : -1}
