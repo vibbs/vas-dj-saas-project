@@ -192,8 +192,6 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
     }
   }, [mode, value, onChange, closeOnSelect, range]);
 
-  // Check if we're in a partial range selection state
-  const isPartialRange = range && tempValue && Array.isArray(tempValue) && tempValue[0] && !tempValue[1];
 
   const handleTimeChange = useCallback((newTime: Date) => {
     if (mode === 'time') {

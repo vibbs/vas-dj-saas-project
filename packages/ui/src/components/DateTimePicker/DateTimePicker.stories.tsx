@@ -3,37 +3,95 @@ import { useState } from 'react';
 import { enUS, fr, es, de, ja } from 'date-fns/locale';
 import { DateTimePicker } from './DateTimePicker';
 import { DateTimePickerProps, DateTimeMode } from './types';
+import React from 'react';
 
 // Mock React Native component for Storybook (since we can't import RN components in web)
 const DateTimePickerNativeMock: React.FC<DateTimePickerProps> = (props) => {
+  const [localValue, setLocalValue] = useState<Date | [Date, Date] | [Date, null] | null>(props.value || null);
+
+  React.useEffect(() => {
+    setLocalValue(props.value || null);
+  }, [props.value]);
+
+  const handleMockInteraction = () => {
+    const now = new Date();
+    if (props.range) {
+      const endDate = new Date(now);
+      endDate.setDate(endDate.getDate() + 7);
+      const newValue: [Date, Date] = [now, endDate];
+      setLocalValue(newValue);
+      props.onChange?.(newValue);
+    } else {
+      setLocalValue(now);
+      props.onChange?.(now);
+    }
+  };
+
   return (
-    <div style={{
-      padding: '20px',
-      border: '2px dashed #e5e7eb',
-      borderRadius: '8px',
-      backgroundColor: '#f9fafb',
-      textAlign: 'center',
-      color: '#6b7280'
-    }}>
-      <div style={{ marginBottom: '12px', fontSize: '18px' }}>📱</div>
-      <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>
-        React Native DateTimePicker
+    <div style={{ marginBottom: '16px' }}>
+      {/* Input field mockup */}
+      <div style={{
+        padding: '12px 16px',
+        border: '1px solid #d1d5db',
+        borderRadius: '8px',
+        backgroundColor: 'white',
+        marginBottom: '8px',
+        cursor: 'pointer',
+        fontFamily: 'system-ui, -apple-system, sans-serif'
+      }}
+        onClick={handleMockInteraction}
+      >
+        {localValue ? (
+          Array.isArray(localValue) ?
+            `${localValue[0]?.toLocaleDateString() || ''}${localValue[1] ? ` - ${localValue[1].toLocaleDateString()}` : ' (select end date)'}` :
+            localValue.toLocaleDateString()
+        ) : (
+          <span style={{ color: '#9ca3af' }}>
+            {props.placeholder || `Select ${props.mode}${props.range ? ' range' : ''}`}
+          </span>
+        )}
       </div>
-      <div style={{ fontSize: '14px', marginBottom: '12px' }}>
-        Mode: {props.mode || 'date'} {props.range ? '(Range)' : ''}
-      </div>
-      <div style={{ fontSize: '12px', color: '#9ca3af' }}>
-        This would render the native date picker on mobile devices using<br />
-        <code>@react-native-community/datetimepicker</code>
-      </div>
-      {props.value && (
-        <div style={{ marginTop: '12px', fontSize: '12px', fontFamily: 'monospace' }}>
-          Current: {Array.isArray(props.value) ?
-            `${props.value[0].toLocaleDateString()}${props.value[1] ? ` - ${props.value[1].toLocaleDateString()}` : ' (incomplete range)'}` :
-            props.value.toLocaleDateString()
-          }
+
+      {/* Native picker representation */}
+      <div style={{
+        padding: '20px',
+        border: '2px dashed #e5e7eb',
+        borderRadius: '8px',
+        backgroundColor: '#f9fafb',
+        textAlign: 'center',
+        color: '#6b7280',
+        minHeight: '120px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center'
+      }}>
+        <div style={{ marginBottom: '12px', fontSize: '24px' }}>📱</div>
+        <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
+          React Native DateTimePicker
         </div>
-      )}
+        <div style={{ fontSize: '14px', marginBottom: '12px', color: '#6b7280' }}>
+          Mode: {props.mode || 'date'} {props.range ? '(Range)' : ''}
+        </div>
+        <div style={{ fontSize: '12px', color: '#9ca3af', lineHeight: '1.4' }}>
+          This would render the native date picker on mobile devices using<br />
+          <code style={{
+            backgroundColor: '#f3f4f6',
+            padding: '2px 4px',
+            borderRadius: '3px',
+            fontSize: '11px'
+          }}>
+            @react-native-community/datetimepicker
+          </code>
+        </div>
+        <div style={{
+          marginTop: '12px',
+          fontSize: '11px',
+          fontStyle: 'italic',
+          color: '#6b7280'
+        }}>
+          Click the input above to simulate native picker interaction
+        </div>
+      </div>
     </div>
   );
 };
