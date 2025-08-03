@@ -31,7 +31,7 @@ export const Table: React.FC<TableProps> = ({
   cellStyle,
   testID,
   // Accessibility props
-  accessibilityRole = 'table' as const,
+  accessibilityRole = 'list' as any,
   accessibilityLabel,
   accessibilityHint,
   // Filter out web-specific props
@@ -51,21 +51,29 @@ export const Table: React.FC<TableProps> = ({
         return {
           fontSize: theme.typography.fontSize.sm,
           padding: theme.spacing.xs,
+          cardPadding: theme.spacing.sm,
+          spacing: theme.spacing.xs,
         };
       case 'md':
         return {
           fontSize: theme.typography.fontSize.base,
           padding: theme.spacing.sm,
+          cardPadding: theme.spacing.md,
+          spacing: theme.spacing.sm,
         };
       case 'lg':
         return {
           fontSize: theme.typography.fontSize.lg,
           padding: theme.spacing.md,
+          cardPadding: theme.spacing.lg,
+          spacing: theme.spacing.md,
         };
       default:
         return {
           fontSize: theme.typography.fontSize.base,
           padding: theme.spacing.sm,
+          cardPadding: theme.spacing.md,
+          spacing: theme.spacing.sm,
         };
     }
   };
@@ -74,69 +82,68 @@ export const Table: React.FC<TableProps> = ({
 
   const containerStyles: ViewStyle = {
     backgroundColor: theme.colors.background,
-    borderRadius: theme.borders.radius.md,
+    ...style,
+  };
+
+  const cardStyles: ViewStyle = {
+    backgroundColor: theme.colors.card,
+    marginBottom: sizeStyles.spacing,
+    marginHorizontal: sizeStyles.spacing,
+    padding: sizeStyles.cardPadding,
+    borderRadius: theme.borders.radius.lg,
     ...(bordered && {
       borderWidth: 1,
       borderColor: theme.colors.border,
     }),
-    ...(maxHeight && {
-      maxHeight: maxHeight,
-    }),
-    ...style,
-  };
-
-  const headerContainerStyles: ViewStyle = {
-    flexDirection: 'row',
-    backgroundColor: theme.colors.muted,
-    ...(bordered && {
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border,
-    }),
-    ...headerStyle,
-  };
-
-  const headerCellStyles: ViewStyle = {
-    flex: 1,
-    padding: sizeStyles.padding,
-    justifyContent: 'center',
-    ...(bordered && {
-      borderRightWidth: 1,
-      borderRightColor: theme.colors.border,
-    }),
-  };
-
-  const headerTextStyles: TextStyle = {
-    fontFamily: theme.typography.fontFamily,
-    fontSize: sizeStyles.fontSize,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.mutedForeground,
-  };
-
-  const rowContainerStyles: ViewStyle = {
-    flexDirection: 'row',
-    ...(bordered && {
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border,
-    }),
+    // Add subtle shadow for card appearance
+    shadowColor: theme.colors.foreground,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
     ...rowStyle,
   };
 
-  const cellStyles: ViewStyle = {
-    flex: 1,
-    padding: sizeStyles.padding,
-    justifyContent: 'center',
-    ...(bordered && {
-      borderRightWidth: 1,
-      borderRightColor: theme.colors.border,
-    }),
-    ...cellStyle,
-  };
-
-  const cellTextStyles: TextStyle = {
+  const keyTextStyles: TextStyle = {
     fontFamily: theme.typography.fontFamily,
     fontSize: sizeStyles.fontSize,
+    fontWeight: theme.typography.fontWeight.medium as any,
+    color: theme.colors.mutedForeground,
+    marginBottom: theme.spacing.xs / 2,
+  };
+
+  const valueTextStyles: TextStyle = {
+    fontFamily: theme.typography.fontFamily,
+    fontSize: sizeStyles.fontSize,
+    fontWeight: theme.typography.fontWeight.normal as any,
     color: theme.colors.foreground,
   };
+
+  const cardHeaderStyles: ViewStyle = {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: sizeStyles.spacing,
+    paddingBottom: sizeStyles.spacing / 2,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  };
+
+  const primaryFieldStyles: TextStyle = {
+    fontFamily: theme.typography.fontFamily,
+    fontSize: sizeStyles.fontSize * 1.1,
+    fontWeight: theme.typography.fontWeight.semibold as any,
+    color: theme.colors.foreground,
+    flex: 1,
+  };
+
+  const fieldRowStyles: ViewStyle = {
+    marginBottom: sizeStyles.spacing,
+  };
+
 
   const getRowKey = (record: any, index: number): string => {
     if (typeof rowKey === 'function') {
@@ -145,11 +152,14 @@ export const Table: React.FC<TableProps> = ({
     return record[rowKey] || index.toString();
   };
 
-  const getTextAlign = (align?: 'left' | 'center' | 'right'): TextStyle => {
-    return { textAlign: align || 'left' };
-  };
+  // Separate actions column from data columns
+  const dataColumns = columns.filter(col => col.key !== 'actions' && col.key !== 'action');
+  const actionsColumn = columns.find(col => col.key === 'actions' || col.key === 'action');
+  
+  // Find primary field (usually the first non-action column or one with special designation)
+  const primaryColumn = dataColumns[0];
 
-  const renderCell = (column: TableColumn, record: any, index: number) => {
+  const renderFieldValue = (column: TableColumn, record: any, index: number) => {
     const value = column.dataIndex ? record[column.dataIndex] : record;
     
     if (column.render) {
@@ -158,14 +168,14 @@ export const Table: React.FC<TableProps> = ({
     
     if (typeof value === 'string' || typeof value === 'number') {
       return (
-        <Text style={[cellTextStyles, getTextAlign(column.align)]}>
+        <Text style={valueTextStyles}>
           {value}
         </Text>
       );
     }
     
     return (
-      <Text style={[cellTextStyles, getTextAlign(column.align)]}>
+      <Text style={valueTextStyles}>
         {String(value)}
       </Text>
     );
@@ -183,7 +193,7 @@ export const Table: React.FC<TableProps> = ({
       ]}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={[
-          cellTextStyles,
+          valueTextStyles,
           { 
             color: theme.colors.mutedForeground,
             marginTop: theme.spacing.sm,
@@ -206,7 +216,7 @@ export const Table: React.FC<TableProps> = ({
         }
       ]}>
         <Text style={[
-          cellTextStyles,
+          valueTextStyles,
           { color: theme.colors.mutedForeground }
         ]}>
           {emptyText}
@@ -222,96 +232,57 @@ export const Table: React.FC<TableProps> = ({
       // React Native accessibility (WCAG 2.1 AA compliant)
       accessible={true}
       accessibilityRole={accessibilityRole}
-      accessibilityLabel={accessibilityLabel || ariaLabel || 'Data table'}
-      accessibilityHint={accessibilityHint || 'Navigate through table data'}
+      accessibilityLabel={accessibilityLabel || ariaLabel || 'Data list'}
+      accessibilityHint={accessibilityHint || 'Scroll through data items'}
       {...props}
     >
       <ScrollView
-        horizontal={true}
-        showsHorizontalScrollIndicator={true}
-        style={{ maxHeight: maxHeight }}
+        style={maxHeight ? { maxHeight: maxHeight as number } : undefined}
+        showsVerticalScrollIndicator={true}
+        contentContainerStyle={{ paddingVertical: sizeStyles.spacing }}
       >
-        <View style={{ minWidth: '100%' }}>
-          {showHeader && (
-            <View style={headerContainerStyles}>
-              {columns.map((column, columnIndex) => (
-                <TouchableOpacity
-                  key={column.key}
-                  style={[
-                    headerCellStyles,
-                    { 
-                      flex: column.width ? 0 : 1,
-                      width: column.width,
-                    }
-                  ]}
-                  onPress={column.onHeaderPress}
-                  disabled={!column.sortable && !column.onHeaderPress}
-                  accessible={true}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${column.title} column header`}
-                  accessibilityHint={column.sortable ? 'Tap to sort' : undefined}
-                >
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={[headerTextStyles, getTextAlign(column.align)]}>
-                      {column.title}
-                    </Text>
-                    {column.sortable && (
-                      <Text style={[
-                        headerTextStyles,
-                        { 
-                          marginLeft: theme.spacing.xs,
-                          opacity: 0.5,
-                        }
-                      ]}>
-                        ↕
-                      </Text>
-                    )}
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-          
-          <ScrollView
-            style={{ maxHeight: maxHeight }}
-            showsVerticalScrollIndicator={true}
+        {data.map((record, rowIndex) => (
+          <TouchableOpacity
+            key={getRowKey(record, rowIndex)}
+            style={cardStyles}
+            onPress={() => onRowPress?.(record, rowIndex)}
+            onLongPress={() => onRowLongPress?.(record, rowIndex)}
+            disabled={!onRowPress && !onRowLongPress}
+            activeOpacity={hoverable ? 0.8 : 1}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={`Item ${rowIndex + 1}`}
+            accessibilityHint={onRowPress ? 'Tap to select item' : undefined}
           >
-            {data.map((record, rowIndex) => (
-              <TouchableOpacity
-                key={getRowKey(record, rowIndex)}
-                style={[
-                  rowContainerStyles,
-                  striped && rowIndex % 2 === 1 && {
-                    backgroundColor: theme.colors.muted,
-                  }
-                ]}
-                onPress={() => onRowPress?.(record, rowIndex)}
-                onLongPress={() => onRowLongPress?.(record, rowIndex)}
-                disabled={!onRowPress && !onRowLongPress}
-                activeOpacity={hoverable ? 0.8 : 1}
-                accessible={true}
-                accessibilityRole="button"
-                accessibilityLabel={`Table row ${rowIndex + 1}`}
-                accessibilityHint={onRowPress ? 'Tap to select row' : undefined}
-              >
-                {columns.map((column, columnIndex) => (
-                  <View
-                    key={`${getRowKey(record, rowIndex)}-${column.key}`}
-                    style={[
-                      cellStyles,
-                      { 
-                        flex: column.width ? 0 : 1,
-                        width: column.width,
-                      }
-                    ]}
-                  >
-                    {renderCell(column, record, rowIndex)}
-                  </View>
-                ))}
-              </TouchableOpacity>
+            {/* Card Header with Primary Field and Actions */}
+            <View style={cardHeaderStyles}>
+              {primaryColumn && (
+                <View style={{ flex: 1, marginRight: theme.spacing.sm }}>
+                  <Text style={primaryFieldStyles}>
+                    {renderFieldValue(primaryColumn, record, rowIndex)}
+                  </Text>
+                </View>
+              )}
+              
+              {/* Actions in header if present */}
+              {actionsColumn && (
+                <View>
+                  {renderFieldValue(actionsColumn, record, rowIndex)}
+                </View>
+              )}
+            </View>
+
+            {/* Key-Value Pairs for remaining fields */}
+            {dataColumns.slice(1).map((column) => (
+              <View key={column.key} style={fieldRowStyles}>
+                <Text style={keyTextStyles}>
+                  {column.title}
+                </Text>
+                {renderFieldValue(column, record, rowIndex)}
+              </View>
             ))}
-          </ScrollView>
-        </View>
+          </TouchableOpacity>
+        ))}
       </ScrollView>
     </View>
   );

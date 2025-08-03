@@ -305,7 +305,7 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             width: '100%'
           }}>
-            📱 React Native Platform
+            📱 React Native Platform (Card Layout)
           </div>
           <div style={{ width: '100%', maxWidth: '500px' }}>
             <NativeTable {...args} maxHeight={300} />
@@ -316,8 +316,8 @@ export const PlatformComparison: Story = {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            ScrollView-based layout<br/>
-            Touch interactions & native scrolling
+            Card-based layout with key-value pairs<br/>
+            Touch interactions & optimized for mobile
           </div>
         </div>
       </div>
@@ -344,6 +344,145 @@ export const PlatformComparison: Story = {
     docs: {
       description: {
         story: 'This story shows both web and React Native implementations side by side, demonstrating how the same props create platform-optimized tables.',
+      },
+    },
+  },
+};
+
+// Mobile Card Layout with Actions showcase
+export const MobileCardLayout: Story = {
+  name: '📱 Mobile Card Layout',
+  render: () => {
+    const columnsWithActions: TableColumn[] = [
+      {
+        key: 'name',
+        title: 'Product Name',
+        dataIndex: 'name',
+      },
+      {
+        key: 'email',
+        title: 'Category',
+        dataIndex: 'email',
+      },
+      {
+        key: 'age',
+        title: 'Inventory',
+        dataIndex: 'age',
+        render: (value) => (
+          <span style={{
+            padding: '4px 8px',
+            borderRadius: '12px',
+            backgroundColor: value > 25 ? '#dcfce7' : '#fee2e2',
+            color: value > 25 ? '#166534' : '#991b1b',
+            fontSize: '12px',
+            fontWeight: '600',
+          }}>
+            {value} units
+          </span>
+        ),
+      },
+      {
+        key: 'status',
+        title: 'Status',
+        dataIndex: 'status',
+        render: (value) => {
+          const colors = {
+            Active: { bg: '#dcfce7', text: '#166534' },
+            Inactive: { bg: '#fee2e2', text: '#991b1b' },
+            Pending: { bg: '#fef3c7', text: '#92400e' },
+          };
+          const color = colors[value as keyof typeof colors] || colors.Pending;
+          
+          return (
+            <span style={{
+              padding: '4px 12px',
+              borderRadius: '16px',
+              fontSize: '12px',
+              fontWeight: '600',
+              backgroundColor: color.bg,
+              color: color.text,
+            }}>
+              {value}
+            </span>
+          );
+        },
+      },
+      {
+        key: 'actions',
+        title: 'Actions',
+        render: () => (
+          <div style={{ display: 'flex', gap: '8px', flexDirection: 'row' }}>
+            <button style={{
+              padding: '6px 12px',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: '500'
+            }}>
+              View
+            </button>
+            <button style={{
+              padding: '6px 12px',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: '#ef4444',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: '500'
+            }}>
+              Edit
+            </button>
+          </div>
+        ),
+      },
+    ];
+
+    const mobileData = [
+      { id: 'P123', name: 'Enterprise Server', email: 'Electronics > Computing', age: 30, status: 'Active' },
+      { id: 'P234', name: 'Executive Office Suite', email: 'Furniture > Complete Sets', age: 18, status: 'Inactive' },
+      { id: 'P345', name: 'Data Center Rack', email: 'Electronics > Infrastructure', age: 35, status: 'Active' },
+      { id: 'P456', name: 'Smart Conference System', email: 'Electronics > Communications', age: 45, status: 'Pending' },
+    ];
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
+        <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Mobile-Optimized Card Layout</h3>
+        
+        <div style={{ width: '100%', maxWidth: '400px' }}>
+          <NativeTable
+            data={mobileData}
+            columns={columnsWithActions}
+            maxHeight={400}
+            hoverable={true}
+            onRowPress={(record) => console.log('Pressed:', record)}
+          />
+        </div>
+        
+        <div style={{ 
+          fontSize: '12px', 
+          color: '#6b7280', 
+          textAlign: 'center', 
+          maxWidth: '600px',
+          lineHeight: '1.5',
+          fontStyle: 'italic'
+        }}>
+          📋 Native table displays as mobile-friendly cards with:
+          <br/>• Primary field prominently shown in the header
+          <br/>• Actions positioned in the top-right corner  
+          <br/>• Secondary fields displayed as labeled key-value pairs
+          <br/>• Touch-optimized spacing and interactions
+        </div>
+      </div>
+    );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Demonstrates the new mobile card layout with special handling for actions columns and key-value pair display.',
       },
     },
   },
