@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { FileUploadProps } from './types';
 import { useTheme } from '../../theme/ThemeProvider';
 import { Icon } from '../Icon';
+import { Button } from '../Button';
 
 export const FileUpload: React.FC<FileUploadProps> = ({
     children,
@@ -31,7 +32,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [file, setFile] = useState<File | null>(null);
 
-    // Define variant styles using theme tokens
+    // Define variant styles for file display (still needed for the file display UI)
     const variantStyles = {
         primary: {
             backgroundColor: theme.colors.primary,
@@ -60,7 +61,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         },
     };
 
-    // Define size styles using theme tokens
+    // Size styles for file display UI
     const sizeStyles = {
         sm: {
             padding: `${theme.spacing.xs}px ${theme.spacing.sm}px`,
@@ -79,42 +80,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         },
     };
 
-    const baseStyles: React.CSSProperties = {
+    const fileDisplayStyles: React.CSSProperties = {
         display: 'inline-flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: theme.typography.fontFamily,
-        fontWeight: theme.typography.fontWeight.medium,
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
-        transition: 'all 0.2s ease-in-out',
         ...sizeStyles[size],
         ...variantStyles[variant],
     };
-
-    const hoverStyles = !disabled ? {
-        ':hover': {
-            opacity: 0.9,
-            transform: 'translateY(-1px)',
-            boxShadow: theme.shadows.sm,
-        },
-    } : {};
-
-    // Add CSS animations for loading states
-    React.useEffect(() => {
-        const styleId = 'fileupload-animations';
-        if (!document.getElementById(styleId)) {
-            const style = document.createElement('style');
-            style.id = styleId;
-            style.textContent = `
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `;
-            document.head.appendChild(style);
-        }
-    }, []);
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
@@ -145,7 +116,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
     if (file) {
         return (
-            <div style={{ ...baseStyles, justifyContent: 'space-between', ...style }}>
+            <div style={{ ...fileDisplayStyles, justifyContent: 'space-between', ...style }}>
                 <Icon name="File" size={20} color={variantStyles[variant].color} />
                 <span style={{ flex: 1, marginLeft: theme.spacing.sm }}>{file.name}</span>
                 <button onClick={handleClear} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
@@ -167,51 +138,24 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 style={{ display: 'none' }}
                 data-testid={`${testID}-input`}
             />
-            <button
-                style={{ ...baseStyles, ...style }}
+            <Button
+                variant={variant}
+                size={size}
+                disabled={disabled}
+                loading={loading}
                 onClick={handleClick}
-                disabled={disabled || loading}
-                data-testid={testID}
+                testID={testID}
                 className={className}
-                // Accessibility attributes (WCAG 2.1 AA compliant)
+                style={style}
                 type={type}
                 role={role}
                 aria-label={ariaLabel || accessibilityLabel}
                 aria-describedby={ariaDescribedBy}
                 aria-pressed={ariaPressed}
-                aria-disabled={disabled || loading}
-                aria-busy={loading}
-                tabIndex={disabled ? -1 : 0}
-                // Keyboard navigation support
-                onKeyDown={(e) => {
-                    if ((e.key === 'Enter' || e.key === ' ') && !disabled && !loading) {
-                        e.preventDefault();
-                        // We can't directly call handleClick here as it expects a mouse event
-                        // But we can trigger the file selection via the ref
-                        if (fileInputRef.current) {
-                            fileInputRef.current.click();
-                        }
-                    }
-                }}
                 {...props}
             >
-                {loading && (
-                    <span
-                        style={{
-                            display: 'inline-block',
-                            width: '12px',
-                            height: '12px',
-                            border: '2px solid currentColor',
-                            borderTop: '2px solid transparent',
-                            borderRadius: '50%',
-                            animation: 'spin 1s linear infinite',
-                            marginRight: theme.spacing.xs,
-                        }}
-                        aria-hidden="true"
-                    />
-                )}
                 {children}
-            </button>
+            </Button>
         </div>
     );
 };

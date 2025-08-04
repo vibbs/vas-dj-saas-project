@@ -214,7 +214,7 @@ REST_FRAMEWORK = {
 
 # drf-spectacular settings
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Django SaaS API",
+    "TITLE": "VAS-DJ SaaS API",
     "DESCRIPTION": "A comprehensive SaaS backend API built with Django and Django REST Framework",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
@@ -235,4 +235,5 @@ SPECTACULAR_SETTINGS = {
 
 # JWT Configuration
 from apps.core.jwt_config import get_jwt_settings
+
 SIMPLE_JWT = get_jwt_settings(SECRET_KEY)

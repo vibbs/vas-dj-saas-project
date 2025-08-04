@@ -1,4 +1,4 @@
-# CLAUDE.md - Django SaaS Monorepo
+# CLAUDE.md - VAS-DJ Project SaaS Monorepo
 
 This file provides guidance to Claude Code (claude.ai/code) when working with this monorepo.
 

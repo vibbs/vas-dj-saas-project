@@ -6,6 +6,7 @@ import { Modal as NativeModal } from './Modal.native';
 import { ModalProps } from './types';
 import { ThemeProvider } from '../../theme/ThemeProvider';
 import { Button } from '../Button';
+import { Input } from '../Input';
 
 // Create a simple wrapper for Storybook to avoid renderer issues
 const ModalStoryComponent = React.forwardRef<any, ModalProps & { triggerText?: string }>((props, _ref) => {
@@ -220,14 +221,11 @@ export const Interactive: Story = {
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
               Sample Input:
             </label>
-            <input
+            <Input
               type="text"
               placeholder="Focus management demo"
               style={{
                 width: '100%',
-                padding: '8px 12px',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
               }}
             />
           </div>
@@ -664,8 +662,6 @@ export const AccessibilityFeatures: Story = {
   name: '♿ Accessibility Features',
   render: () => {
     const [isOpen, setIsOpen] = React.useState(false);
-    const triggerRef = React.useRef<HTMLButtonElement>(null);
-    const firstInputRef = React.useRef<HTMLInputElement>(null);
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
@@ -678,7 +674,6 @@ export const AccessibilityFeatures: Story = {
         </div>
 
         <Button 
-          ref={triggerRef}
           onClick={() => setIsOpen(true)}
         >
           Open Accessible Modal
@@ -691,31 +686,24 @@ export const AccessibilityFeatures: Story = {
           size="md"
           aria-labelledby="modal-title"
           aria-describedby="modal-description"
-          initialFocusRef={firstInputRef}
-          finalFocusRef={triggerRef}
         >
           <div>
             <h2 id="modal-title" style={{ margin: '0 0 8px 0', fontSize: '20px', fontWeight: 600 }}>
               Accessible Form Modal
             </h2>
             <p id="modal-description" style={{ margin: '0 0 16px 0', fontSize: '14px', color: '#6b7280' }}>
-              Focus automatically moves to the first input. Try using Tab, Shift+Tab, and Escape keys.
+              Modal provides proper focus management and keyboard navigation. Try using Tab, Shift+Tab, and Escape keys.
             </p>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 500 }}>
-                  First Name (auto-focused):
+                  First Name:
                 </label>
-                <input
-                  ref={firstInputRef}
+                <Input
                   type="text"
                   style={{
                     width: '100%',
-                    padding: '8px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '4px',
-                    fontSize: '14px',
                   }}
                   placeholder="Enter your first name"
                 />
@@ -725,14 +713,10 @@ export const AccessibilityFeatures: Story = {
                 <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 500 }}>
                   Last Name:
                 </label>
-                <input
+                <Input
                   type="text"
                   style={{
                     width: '100%',
-                    padding: '8px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '4px',
-                    fontSize: '14px',
                   }}
                   placeholder="Enter your last name"
                 />

@@ -5,6 +5,7 @@ import { Collapse as WebCollapse } from './Collapse.web';
 import { Collapse as NativeCollapse } from './Collapse.native';
 import { CollapseProps } from './types';
 import { ThemeProvider } from '../../theme/ThemeProvider';
+import { Button } from '../Button';
 
 // Create a simple wrapper for Storybook to avoid renderer issues
 const CollapseStoryComponent = React.forwardRef<any, CollapseProps>((props, _ref) => {
@@ -481,9 +482,9 @@ export const States: Story = {
               <div style={{ padding: '8px', backgroundColor: '#f1f5f9', borderRadius: '4px', margin: '8px 0' }}>
                 <code>Code snippet example</code>
               </div>
-              <button style={{ padding: '4px 8px', border: '1px solid #ccc', borderRadius: '4px' }}>
+              <Button variant="outline" size="sm">
                 Nested Button
-              </button>
+              </Button>
             </div>
           </WebCollapse>
         </div>

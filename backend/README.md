@@ -1,4 +1,4 @@
-# Django SaaS Project
+# VAS-DJ - Django SaaS Project
 
 A comprehensive, production-ready SaaS backend built with Django and Django REST Framework. This project provides a solid foundation for building multi-tenant SaaS applications with modern architecture patterns.
 

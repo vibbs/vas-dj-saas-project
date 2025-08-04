@@ -2,7 +2,7 @@
 
 ## Overview
 
-This package provides a comprehensive exception handling system for the Django SaaS application, with automatic OpenAPI documentation generation.
+This package provides a comprehensive exception handling system for the VAS-DJ SaaS application, with automatic OpenAPI documentation generation.
 
 ## Features
 

@@ -5,6 +5,7 @@ import { Tag as WebTag } from './Tag.web';
 import { Tag as NativeTag } from './Tag.native';
 import { TagProps } from './types';
 import { ThemeProvider } from '../../theme/ThemeProvider';
+import { Button } from '../Button/Button';
 
 // Create a simple wrapper for Storybook to avoid renderer issues
 const TagStoryComponent = React.forwardRef<any, TagProps>((props, _ref) => {
@@ -446,20 +447,13 @@ export const InteractiveFeatures: Story = {
                 </WebTag>
               ))}
             </div>
-            <button
+            <Button
               onClick={addTag}
-              style={{
-                padding: '6px 12px',
-                backgroundColor: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '12px'
-              }}
+              variant="primary"
+              size="sm"
             >
               Add Tag
-            </button>
+            </Button>
           </div>
 
           {/* Clickable Tags */}

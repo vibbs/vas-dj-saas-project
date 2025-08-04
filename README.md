@@ -1,6 +1,9 @@
-# Django SaaS Monorepo
+# VAS-DJ Project SaaS Monorepo
 
 A full-stack SaaS application with Django backend and TypeScript frontend applications.
+
+![vas-dj-logo](./_docs/images/vas-dj-logo-banner.png)
+
 
 ## 🏗️ Monorepo Structure
 

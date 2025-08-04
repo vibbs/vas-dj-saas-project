@@ -1,5 +1,5 @@
 """
-Logging configuration for Django SaaS project.
+Logging configuration for VAS-DJ SaaS project.
 """
 
 import logging

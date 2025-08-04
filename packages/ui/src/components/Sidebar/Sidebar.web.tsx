@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { SidebarProps, SidebarItem } from './types';
 import { useTheme } from '../../theme/ThemeProvider';
 import { ChevronDown, ChevronRight, Menu, X } from 'lucide-react';
+import { Button } from '../Button';
 
 export const Sidebar: React.FC<SidebarProps> = ({
   items,
@@ -235,24 +236,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
           >
             {!collapsed && header}
             {collapsible && (
-              <button
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: theme.spacing.xs,
-                  borderRadius: theme.borders.radius.sm,
-                  color: theme.colors.foreground,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={handleToggle}
                 aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                type="button"
+                style={{
+                  padding: theme.spacing.xs,
+                  minWidth: 'auto',
+                  width: 'auto',
+                  height: 'auto',
+                }}
               >
                 {collapsed ? <Menu size={18} /> : <X size={18} />}
-              </button>
+              </Button>
             )}
           </div>
         )}
