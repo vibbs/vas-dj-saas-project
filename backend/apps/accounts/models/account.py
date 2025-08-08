@@ -8,6 +8,8 @@ from django.contrib.auth.models import (
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
+from datetime import timedelta
+import secrets
 from apps.accounts.enums import UserRoleTypes, GenderTypes, UserStatusTypes
 
 from apps.core.models import BaseFields
@@ -99,6 +101,10 @@ class Account(BaseFields, AbstractBaseUser, PermissionsMixin):
     can_invite_users = models.BooleanField(default=False)
     can_manage_billing = models.BooleanField(default=False)
     can_delete_org = models.BooleanField(default=False)
+    
+    # Email verification fields
+    email_verification_token = models.CharField(max_length=100, blank=True, null=True)
+    email_verification_token_expires = models.DateTimeField(blank=True, null=True)
 
     objects = AccountManager()
 
@@ -128,6 +134,67 @@ class Account(BaseFields, AbstractBaseUser, PermissionsMixin):
         if first and last:
             return f"{first[0].upper()}{last[0].upper()}"
         return str(self.email)[0].upper() if self.email else "UKN"
+
+    def generate_email_verification_token(self):
+        """Generate a new email verification token."""
+        self.email_verification_token = secrets.token_urlsafe(32)
+        self.email_verification_token_expires = timezone.now() + timedelta(hours=24)
+        self.save(update_fields=['email_verification_token', 'email_verification_token_expires'])
+        return self.email_verification_token
+
+    def verify_email(self, token):
+        """Verify email using the provided token."""
+        if not self.email_verification_token or not self.email_verification_token_expires:
+            return False
+        
+        if self.email_verification_token != token:
+            return False
+        
+        if timezone.now() > self.email_verification_token_expires:
+            return False
+        
+        # Mark email as verified and clear token
+        self.is_email_verified = True
+        self.status = UserStatusTypes.ACTIVE.value
+        self.email_verification_token = None
+        self.email_verification_token_expires = None
+        self.save(update_fields=[
+            'is_email_verified', 
+            'status', 
+            'email_verification_token', 
+            'email_verification_token_expires'
+        ])
+        return True
+
+    def send_verification_email(self):
+        """Send email verification email to the user."""
+        if self.is_email_verified:
+            return False
+        
+        # Generate verification token
+        token = self.generate_email_verification_token()
+        
+        # Import here to avoid circular imports
+        from apps.email_service.services import send_email
+        
+        # Send verification email
+        context = {
+            'user': self,
+            'verification_token': token,
+            'verification_url': f"{settings.FRONTEND_URL}/verify-email?token={token}",
+            'organization': self.organization
+        }
+        
+        try:
+            send_email(
+                organization=self.organization,
+                recipient=self,
+                template_slug='email_verification',
+                context=context
+            )
+            return True
+        except Exception:
+            return False
 
     # @property
     # def organization(self):
