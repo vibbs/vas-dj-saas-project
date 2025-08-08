@@ -11,9 +11,15 @@
   },
   "dependencies": {
     "@vas-dj-saas/api-client": "workspace:*",
-    "@vas-dj-saas/types": "workspace:*"
+    "@vas-dj-saas/types": "workspace:*",
+    "@vas-dj-saas/ui": "workspace:*",
+    "@vas-dj-saas/utils": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "19.0.0"
   },
   "devDependencies": {
+    "@types/react": "~19.0.10",
     "typescript": "~5.8.3",
     "eslint": "^9.25.0"
   }
