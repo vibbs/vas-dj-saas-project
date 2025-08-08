@@ -4,11 +4,11 @@ import { contentConfig } from '@/config/content'
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-background to-purple-50 dark:from-blue-950/20 dark:via-background dark:to-purple-950/20">
+    <section className="relative overflow-hidden bg-gradient-to-br from-lavender-50 via-background to-mint-50 dark:from-lavender-950/30 dark:via-background dark:to-mint-950/30">
       {/* Background decorations */}
       <div className="absolute inset-0">
-        <div className="absolute top-0 left-0 w-72 h-72 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-400/10 to-pink-400/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
+        <div className="absolute top-0 left-0 w-72 h-72 bg-gradient-to-br from-lavender-400/20 to-peach-400/15 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-peach-400/15 to-mint-400/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24 lg:py-32">
@@ -22,7 +22,7 @@ export function Hero() {
           {/* Main heading */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 animate-fade-up">
             <span className="block">{contentConfig.hero.title.split(',')[0]},</span>
-            <span className="block bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+            <span className="block bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
               {contentConfig.hero.title.split(', ')[1]}
             </span>
           </h1>
@@ -86,8 +86,8 @@ export function Hero() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                   <div className="bg-background dark:bg-card rounded-xl p-6 shadow-sm border border-border">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <div className="w-5 h-5 bg-blue-500 rounded"></div>
+                      <div className="w-10 h-10 bg-lavender-100 dark:bg-lavender-800 rounded-lg flex items-center justify-center">
+                        <div className="w-5 h-5 bg-lavender-500 rounded"></div>
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-foreground">$12.4K</div>
@@ -98,8 +98,8 @@ export function Hero() {
 
                   <div className="bg-background dark:bg-card rounded-xl p-6 shadow-sm border border-border">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                        <div className="w-5 h-5 bg-green-500 rounded"></div>
+                      <div className="w-10 h-10 bg-mint-100 dark:bg-mint-800 rounded-lg flex items-center justify-center">
+                        <div className="w-5 h-5 bg-mint-500 rounded"></div>
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-foreground">324</div>
@@ -110,8 +110,8 @@ export function Hero() {
 
                   <div className="bg-background dark:bg-card rounded-xl p-6 shadow-sm border border-border">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                        <div className="w-5 h-5 bg-orange-500 rounded"></div>
+                      <div className="w-10 h-10 bg-peach-100 dark:bg-peach-800 rounded-lg flex items-center justify-center">
+                        <div className="w-5 h-5 bg-peach-500 rounded"></div>
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-foreground">94.2%</div>
@@ -126,15 +126,15 @@ export function Hero() {
                   <h3 className="font-semibold text-foreground mb-4">Today's Tasks</h3>
                   <div className="space-y-3">
                     <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-lavender-500 rounded-full"></div>
                       <span className="text-sm text-muted-foreground">2 pm - Team standup meeting</span>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-peach-500 rounded-full"></div>
                       <span className="text-sm text-muted-foreground">Review quarterly reports</span>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-mint-500 rounded-full"></div>
                       <span className="text-sm text-muted-foreground">Client presentation prep</span>
                     </div>
                   </div>
@@ -143,8 +143,8 @@ export function Hero() {
             </div>
 
             {/* Floating elements */}
-            <div className="absolute -top-4 -left-4 w-16 h-16 bg-yellow-400 rounded-full opacity-80 animate-bounce animation-delay-1000"></div>
-            <div className="absolute -bottom-8 -right-8 w-20 h-20 bg-purple-400 rounded-full opacity-80 animate-bounce animation-delay-1500"></div>
+            <div className="absolute -top-4 -left-4 w-16 h-16 bg-gradient-to-br from-peach-400 to-peach-500 rounded-full opacity-80 animate-bounce animation-delay-1000"></div>
+            <div className="absolute -bottom-8 -right-8 w-20 h-20 bg-gradient-to-br from-lavender-400 to-lavender-500 rounded-full opacity-80 animate-bounce animation-delay-1500"></div>
           </div>
         </div>
       </div>
