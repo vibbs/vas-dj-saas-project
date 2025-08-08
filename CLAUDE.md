@@ -8,19 +8,20 @@ This is a turborepo-powered monorepo containing:
 
 ```
 ├── apps/                    # Applications
-│   ├── web/                # Next.js web application
-│   └── mobile/             # React Native mobile app
+│   ├── web/                # Next.js web application (main SaaS app)
+│   ├── mobile/             # React Native mobile app (Expo-based)
+│   └── marketing/          # Next.js marketing site (SEO & landing pages)
 ├── packages/               # Shared packages
-│   ├── ui/                 # Shared UI components
-│   ├── auth/               # Authentication utilities
-│   ├── api-client/         # API client for backend
-│   ├── utils/              # Shared utilities
-│   └── types/              # Shared TypeScript types
-└── backend/                # Django backend API
-    ├── apps/               # Django apps
-    ├── config/             # Django settings
+│   ├── ui/                 # Cross-platform UI components (Web + Native)
+│   ├── auth/               # Authentication utilities (JWT, hooks, components)
+│   ├── api-client/         # Type-safe API client for Django backend
+│   ├── utils/              # Shared utility functions
+│   └── types/              # Shared TypeScript type definitions
+└── backend/                # Django REST API backend
+    ├── apps/               # Django apps (accounts, organizations, billing, etc.)
+    ├── config/             # Django settings and configuration
     ├── docker/             # Docker configuration
-    └── manage.py           # Django management
+    └── manage.py           # Django management script
 ```
 
 ## Development Commands
@@ -78,15 +79,16 @@ The Django backend provides:
 ## Frontend Architecture
 
 ### Shared Packages
-- **@vas-dj-saas/ui**: Reusable UI components for web and mobile (Storybook, cross-platform)
-- **@vas-dj-saas/auth**: Authentication logic and state management (JWT tokens)
-- **@vas-dj-saas/api-client**: Type-safe API client for Django backend (Axios-based)
-- **@vas-dj-saas/utils**: Shared utility functions
-- **@vas-dj-saas/types**: TypeScript type definitions (shared across all packages)
+- **@vas-dj-saas/ui**: Reusable UI components for web and mobile (Storybook, cross-platform) → [Documentation](./packages/ui/README.md)
+- **@vas-dj-saas/auth**: Authentication logic and state management (JWT tokens) → [Documentation](./packages/auth/README.md)
+- **@vas-dj-saas/api-client**: Type-safe API client for Django backend (Axios-based) → [Documentation](./packages/api-client/README.md)
+- **@vas-dj-saas/utils**: Shared utility functions → [Documentation](./packages/utils/README.md)
+- **@vas-dj-saas/types**: TypeScript type definitions (shared across all packages) → [Documentation](./packages/types/README.md)
 
 ### Applications
-- **@vas-dj-saas/web**: Next.js 15.4.5 web application (React 19, Tailwind CSS 4)
-- **@vas-dj-saas/mobile**: React Native 0.79.5 mobile application (Expo 53, React 19)
+- **@vas-dj-saas/web**: Next.js 15.4.5 web application (React 19, Tailwind CSS 4) → [Documentation](./apps/web/README.md)
+- **@vas-dj-saas/mobile**: React Native 0.79.5 mobile application (Expo 53, React 19) → [Documentation](./apps/mobile/README.md)
+- **@vas-dj-saas/marketing**: Next.js 15.4.5 marketing site (SEO optimized, Tailwind CSS 4) → [Documentation](./apps/marketing/README.md)
 
 ## API Documentation
 

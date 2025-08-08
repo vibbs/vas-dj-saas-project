@@ -1,3 +1,7 @@
+## VAS-DJ Project SaaS Monorepo
+
+Validated App Stack for Dreamers & Jackers
+
 
 ![vas-dj-logo](./images/vas-dj-logo-banner.png)
 

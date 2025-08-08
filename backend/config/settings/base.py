@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import os
 import dj_database_url
 from pathlib import Path
 from decouple import config, Csv
@@ -237,3 +238,6 @@ SPECTACULAR_SETTINGS = {
 from apps.core.jwt_config import get_jwt_settings
 
 SIMPLE_JWT = get_jwt_settings(SECRET_KEY)
+
+# Frontend URL for email verification links
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')

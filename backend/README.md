@@ -1,28 +1,42 @@
-# VAS-DJ - Django SaaS Project
+# VAS-DJ Django Backend
 
-A comprehensive, production-ready SaaS backend built with Django and Django REST Framework. This project provides a solid foundation for building multi-tenant SaaS applications with modern architecture patterns.
+Production-ready Django REST API backend for the VAS-DJ SaaS platform, featuring multi-tenant architecture, JWT authentication, and comprehensive business logic for SaaS applications.
 
-## 🚀 Features
+## 🚀 Quick Start
 
-### Core Functionality
-- **Multi-Tenant Architecture**: Organization-based tenancy with subdomain support
-- **Custom User Management**: Extended user model with comprehensive profile fields
-- **RESTful API**: Full-featured API built with Django REST Framework
-- **Interactive API Documentation**: Swagger/OpenAPI documentation with drf-spectacular
-- **Background Task Processing**: Celery integration with Redis broker
-- **Role-Based Permissions**: Flexible user roles and organization-level permissions
+```bash
+# Build and start all services
+make backend-build
+make backend-migrate
+make start
 
-### Authentication & Security
-- **Session & Token Authentication**: Multiple authentication methods supported
-- **Multi-Provider Auth Support**: Extensible authentication provider system
-- **Email & Phone Verification**: Built-in verification workflows
-- **Two-Factor Authentication Ready**: 2FA infrastructure in place
+# Check system status
+make check-system
 
-### Development Experience
-- **Docker Development Environment**: Complete containerized setup
-- **Environment-Based Configuration**: Separate settings for development/production
-- **Poetry Dependency Management**: Modern Python package management
-- **Comprehensive Test Structure**: Ready-to-use testing framework
+# View API documentation
+open http://localhost:8000/api/docs/
+```
+
+## 🏗️ Architecture Overview
+
+### Multi-Tenant SaaS Design
+- **Organization-based tenancy** with automatic data isolation
+- **Subdomain routing** for seamless tenant access
+- **Custom user model** with organization-scoped permissions
+- **Tenant-aware models** with automatic filtering
+
+### API-First Architecture
+- **Django REST Framework** for robust API development
+- **JWT authentication** with automatic token refresh
+- **OpenAPI/Swagger** documentation with drf-spectacular
+- **Versioned APIs** for backward compatibility
+
+### Key Features
+- **Custom user management** with email/phone verification
+- **Role-based permissions** with organization-level access control
+- **Background task processing** with Celery and Redis
+- **Email service** with transactional email templates
+- **Billing integration** ready for subscription management
 
 ## 🛠 Technology Stack
 
@@ -186,23 +200,30 @@ The project includes production-ready configurations:
 4. **Security**: Review and update security settings
 5. **Monitoring**: Add monitoring and logging as needed
 
-## 📝 Contributing
+## 📚 Related Documentation
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
+- **[Monorepo Overview](../README.md)** - Complete project documentation
+- **[Frontend Applications](../apps/)** - Web and mobile app integration
+- **[Shared Packages](../packages/)** - Reusable components and utilities
+- **[Development Guide](../CLAUDE.md)** - Development setup and workflows
 
-## 📄 License
+## 🔗 Integration Points
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+### Frontend Integration
+- **Web Application**: [apps/web/](../apps/web/README.md) - Next.js SaaS interface
+- **Mobile Application**: [apps/mobile/](../apps/mobile/README.md) - React Native app
+- **Marketing Site**: [apps/marketing/](../apps/marketing/README.md) - Landing pages
 
-## 🤝 Support
+### Shared Packages
+- **API Client**: [packages/api-client/](../packages/api-client/README.md) - Type-safe API client
+- **Authentication**: [packages/auth/](../packages/auth/README.md) - Auth logic and components
+- **Type Definitions**: [packages/types/](../packages/types/README.md) - Shared TypeScript types
 
-For support and questions:
-- Create an issue in the repository
-- Check the documentation at `/api/docs/`
-- Review the CLAUDE.md file for development guidance
+## 🤝 Contributing
+
+1. Review the [development guide](../CLAUDE.md) for setup instructions
+2. Follow Django and DRF best practices
+3. Maintain API documentation with schema annotations
+4. Write comprehensive tests for new features
+5. Ensure multi-tenant data isolation in all models
 
