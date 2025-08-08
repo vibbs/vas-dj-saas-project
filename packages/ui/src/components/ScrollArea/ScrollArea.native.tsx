@@ -63,7 +63,7 @@ export const ScrollArea: React.FC<ScrollAreaProps> = ({
     accessibilityLabel: accessibilityLabel || ariaLabel,
     accessibilityHint: accessibilityHint,
     // Native scrollbar styling
-    indicatorStyle: fadeScrollbars ? 'default' : 'black',
+    indicatorStyle: (fadeScrollbars ? 'default' : 'black') as "white" | "black" | "default",
     scrollEventThrottle: 16,
     ...props,
   };

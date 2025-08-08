@@ -14,7 +14,7 @@ export interface BadgeProps {
   // Accessibility props (WCAG 2.1 AA compliant)
   accessibilityLabel?: string;     // React Native: Accessible name
   accessibilityHint?: string;      // React Native: Additional context
-  accessibilityRole?: 'button' | 'text' | 'none' | 'status'; // React Native: Element role
+  accessibilityRole?: 'button' | 'text' | 'none'; // React Native: Element role
   'aria-label'?: string;           // Web: Accessible name
   'aria-describedby'?: string;     // Web: References to describing elements
   'aria-live'?: 'polite' | 'assertive' | 'off'; // Web: Live region announcements

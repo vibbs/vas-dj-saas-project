@@ -47,6 +47,8 @@ export const lumenTheme: Theme = {
     md: 16,
     lg: 24,
     xl: 32,
+    "2xl": 40,
+    xxl: 48,
   },
   typography: {
     fontFamily: "Inter, sans-serif",
@@ -145,6 +147,8 @@ export const obsidianTheme: Theme = {
     md: 16,
     lg: 24,
     xl: 32,
+    "2xl": 40,
+    xxl: 48,
   },
   typography: {
     fontFamily: "Inter, sans-serif",
@@ -243,6 +247,8 @@ export const auroraTheme: Theme = {
     md: 16,
     lg: 24,
     xl: 32,
+    "2xl": 40,
+    xxl: 48,
   },
   typography: {
     fontFamily: "Inter, sans-serif",
@@ -341,6 +347,8 @@ export const verdantTheme: Theme = {
     md: 16,
     lg: 24,
     xl: 32,
+    "2xl": 40,
+    xxl: 48,
   },
   typography: {
     fontFamily: "Inter, sans-serif",
@@ -439,6 +447,8 @@ export const velvetTheme: Theme = {
     md: 16,
     lg: 24,
     xl: 32,
+    "2xl": 40,
+    xxl: 48,
   },
   typography: {
     fontFamily: "Inter, sans-serif",
@@ -537,6 +547,8 @@ export const blushTheme: Theme = {
     md: 16,
     lg: 24,
     xl: 32,
+    "2xl": 40,
+    xxl: 48,
   },
   typography: {
     fontFamily: "Inter, sans-serif",
@@ -635,6 +647,8 @@ export const solarTheme: Theme = {
     md: 16,
     lg: 24,
     xl: 32,
+    "2xl": 40,
+    xxl: 48,
   },
   typography: {
     fontFamily: "Inter, sans-serif",

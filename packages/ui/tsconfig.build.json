@@ -12,8 +12,6 @@
   "exclude": [
     "node_modules",
     "dist",
-    "**/*.native.tsx",
-    "**/*.native.ts",
     "**/*.stories.tsx",
     "**/*.stories.native.tsx",
     "**/*.test.tsx",

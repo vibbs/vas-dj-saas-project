@@ -105,7 +105,7 @@ export const Badge: React.FC<BadgeProps> = ({
 
   const textStyles: TextStyle = {
     fontFamily: theme.typography.fontFamily,
-    fontWeight: theme.typography.fontWeight.medium,
+    fontWeight: theme.typography.fontWeight.medium as any,
     textAlign: 'center',
     ...sizeTextStyles[size],
     ...variantTextStyles[variant],

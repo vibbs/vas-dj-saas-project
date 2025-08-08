@@ -97,12 +97,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         }
     };
 
-    const handleClick = (e: React.MouseEvent) => {
+    const handleClick = () => {
         if (!disabled && !loading) {
             // Trigger file input click
             if (fileInputRef.current) {
                 fileInputRef.current.click();
             }
+            // Call onClick callback
             onClick?.();
         }
     };

@@ -322,7 +322,7 @@ export const Select: React.FC<SelectProps> = ({
               <Text style={{
                 fontSize: theme.typography.fontSize.lg,
                 fontFamily: theme.typography.fontFamily,
-                fontWeight: theme.typography.fontWeight.semibold,
+                fontWeight: theme.typography.fontWeight.semibold as any,
                 color: theme.colors.foreground,
               }}>
                 {label || 'Select Option'}

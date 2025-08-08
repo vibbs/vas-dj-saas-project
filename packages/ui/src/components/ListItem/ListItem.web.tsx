@@ -107,7 +107,7 @@ export const ListItem: React.FC<ListItemProps> = ({
 
   const handleClick = (e: React.MouseEvent) => {
     if (disabled) return;
-    onClick?.(e as any);
+    onClick?.();
   };
 
   const handleContextMenu = (e: React.MouseEvent) => {

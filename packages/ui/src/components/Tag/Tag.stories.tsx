@@ -417,7 +417,7 @@ export const InteractiveFeatures: Story = {
       setTags([...tags, {
         id: newId,
         text: `Tag ${newId}`,
-        variant: 'default' as const
+        variant: 'primary' as const
       }]);
     };
 

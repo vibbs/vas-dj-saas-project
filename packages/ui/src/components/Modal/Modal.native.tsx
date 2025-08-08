@@ -247,17 +247,18 @@ export const Modal: React.FC<ModalProps> = ({
                 {React.Children.map(children, (child, index) => {
                   if (React.isValidElement(child) && showDivider && index === React.Children.count(children) - 1) {
                     // Add divider to the last child if it has marginTop: auto style
-                    const childStyle = child.props.style;
+                    const childElement = child as React.ReactElement<any>;
+                    const childStyle = childElement.props?.style;
                     const hasMarginAuto = childStyle && (
                       childStyle.marginTop === 'auto' || 
                       (Array.isArray(childStyle) && childStyle.some((s: any) => s?.marginTop === 'auto'))
                     );
                     
                     if (hasMarginAuto) {
-                      return React.cloneElement(child, {
-                        ...child.props,
+                      return React.cloneElement(childElement, {
+                        ...childElement.props,
                         style: [
-                          child.props.style,
+                          childElement.props?.style,
                           { borderTopWidth: 1, borderTopColor: theme.colors.border }
                         ]
                       });

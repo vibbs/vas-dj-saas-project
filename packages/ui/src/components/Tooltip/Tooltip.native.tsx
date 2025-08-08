@@ -36,7 +36,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   const [triggerLayout, setTriggerLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isControlled = controlledVisible !== undefined;
   const shouldShow = isControlled ? controlledVisible : isVisible;
@@ -326,14 +326,14 @@ export const Tooltip: React.FC<TooltipProps> = ({
   const isChildTouchable = React.isValidElement(children) && 
     (children.type === TouchableOpacity || 
      (typeof children.type === 'string' && children.type === 'button') ||
-     children.props?.onPress || 
-     children.props?.onClick);
+     (children.props as any)?.onPress || 
+     (children.props as any)?.onClick);
 
   const triggerElement = isChildTouchable ? (
     React.cloneElement(children as React.ReactElement, {
       onLayout: handleTriggerLayout,
       ...getTriggerProps(),
-      testID: testID || (children as React.ReactElement).props.testID,
+      testID: testID || (children as any)?.props?.testID,
     })
   ) : (
     <TouchableOpacity

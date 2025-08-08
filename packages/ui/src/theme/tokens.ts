@@ -43,6 +43,8 @@ export interface SpacingTokens {
   md: number;
   lg: number;
   xl: number;
+  "2xl": number;
+  xxl: number;
 }
 
 export interface TypographyTokens {
@@ -58,10 +60,10 @@ export interface TypographyTokens {
     "4xl": number;
   };
   fontWeight: {
-    normal: string;
-    medium: string;
-    semibold: string;
-    bold: string;
+    normal: "normal" | "400";
+    medium: "500";
+    semibold: "600";
+    bold: "bold" | "700";
   };
   lineHeight: {
     tight: number;
@@ -165,6 +167,8 @@ export const defaultTheme: Theme = {
     md: 16,
     lg: 24,
     xl: 32,
+    "2xl": 40,
+    xxl: 48,
   },
   typography: {
     fontFamily:

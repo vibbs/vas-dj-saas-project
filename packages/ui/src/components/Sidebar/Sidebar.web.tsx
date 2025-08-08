@@ -84,7 +84,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     backgroundColor: currentVariant.backgroundColor,
     border: variant !== 'minimal' ? `1px solid ${currentVariant.borderColor}` : 'none',
     boxShadow: currentVariant.shadow,
-    borderRadius: variant === 'floating' ? currentVariant.borderRadius : 0,
+    borderRadius: variant === 'floating' ? (currentVariant as any).borderRadius || 0 : 0,
     transition: 'all 0.3s ease-in-out',
     zIndex: overlay ? 1000 : 'auto',
     display: 'flex',

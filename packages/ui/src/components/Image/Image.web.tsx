@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ImageProps } from './types';
+import { ImageProps, ImageSource } from './types';
 import { useTheme } from '../../theme/ThemeProvider';
 import { 
   processImageSource, 
@@ -143,13 +143,29 @@ export const Image: React.FC<ImageProps> = ({
     }
     
     if (fallback) {
+      // Handle fallback as ImageSource
+      if (typeof fallback === 'object' && fallback !== null && 'uri' in fallback) {
+        const fallbackSource = processImageSource(fallback as ImageSource);
+        return (
+          <img
+            src={fallbackSource.uri}
+            alt={alt || 'Fallback image'}
+            style={{...imageStyles, ...dimensionStyles}}
+            className={className}
+            data-testid={testID ? `${testID}-fallback` : undefined}
+            aria-label={ariaLabel || accessibilityLabel}
+          />
+        );
+      }
+      
+      // Handle fallback as ReactNode
       return (
         <div 
           style={containerStyles} 
           className={containerClassName}
           data-testid={testID ? `${testID}-fallback` : undefined}
         >
-          {fallback}
+          {fallback as React.ReactNode}
         </div>
       );
     }

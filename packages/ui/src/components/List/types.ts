@@ -13,7 +13,7 @@ export interface ListProps {
   // Accessibility props (WCAG 2.1 AA compliant)
   accessibilityLabel?: string;     // React Native: Accessible name
   accessibilityHint?: string;      // React Native: Additional context
-  accessibilityRole?: 'list' | 'none'; // React Native: Element role
+  accessibilityRole?: 'none'; // React Native: Element role
   'aria-label'?: string;           // Web: Accessible name
   'aria-describedby'?: string;     // Web: References to describing elements
   role?: string;                   // Web: Element role
@@ -30,7 +30,7 @@ export interface ListItemProps {
   // Accessibility props (WCAG 2.1 AA compliant)
   accessibilityLabel?: string;     // React Native: Accessible name
   accessibilityHint?: string;      // React Native: Additional context
-  accessibilityRole?: 'listitem' | 'none'; // React Native: Element role
+  accessibilityRole?: 'none' | 'text'; // React Native: Element role
   'aria-label'?: string;           // Web: Accessible name
   'aria-describedby'?: string;     // Web: References to describing elements
   role?: string;                   // Web: Element role

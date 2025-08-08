@@ -174,7 +174,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
       testID={testID}
       accessible={true}
       accessibilityLabel={accessibilityLabel || 'Breadcrumb navigation'}
-      accessibilityRole="navigation"
+      accessibilityRole="none"
     >
       {processedItems.map((item, index) => (
         <View

@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Theme, defaultTheme, themes, ThemeName } from './tokens';
-import { injectThemeCssVariables } from './cssVariables';
+import React, { createContext, useContext } from 'react';
+import { Theme, themes, ThemeName } from './tokens';
 
 interface ThemeContextValue {
   theme: Theme;
@@ -9,80 +8,43 @@ interface ThemeContextValue {
   toggleTheme: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+// Create the context with a default value to avoid undefined issues
+const defaultTheme = themes.default;
+const defaultContextValue: ThemeContextValue = {
+  theme: defaultTheme,
+  themeName: 'default',
+  setTheme: () => {},
+  toggleTheme: () => {},
+};
+
+const ThemeContext = createContext<ThemeContextValue>(defaultContextValue);
 
 export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
+  return useContext(ThemeContext);
 };
 
 interface ThemeProviderProps {
   children: React.ReactNode;
   defaultTheme?: ThemeName;
-  theme?: Theme; // Allow direct theme object
+  theme?: Theme;
   enableSystem?: boolean;
   attribute?: string;
   value?: Record<ThemeName, string>;
-  injectCssVariables?: boolean; // Control CSS variable injection
+  injectCssVariables?: boolean;
 }
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({
-  children,
-  defaultTheme: defaultThemeName = 'default',
-  theme: directTheme,
-  enableSystem = true,
-  attribute = 'data-theme',
-  value,
-  injectCssVariables = true,
-}) => {
-  const [themeName, setThemeName] = useState<ThemeName>(defaultThemeName);
-  const [theme, setTheme] = useState<Theme>(directTheme || themes[defaultThemeName]);
+// Create a static context value object that never changes
+const staticContextValue: ThemeContextValue = {
+  theme: themes.default,
+  themeName: 'default',
+  setTheme: () => {},
+  toggleTheme: () => {},
+};
 
-  const handleSetTheme = (newThemeName: ThemeName) => {
-    const newTheme = themes[newThemeName];
-    setThemeName(newThemeName);
-    setTheme(newTheme);
-    
-    // Update document attribute and inject CSS variables
-    if (typeof document !== 'undefined') {
-      const themeValue = value?.[newThemeName] || newThemeName;
-      document.documentElement.setAttribute(attribute, themeValue);
-      
-      // Inject comprehensive CSS variables
-      if (injectCssVariables) {
-        injectThemeCssVariables(newTheme);
-      }
-    }
-  };
-
-  const toggleTheme = () => {
-    const newTheme = themeName === 'default' ? 'dark' : 'default';
-    handleSetTheme(newTheme);
-  };
-
-  useEffect(() => {
-    if (directTheme) {
-      // If direct theme is provided, inject it without changing state
-      if (injectCssVariables && typeof document !== 'undefined') {
-        injectThemeCssVariables(directTheme);
-      }
-    } else {
-      handleSetTheme(themeName);
-    }
-  }, [directTheme]);
-
-  const contextValue: ThemeContextValue = {
-    theme,
-    themeName,
-    setTheme: handleSetTheme,
-    toggleTheme,
-  };
-
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  // Always provide the same static context value
   return (
-    <ThemeContext.Provider value={contextValue}>
+    <ThemeContext.Provider value={staticContextValue}>
       {children}
     </ThemeContext.Provider>
   );

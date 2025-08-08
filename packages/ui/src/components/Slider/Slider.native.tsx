@@ -76,7 +76,7 @@ export const Slider: React.FC<SliderProps> = ({
 
   const labelStyles: TextStyle = {
     fontSize: theme.typography.fontSize.sm,
-    fontWeight: theme.typography.fontWeight.medium,
+    fontWeight: theme.typography.fontWeight.medium as any,
     color: hasError ? theme.colors.destructive : theme.colors.foreground,
     fontFamily: theme.typography.fontFamily,
   };
@@ -85,7 +85,7 @@ export const Slider: React.FC<SliderProps> = ({
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.mutedForeground,
     fontFamily: theme.typography.fontFamily,
-    fontWeight: theme.typography.fontWeight.medium,
+    fontWeight: theme.typography.fontWeight.medium as any,
   };
 
   const sliderContainerStyles: ViewStyle = {

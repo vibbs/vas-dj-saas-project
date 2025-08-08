@@ -49,7 +49,7 @@ export interface ImageProps {
   // Advanced options
   crossOrigin?: 'anonymous' | 'use-credentials'; // Web CORS
   decoding?: 'async' | 'sync' | 'auto'; // Web decoding hint
-  referrerPolicy?: string; // Web referrer policy
+  referrerPolicy?: 'no-referrer' | 'no-referrer-when-downgrade' | 'origin' | 'origin-when-cross-origin' | 'same-origin' | 'strict-origin' | 'strict-origin-when-cross-origin' | 'unsafe-url'; // Web referrer policy
   sizes?: string; // Web responsive sizes
   srcSet?: string; // Web responsive image set
   
