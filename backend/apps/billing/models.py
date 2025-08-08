@@ -28,6 +28,16 @@ class InvoiceStatus(models.TextChoices):
 
 
 class Plan(BaseFields):
+    # Override organization to be nullable for global plans
+    organization = models.ForeignKey(
+        "organizations.Organization",
+        on_delete=models.CASCADE,
+        related_name="%(class)s_set",
+        null=True,
+        blank=True,
+        help_text="If null, this is a global plan available to all organizations"
+    )
+    
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField(blank=True)
