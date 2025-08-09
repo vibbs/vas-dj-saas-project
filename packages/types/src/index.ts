@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 // User types
 export interface User {
@@ -23,18 +23,18 @@ export interface User {
 }
 
 export enum UserRole {
-  USER = 'USER',
-  ADMIN = 'ADMIN',
-  GUEST = 'GUEST',
+  USER = "USER",
+  ADMIN = "ADMIN",
+  GUEST = "GUEST",
 }
 
 export enum UserStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  SUSPENDED = 'SUSPENDED',
-  DELETED = 'DELETED',
-  BANNED = 'BANNED',
-  PENDING = 'PENDING',
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  SUSPENDED = "SUSPENDED",
+  DELETED = "DELETED",
+  BANNED = "BANNED",
+  PENDING = "PENDING",
 }
 
 // Organization types
@@ -133,10 +133,10 @@ export interface SocialAuthData {
 }
 
 export enum SocialProvider {
-  GOOGLE = 'google',
-  GITHUB = 'github',
-  FACEBOOK = 'facebook',
-  TWITTER = 'twitter',
+  GOOGLE = "google",
+  GITHUB = "github",
+  FACEBOOK = "facebook",
+  TWITTER = "twitter",
 }
 
 export interface SocialAuthResponse {
@@ -187,12 +187,5 @@ export interface TokenVerificationResponse {
   error?: string;
 }
 
-// Common UI types
-export interface ButtonProps {
-  variant?: 'primary' | 'secondary' | 'danger';
-  size?: 'small' | 'medium' | 'large';
-  disabled?: boolean;
-  loading?: boolean;
-  children: React.ReactNode;
-  onClick?: () => void;
-}
+// Export all zod schemas and additional types
+export * from './schemas';

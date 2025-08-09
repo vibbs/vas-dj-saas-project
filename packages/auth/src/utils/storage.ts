@@ -46,29 +46,54 @@ class WebStorageAdapter implements StorageAdapter {
 }
 
 /**
- * React Native storage implementation (placeholder)
- * This will be implemented when AsyncStorage is available
+ * React Native storage implementation using SecureStore
  */
 class ReactNativeStorageAdapter implements StorageAdapter {
+  private SecureStore: any = null;
+
+  constructor() {
+    try {
+      // Try to import SecureStore (this will fail on web, which is expected)
+      this.SecureStore = require('expo-secure-store');
+    } catch (error) {
+      // SecureStore not available, will fall back to memory storage
+    }
+  }
+
   async getItem(key: string): Promise<string | null> {
-    // TODO: Implement with AsyncStorage
-    console.warn('ReactNativeStorageAdapter not implemented yet');
-    return null;
+    if (!this.SecureStore) return null;
+    
+    try {
+      return await this.SecureStore.getItemAsync(key);
+    } catch (error) {
+      console.warn('Failed to get item from SecureStore:', error);
+      return null;
+    }
   }
 
   async setItem(key: string, value: string): Promise<void> {
-    // TODO: Implement with AsyncStorage
-    console.warn('ReactNativeStorageAdapter not implemented yet');
+    if (!this.SecureStore) return;
+    
+    try {
+      await this.SecureStore.setItemAsync(key, value);
+    } catch (error) {
+      console.warn('Failed to set item in SecureStore:', error);
+    }
   }
 
   async removeItem(key: string): Promise<void> {
-    // TODO: Implement with AsyncStorage
-    console.warn('ReactNativeStorageAdapter not implemented yet');
+    if (!this.SecureStore) return;
+    
+    try {
+      await this.SecureStore.deleteItemAsync(key);
+    } catch (error) {
+      console.warn('Failed to remove item from SecureStore:', error);
+    }
   }
 
   async clear(): Promise<void> {
-    // TODO: Implement with AsyncStorage
-    console.warn('ReactNativeStorageAdapter not implemented yet');
+    // SecureStore doesn't have a clear method, so we'd need to track keys
+    console.warn('Clear not implemented for SecureStore');
   }
 }
 
@@ -104,15 +129,16 @@ function createStorageAdapter(): StorageAdapter {
     return new WebStorageAdapter();
   }
   
-  // Check if we're in React Native (AsyncStorage would be imported here)
-  // if (typeof require !== 'undefined') {
-  //   try {
-  //     const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-  //     return new ReactNativeStorageAdapter();
-  //   } catch (error) {
-  //     // AsyncStorage not available
-  //   }
-  // }
+  // Check if we're in React Native/Expo environment
+  if (typeof require !== 'undefined') {
+    try {
+      // Try to import SecureStore to check if we're in Expo
+      require('expo-secure-store');
+      return new ReactNativeStorageAdapter();
+    } catch (error) {
+      // SecureStore not available, continue to fallback
+    }
+  }
   
   // Fallback to memory storage
   console.warn('No persistent storage available, using memory storage');
@@ -121,6 +147,19 @@ function createStorageAdapter(): StorageAdapter {
 
 // Create the storage instance
 export const storage = createStorageAdapter();
+
+/**
+ * Create storage for Zustand persist middleware
+ */
+export function createStorage() {
+  const adapter = createStorageAdapter();
+  
+  return {
+    getItem: (name: string) => adapter.getItem(name),
+    setItem: (name: string, value: string) => adapter.setItem(name, value),
+    removeItem: (name: string) => adapter.removeItem(name),
+  };
+}
 
 /**
  * Authentication-specific storage keys

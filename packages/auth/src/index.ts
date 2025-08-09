@@ -1,3 +1,7 @@
+// Modern Zustand-based auth store
+export * from './stores/session';
+
+// Legacy exports for backward compatibility
 export * from './AuthService';
 export * from './hooks/useAuth';
 export * from './hooks/useAuthState';

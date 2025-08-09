@@ -4,30 +4,26 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthLayout } from '@vas-dj-saas/ui';
 import { LoginForm } from '@vas-dj-saas/auth';
+import { useAuthActions, useAuthStatus, useAuthError } from '@vas-dj-saas/auth';
+import { RouteGuard } from '../../../components/RouteGuard';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const { login, clearError } = useAuthActions();
+  const status = useAuthStatus();
+  const authError = useAuthError();
+  
+  const isLoading = status === 'authenticating';
 
   const handleSubmit = async (credentials: { email: string; password: string }) => {
-    setIsLoading(true);
-    setError('');
-
-    // Simulate API call for now
+    clearError();
+    
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For demo purposes, accept any credentials
-      if (credentials.email && credentials.password) {
-        router.push('/dashboard');
-      } else {
-        setError('Please enter email and password');
-      }
-    } catch {
-      setError('Login failed');
-    } finally {
-      setIsLoading(false);
+      await login(credentials.email, credentials.password);
+      router.push('/dashboard');
+    } catch (error) {
+      // Error is handled by the auth store
+      console.error('Login error:', error);
     }
   };
 
@@ -49,12 +45,20 @@ export default function LoginPage() {
       <LoginForm
         onSubmit={handleSubmit}
         isLoading={isLoading}
-        error={error}
+        error={authError || ''}
         onSignUpClick={handleSignUpClick}
         onForgotPassword={handleForgotPassword}
         showRememberMe={true}
         showForgotPassword={true}
       />
     </AuthLayout>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <RouteGuard requireAuth={false}>
+      <LoginContent />
+    </RouteGuard>
   );
 }

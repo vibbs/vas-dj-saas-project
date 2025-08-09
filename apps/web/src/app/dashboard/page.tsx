@@ -2,13 +2,23 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth, useAuthUser, useAuthActions } from '@vas-dj-saas/auth';
+import { RouteGuard } from '../../components/RouteGuard';
 
-export default function DashboardPage() {
+function DashboardContent() {
   const router = useRouter();
+  const user = useAuthUser();
+  const { logout } = useAuthActions();
 
   const handleLogout = async () => {
-    // Clear any auth tokens/session data here
-    router.push('/auth/login');
+    try {
+      await logout();
+      router.push('/auth/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force redirect even if logout fails
+      router.push('/auth/login');
+    }
   };
 
   const handleBackToLogin = () => {
@@ -42,8 +52,8 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="ml-4">
-                  <h2 className="text-lg font-medium text-gray-900">Welcome to VAS-DJ SaaS!</h2>
-                  <p className="text-gray-500">Your dashboard is ready to go.</p>
+                  <h2 className="text-lg font-medium text-gray-900">Welcome back, {user?.firstName || 'User'}!</h2>
+                  <p className="text-gray-500">{user?.email || 'Your dashboard is ready to go.'}</p>
                 </div>
               </div>
             </div>
@@ -64,16 +74,16 @@ export default function DashboardPage() {
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">User Status</dt>
-                      <dd className="text-lg font-medium text-gray-900">Active</dd>
+                      <dt className="text-sm font-medium text-gray-500 truncate">Email Status</dt>
+                      <dd className="text-lg font-medium text-gray-900">{user?.isEmailVerified ? 'Verified' : 'Not Verified'}</dd>
                     </dl>
                   </div>
                 </div>
               </div>
               <div className="bg-gray-50 px-5 py-3">
                 <div className="text-sm">
-                  <span className="font-medium text-gray-500">Account Type:</span>
-                  <span className="ml-2 text-gray-900">Trial</span>
+                  <span className="font-medium text-gray-500">Role:</span>
+                  <span className="ml-2 text-gray-900">{user?.role || 'USER'}</span>
                 </div>
               </div>
             </div>
@@ -90,7 +100,7 @@ export default function DashboardPage() {
                   <div className="ml-5 w-0 flex-1">
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">Organization</dt>
-                      <dd className="text-lg font-medium text-gray-900">Your Organization</dd>
+                      <dd className="text-lg font-medium text-gray-900">{user?.organization?.name || 'No Organization'}</dd>
                     </dl>
                   </div>
                 </div>
@@ -98,7 +108,7 @@ export default function DashboardPage() {
               <div className="bg-gray-50 px-5 py-3">
                 <div className="text-sm">
                   <span className="font-medium text-gray-500">Subdomain:</span>
-                  <span className="ml-2 text-gray-900">your-org.vas-dj.com</span>
+                  <span className="ml-2 text-gray-900">{user?.organization?.subdomain || 'N/A'}.vas-dj.com</span>
                 </div>
               </div>
             </div>
@@ -114,8 +124,8 @@ export default function DashboardPage() {
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Trial Period</dt>
-                      <dd className="text-lg font-medium text-gray-900">14 Days</dd>
+                      <dt className="text-sm font-medium text-gray-500 truncate">Account Status</dt>
+                      <dd className="text-lg font-medium text-gray-900">{user?.organization?.onTrial ? 'Trial' : 'Active'}</dd>
                     </dl>
                   </div>
                 </div>
@@ -179,5 +189,13 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <RouteGuard requireAuth={true}>
+      <DashboardContent />
+    </RouteGuard>
   );
 }

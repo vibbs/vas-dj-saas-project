@@ -188,3 +188,6 @@ lerna-debug.log*
 
 # Storybook build outputs
 storybook-static/
+
+# Blog content scratchpad
+blog_posts/
