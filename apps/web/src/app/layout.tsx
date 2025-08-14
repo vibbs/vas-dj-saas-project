@@ -2,7 +2,7 @@
 
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@vas-dj-saas/ui";
-import { Providers } from "../providers";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,11 +31,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
-          <ThemeProvider>
-            {children}
-          </ThemeProvider>
-        </Providers>
+        {children}
       </body>
     </html>
   );
