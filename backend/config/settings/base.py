@@ -184,6 +184,9 @@ SITE_URL = config("SITE_URL", default="http://localhost:8000")
 APP_PREFIX = "saas"
 LOG_LEVEL = config("LOG_LEVEL", default="INFO").upper()
 
+# RFC 7807 and API response configuration
+PROJECT_CODE_PREFIX = "VDJ"
+
 
 # Custom user model
 AUTH_USER_MODEL = "accounts.Account"
@@ -208,9 +211,9 @@ REST_FRAMEWORK = {
         "djangorestframework_camel_case.parser.CamelCaseFormParser",
         "djangorestframework_camel_case.parser.CamelCaseMultiPartParser",
     ),
-    "DEFAULT_PAGINATION_CLASS": "apps.core.middleware.CustomPaginationClass",
+    "DEFAULT_PAGINATION_CLASS": "apps.core.pagination.StandardPagination",
     "PAGE_SIZE": 20,
-    "EXCEPTION_HANDLER": "apps.core.exceptions.handler.custom_exception_handler",
+    "EXCEPTION_HANDLER": "apps.core.exceptions.handler.rfc7807_exception_handler",
 }
 
 # drf-spectacular settings
@@ -225,8 +228,9 @@ SPECTACULAR_SETTINGS = {
     "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
     "SERVE_AUTHENTICATION": None,
     "POSTPROCESSING_HOOKS": [
-        "apps.core.schema_hooks.wrap_responses_in_data",
-        "apps.core.schema_hooks.add_common_error_responses",
+        "apps.core.schema_hooks.add_schema_components",
+        "apps.core.schema_hooks.wrap_responses_in_success_envelope",
+        "apps.core.schema_hooks.add_rfc7807_error_responses",
         "drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields",
     ],
     "ENUM_NAME_OVERRIDES": {

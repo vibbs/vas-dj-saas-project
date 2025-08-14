@@ -176,6 +176,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         # Create organization first
         organization = Organization.objects.create(
             name=organization_name,
+            slug=subdomain,  # Use subdomain as slug as well
             sub_domain=subdomain,
             creator_email=validated_data['email'],
             creator_name=f"{validated_data.get('first_name', '')} {validated_data.get('last_name', '')}".strip(),
@@ -234,13 +235,19 @@ class RegistrationResponseSerializer(serializers.Serializer):
     
     def get_organization(self, obj):
         """Return basic organization information."""
-        if hasattr(obj, 'organization') and obj.organization:
+        # Handle both dictionary structure and object attribute access
+        if isinstance(obj, dict):
+            organization = obj.get('organization')
+        else:
+            organization = getattr(obj, 'organization', None)
+            
+        if organization:
             return {
-                'id': str(obj.organization.id),
-                'name': obj.organization.name,
-                'subdomain': obj.organization.sub_domain,
-                'on_trial': obj.organization.on_trial,
-                'trial_ends_on': obj.organization.trial_ends_on
+                'id': str(organization.id),
+                'name': organization.name,
+                'subdomain': organization.sub_domain,
+                'on_trial': organization.on_trial,
+                'trial_ends_on': organization.trial_ends_on
             }
         return None
 
@@ -362,6 +369,7 @@ class SocialRegistrationSerializer(serializers.Serializer):
         # Create organization
         organization = Organization.objects.create(
             name=organization_name,
+            slug=subdomain,  # Use subdomain as slug as well
             sub_domain=subdomain,
             creator_email=email,
             creator_name=f"{first_name} {last_name}".strip(),

@@ -1,0 +1,71 @@
+- slug: subscription-not-found
+  type: https://docs.yourapp.com/problems/subscription-not-found
+  title: Subscription not found
+  default_status: 404
+  i18n_key: billing.subscription.not_found
+  description: The specified subscription could not be found.
+  codes:
+    - VDJ-BILL-SUB-404
+
+- slug: payment-method-invalid
+  type: https://docs.yourapp.com/problems/payment-method-invalid
+  title: Invalid payment method
+  default_status: 400
+  i18n_key: billing.payment_method.invalid
+  description: The provided payment method is invalid or cannot be processed.
+  codes:
+    - VDJ-BILL-PAY-400
+
+- slug: subscription-already-active
+  type: https://docs.yourapp.com/problems/subscription-already-active
+  title: Subscription already active
+  default_status: 409
+  i18n_key: billing.subscription.already_active
+  description: An active subscription already exists for this organization.
+  codes:
+    - VDJ-BILL-SUB-409
+
+- slug: trial-expired
+  type: https://docs.yourapp.com/problems/trial-expired
+  title: Trial period expired
+  default_status: 403
+  i18n_key: billing.trial.expired
+  description: The trial period has expired. Please upgrade to continue using the service.
+  codes:
+    - VDJ-BILL-TRIAL-403
+
+- slug: payment-failed
+  type: https://docs.yourapp.com/problems/payment-failed
+  title: Payment failed
+  default_status: 402
+  i18n_key: billing.payment.failed
+  description: Payment could not be processed. Please check your payment method.
+  codes:
+    - VDJ-BILL-PAY-402
+
+- slug: plan-not-found
+  type: https://docs.yourapp.com/problems/plan-not-found
+  title: Plan not found
+  default_status: 404
+  i18n_key: billing.plan.not_found
+  description: The specified billing plan could not be found.
+  codes:
+    - VDJ-BILL-PLAN-404
+
+- slug: downgrade-not-allowed
+  type: https://docs.yourapp.com/problems/downgrade-not-allowed
+  title: Downgrade not allowed
+  default_status: 403
+  i18n_key: billing.downgrade.not_allowed
+  description: Cannot downgrade to this plan due to current usage limits.
+  codes:
+    - VDJ-BILL-DOWN-403
+
+- slug: invoice-not-found
+  type: https://docs.yourapp.com/problems/invoice-not-found
+  title: Invoice not found
+  default_status: 404
+  i18n_key: billing.invoice.not_found
+  description: The specified invoice could not be found.
+  codes:
+    - VDJ-BILL-INV-404

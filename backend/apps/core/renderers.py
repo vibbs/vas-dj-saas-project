@@ -21,7 +21,7 @@ class ConsistentDataRenderer(CamelCaseJSONRenderer):
             if isinstance(data, dict) and "pagination" in data:
                 # Already paginated, don't wrap again
                 response_data = data
-            elif isinstance(data, dict) and ("detail" in data or "error" in data):
+            elif isinstance(data, dict) and ("detail" in data or "error" in data or "status_code" in data or "field_errors" in data):
                 # Error responses, don't wrap
                 response_data = data
             else:
@@ -47,7 +47,7 @@ class ConsistentDataJSONRenderer(JSONRenderer):
             if isinstance(data, dict) and "pagination" in data:
                 # Already paginated, don't wrap again
                 response_data = data
-            elif isinstance(data, dict) and ("detail" in data or "error" in data):
+            elif isinstance(data, dict) and ("detail" in data or "error" in data or "status_code" in data or "field_errors" in data):
                 # Error responses, don't wrap
                 response_data = data
             else:

@@ -1,0 +1,44 @@
+- slug: email-send-failed
+  type: https://docs.yourapp.com/problems/email-send-failed
+  title: Email send failed
+  default_status: 500
+  i18n_key: email.send.failed
+  description: Failed to send email due to a server error.
+  codes:
+    - VDJ-EMAIL-SEND-500
+
+- slug: email-template-not-found
+  type: https://docs.yourapp.com/problems/email-template-not-found
+  title: Email template not found
+  default_status: 404
+  i18n_key: email.template.not_found
+  description: The specified email template could not be found.
+  codes:
+    - VDJ-EMAIL-TPL-404
+
+- slug: email-invalid-recipient
+  type: https://docs.yourapp.com/problems/email-invalid-recipient
+  title: Invalid email recipient
+  default_status: 400
+  i18n_key: email.recipient.invalid
+  description: The email address provided is invalid.
+  codes:
+    - VDJ-EMAIL-REC-400
+
+- slug: email-rate-limit-exceeded
+  type: https://docs.yourapp.com/problems/email-rate-limit-exceeded
+  title: Email rate limit exceeded
+  default_status: 429
+  i18n_key: email.rate_limit.exceeded
+  description: Too many emails sent. Please try again later.
+  codes:
+    - VDJ-EMAIL-RATE-429
+
+- slug: email-service-unavailable
+  type: https://docs.yourapp.com/problems/email-service-unavailable
+  title: Email service unavailable
+  default_status: 503
+  i18n_key: email.service.unavailable
+  description: Email service is temporarily unavailable.
+  codes:
+    - VDJ-EMAIL-SRV-503

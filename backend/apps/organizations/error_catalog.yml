@@ -1,0 +1,71 @@
+- slug: org-not-found
+  type: https://docs.yourapp.com/problems/org-not-found
+  title: Organization not found
+  default_status: 404
+  i18n_key: org.not_found
+  description: The specified organization could not be found.
+  codes:
+    - VDJ-ORG-NOTFOUND-404
+
+- slug: org-access-denied
+  type: https://docs.yourapp.com/problems/org-access-denied
+  title: Organization access denied
+  default_status: 403
+  i18n_key: org.access_denied
+  description: You do not have access to this organization.
+  codes:
+    - VDJ-ORG-ACCESS-403
+
+- slug: org-invite-conflict
+  type: https://docs.yourapp.com/problems/org-invite-conflict
+  title: Invite already exists
+  default_status: 409
+  i18n_key: org.invite.already_exists
+  description: An invitation for this email address already exists in the organization.
+  codes:
+    - VDJ-ORG-INVITE-409
+
+- slug: org-member-exists
+  type: https://docs.yourapp.com/problems/org-member-exists
+  title: Member already exists
+  default_status: 409
+  i18n_key: org.member.already_exists
+  description: This user is already a member of the organization.
+  codes:
+    - VDJ-ORG-MEMBER-409
+
+- slug: org-invite-invalid
+  type: https://docs.yourapp.com/problems/org-invite-invalid
+  title: Invalid invitation
+  default_status: 400
+  i18n_key: org.invite.invalid
+  description: The organization invitation is invalid or has expired.
+  codes:
+    - VDJ-ORG-INVITE-400
+
+- slug: org-member-limit-exceeded
+  type: https://docs.yourapp.com/problems/org-member-limit-exceeded
+  title: Member limit exceeded
+  default_status: 403
+  i18n_key: org.member.limit_exceeded
+  description: Organization has reached the maximum number of allowed members.
+  codes:
+    - VDJ-ORG-LIMIT-403
+
+- slug: org-subdomain-taken
+  type: https://docs.yourapp.com/problems/org-subdomain-taken
+  title: Subdomain unavailable
+  default_status: 409
+  i18n_key: org.subdomain.taken
+  description: This subdomain is already in use by another organization.
+  codes:
+    - VDJ-ORG-SUB-409
+
+- slug: org-owner-required
+  type: https://docs.yourapp.com/problems/org-owner-required
+  title: Organization owner required
+  default_status: 403
+  i18n_key: org.owner_required
+  description: This action requires organization owner permissions.
+  codes:
+    - VDJ-ORG-OWNER-403

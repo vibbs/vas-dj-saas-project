@@ -2,40 +2,83 @@
 5xx Server Error exceptions for standardized error handling.
 """
 
-from rest_framework import status
+from typing import Optional
 from .base import BaseHttpException
+from ..codes import APIResponseCodes
 
 
 class InternalServerErrorException(BaseHttpException):
     """500 Internal Server Error - A generic error message for unexpected server errors."""
-    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-    default_detail = "An internal server error occurred"
-    default_code = "internal_server_error"
+
+    def __init__(self, detail: Optional[str] = None, **kwargs):
+        super().__init__(
+            type="https://docs.yourapp.com/problems/internal-server-error",
+            title="Internal server error",
+            status=500,
+            detail=detail or "An unexpected server error occurred.",
+            code=kwargs.get("code", APIResponseCodes.GEN_ERR_500),
+            i18n_key=kwargs.get("i18n_key", "errors.internal_server_error"),
+            **{k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]}
+        )
 
 
 class NotImplementedException(BaseHttpException):
     """501 Not Implemented - The server does not support the functionality required."""
-    status_code = status.HTTP_501_NOT_IMPLEMENTED
-    default_detail = "This functionality is not implemented"
-    default_code = "not_implemented"
+
+    def __init__(self, detail: Optional[str] = None, **kwargs):
+        super().__init__(
+            type="https://docs.yourapp.com/problems/not-implemented",
+            title="Not implemented",
+            status=501,
+            detail=detail or "This functionality is not implemented.",
+            code=kwargs.get("code", "VDJ-GEN-NOTIMPL-501"),
+            i18n_key=kwargs.get("i18n_key", "errors.not_implemented"),
+            **{k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]}
+        )
 
 
 class BadGatewayException(BaseHttpException):
     """502 Bad Gateway - The server received an invalid response from an upstream server."""
-    status_code = status.HTTP_502_BAD_GATEWAY
-    default_detail = "Bad gateway error occurred"
-    default_code = "bad_gateway"
+
+    def __init__(self, detail: Optional[str] = None, **kwargs):
+        super().__init__(
+            type="https://docs.yourapp.com/problems/bad-gateway",
+            title="Bad gateway",
+            status=502,
+            detail=detail
+            or "The server received an invalid response from an upstream server.",
+            code=kwargs.get("code", "VDJ-GEN-GATEWAY-502"),
+            i18n_key=kwargs.get("i18n_key", "errors.bad_gateway"),
+            **{k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]}
+        )
 
 
 class ServiceUnavailableException(BaseHttpException):
     """503 Service Unavailable - The server is currently unavailable."""
-    status_code = status.HTTP_503_SERVICE_UNAVAILABLE
-    default_detail = "Service is temporarily unavailable"
-    default_code = "service_unavailable"
+
+    def __init__(self, detail: Optional[str] = None, **kwargs):
+        super().__init__(
+            type="https://docs.yourapp.com/problems/service-unavailable",
+            title="Service unavailable",
+            status=503,
+            detail=detail or "Service is temporarily unavailable.",
+            code=kwargs.get("code", APIResponseCodes.GEN_UNAVAIL_503),
+            i18n_key=kwargs.get("i18n_key", "errors.service_unavailable"),
+            **{k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]}
+        )
 
 
 class GatewayTimeoutException(BaseHttpException):
     """504 Gateway Timeout - The server did not receive a timely response from upstream."""
-    status_code = status.HTTP_504_GATEWAY_TIMEOUT
-    default_detail = "Gateway timeout occurred"
-    default_code = "gateway_timeout"
+
+    def __init__(self, detail: Optional[str] = None, **kwargs):
+        super().__init__(
+            type="https://docs.yourapp.com/problems/gateway-timeout",
+            title="Gateway timeout",
+            status=504,
+            detail=detail
+            or "The server did not receive a timely response from upstream.",
+            code=kwargs.get("code", "VDJ-GEN-TIMEOUT-504"),
+            i18n_key=kwargs.get("i18n_key", "errors.gateway_timeout"),
+            **{k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]}
+        )
