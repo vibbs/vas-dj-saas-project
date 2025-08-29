@@ -26,7 +26,7 @@ class AccountResponseCodes(BaseAPICodeEnum):
     ACC_RESET_400 = f"{BaseAPICodeEnum.PROJECT_PREFIX}-ACC-RESET-400"
 
     # Validation errors
-    ACC_MISSING_FIELD_400 = f"{BaseAPICodeEnum.PROJECT_PREFIX}-ACC-MISSING-400"
+    ACC_MISSING_400 = f"{BaseAPICodeEnum.PROJECT_PREFIX}-ACC-MISSING-400"
 
     # Registration errors
     ACC_REG_403 = f"{BaseAPICodeEnum.PROJECT_PREFIX}-ACC-REG-403"

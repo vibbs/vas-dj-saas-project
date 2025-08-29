@@ -86,7 +86,6 @@ class Account(BaseFields, AbstractBaseUser, PermissionsMixin):
 
     # Metadata
     date_joined = models.DateTimeField(default=timezone.now)
-    is_active = models.BooleanField(default=True)
     status = models.CharField(
         max_length=10,
         choices=UserStatusTypes.choices(),
@@ -112,7 +111,7 @@ class Account(BaseFields, AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ["first_name", "last_name"]
 
     def __str__(self):
-        return f"{self.email} ({self.organization.name})"
+        return f"{self.email}"
 
     @property
     def is_admin(self):
@@ -129,11 +128,17 @@ class Account(BaseFields, AbstractBaseUser, PermissionsMixin):
     @property
     def abbreviated_name(self):
         # Return the first letter of the first name and the last name
-        first = str(self.first_name) if self.first_name else ""
-        last = str(self.last_name) if self.last_name else ""
+        first = str(self.first_name).strip() if self.first_name else ""
+        last = str(self.last_name).strip() if self.last_name else ""
+        
         if first and last:
             return f"{first[0].upper()}{last[0].upper()}"
-        return str(self.email)[0].upper() if self.email else "UKN"
+        elif first:
+            return first[0].upper()
+        elif last:
+            return last[0].upper()
+        else:
+            return str(self.email)[0].upper() if self.email else "UKN"
 
     def generate_email_verification_token(self):
         """Generate a new email verification token."""
@@ -178,42 +183,148 @@ class Account(BaseFields, AbstractBaseUser, PermissionsMixin):
         from apps.email_service.services import send_email
         
         # Send verification email
+        primary_org = self.get_primary_organization()
+        verification_url = f"{getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')}/verify-email?token={token}"
+        
         context = {
             'user': self,
             'verification_token': token,
-            'verification_url': f"{settings.FRONTEND_URL}/verify-email?token={token}",
-            'organization': self.organization
+            'verification_url': verification_url,
+            'organization': primary_org or {'name': 'VAS-DJ Platform'},  # Fallback for users without org
+            'subject': 'Verify Your Email Address - VAS-DJ'
         }
         
         try:
             send_email(
-                organization=self.organization,
+                organization=primary_org,  # This can be None for users without org
                 recipient=self,
                 template_slug='email_verification',
                 context=context
             )
             return True
-        except Exception:
+        except Exception as e:
+            # Log the specific error for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to send verification email to {self.email}: {str(e)}")
+            
+            # Log the traceback for better debugging
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            
+            # If it's an email template issue, we could fall back to a simple email
+            # For now, we'll return False and let the calling code handle it
             return False
 
-    # @property
-    # def organization(self):
-    #     """Get the organization this user belongs to"""
-    #     from django.db import connection
-    #     from apps.organization.models import Organization
+    # Membership-based methods
+    def get_memberships(self):
+        """Get all organization memberships for this user."""
+        return self.organization_memberships.all()
+    
+    def get_active_memberships(self):
+        """Get all active organization memberships for this user."""
+        return self.organization_memberships.filter(status='active')
+    
+    def get_primary_organization(self):
+        """Get the primary organization for this user (for backward compatibility)."""
+        # If user has direct organization (legacy), return it
+        if self.organization:
+            return self.organization
+        
+        # Otherwise, get the first active membership's organization
+        membership = self.get_active_memberships().first()
+        return membership.organization if membership else None
+    
+    def get_organizations(self):
+        """Get all organizations this user is a member of."""
+        return [m.organization for m in self.get_active_memberships()]
+    
+    def has_membership_in(self, organization):
+        """Check if user has any membership in the given organization."""
+        return self.organization_memberships.filter(
+            organization=organization
+        ).exists()
+    
+    def has_active_membership_in(self, organization):
+        """Check if user has active membership in the given organization."""
+        return self.organization_memberships.filter(
+            organization=organization,
+            status='active'
+        ).exists()
+    
+    def get_membership_in(self, organization):
+        """Get membership in the given organization, if any."""
+        return self.organization_memberships.filter(
+            organization=organization
+        ).first()
+    
+    def is_owner_of(self, organization):
+        """Check if user is owner of the given organization."""
+        membership = self.get_membership_in(organization)
+        return membership and membership.is_owner()
+    
+    def is_admin_of(self, organization):
+        """Check if user is admin or owner of the given organization."""
+        membership = self.get_membership_in(organization)
+        return membership and membership.is_admin()
+    
+    def can_manage_members_in(self, organization):
+        """Check if user can manage members in the given organization."""
+        membership = self.get_membership_in(organization)
+        return membership and membership.can_manage_members()
+    
+    def can_manage_billing_in(self, organization):
+        """Check if user can manage billing in the given organization."""
+        membership = self.get_membership_in(organization)
+        return membership and membership.can_manage_billing()
+    
+    def create_default_organization(self, name=None):
+        """Create a default organization for this user (for trial users)."""
+        from apps.organizations.models import Organization, OrganizationMembership
+        from django.utils.text import slugify
+        
+        if not name:
+            name = f"{self.full_name or self.email}'s Organization"
+        
+        # Generate unique slug
+        base_slug = slugify(name)[:40]  # Limit length
+        slug = base_slug
+        counter = 1
+        while Organization.objects.filter(slug=slug).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        
+        # Create organization
+        organization = Organization.objects.create(
+            name=name,
+            slug=slug,
+            creator_email=self.email,
+            creator_name=self.full_name,
+            created_by=self,
+            plan='free_trial',
+            on_trial=True,
+            sub_domain=slug  # Use same as slug for now
+        )
+        
+        # Create owner membership
+        membership = OrganizationMembership.objects.create(
+            organization=organization,
+            user=self,
+            role='owner',
+            status='active'
+        )
+        
+        return organization, membership
 
-    #     # The tenant schema name corresponds to the organization
-    #     schema_name = connection.schema_name
-    #     return Organization.objects.get(schema_name=schema_name)
-
-    # @property
-    # def is_founder(self):
-    #     """Check if this user is the organization founder"""
-    #     org = self.organization
-    #     return org.created_by_id == self.id if org.created_by else False
+    # Legacy compatibility property (deprecated)
+    @property  
+    def is_founder(self):
+        """Check if this user is founder of their primary organization (deprecated)."""
+        org = self.get_primary_organization()
+        return org and org.created_by_id == self.id if org and hasattr(org, 'created_by') else False
 
     class Meta:
         verbose_name = "Account"
         verbose_name_plural = "Accounts"
         ordering = ["-date_joined"]
-        unique_together = [["organization", "email"]]
+        # Removed unique_together constraint - users can exist across multiple orgs

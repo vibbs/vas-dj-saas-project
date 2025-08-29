@@ -1,10 +1,11 @@
 from rest_framework import serializers
 from django.utils.translation import gettext_lazy as _
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from datetime import datetime, timedelta
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema_field
 from .models import Account, AccountAuthProvider
-from apps.organizations.models import Organization
+from apps.organizations.models import Organization, OrganizationMembership
 from apps.billing.models import Plan, Subscription, SubscriptionStatus
 
 
@@ -97,6 +98,14 @@ class RegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(_("An account with this email already exists."))
         return value
 
+    def validate_organization_name(self, value):
+        """Validate organization name length."""
+        if value and len(value) > 100:
+            raise serializers.ValidationError(
+                _("Organization name cannot be longer than 100 characters.")
+            )
+        return value
+
     def validate_preferred_subdomain(self, value):
         """Validate subdomain format and uniqueness if provided."""
         if value:
@@ -115,21 +124,66 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return value.lower() if value else value
 
     def validate(self, attrs):
-        """Validate that password and password_confirm match."""
-        if attrs['password'] != attrs['password_confirm']:
-            raise serializers.ValidationError(_("Passwords don't match"))
+        """Validate that password and password_confirm match and meets requirements."""
+        password = attrs.get('password')
+        password_confirm = attrs.get('password_confirm')
+        
+        # Check password confirmation match
+        if password != password_confirm:
+            raise serializers.ValidationError({
+                'password_confirm': [_("Passwords don't match")]
+            })
+        
+        # Validate password strength with custom rules (independent of Django settings)
+        password_errors = []
+        
+        # Check password length
+        if len(password) < 8:
+            password_errors.append(_("Password must be at least 8 characters long."))
+        
+        # Check for common passwords
+        common_passwords = ['password', 'password123', '12345678', 'qwerty', 'abc123']
+        if password.lower() in common_passwords:
+            password_errors.append(_("This password is too common."))
+        
+        # Check for variety - at least 2 different types of characters
+        has_digit = any(c.isdigit() for c in password)
+        has_alpha = any(c.isalpha() for c in password)
+        has_special = any(c in '!@#$%^&*(),.?":{}|<>' for c in password)
+        
+        char_types = sum([has_digit, has_alpha, has_special])
+        if char_types < 2:
+            password_errors.append(_("Password must contain at least 2 different types of characters (letters, digits, symbols)."))
+        
+        # Check for too repetitive (same character repeated)
+        if len(set(password)) < 4:  # Must have at least 4 different characters
+            password_errors.append(_("Password contains too many repeated characters."))
+        
+        if password_errors:
+            raise serializers.ValidationError({
+                'password': password_errors
+            })
+        
         return attrs
 
     def _generate_unique_subdomain(self, first_name, last_name, preferred=None):
         """Generate a unique subdomain for the organization."""
         if preferred:
-            return preferred
+            # Ensure preferred subdomain doesn't exceed 50 characters
+            return preferred[:50]
         
         # Create base subdomain from name
         base = f"{first_name.lower()}-{last_name.lower()}" if first_name and last_name else "user"
         
-        # Remove any non-alphanumeric characters except hyphens
+        # Handle unicode characters by transliterating them to ASCII equivalents
         import re
+        import unicodedata
+        
+        # Normalize unicode characters (é -> e, ü -> u, etc.)
+        base = unicodedata.normalize('NFD', base)
+        base = ''.join(c for c in base if unicodedata.category(c) != 'Mn')  # Remove accents
+        
+        # Remove any non-alphanumeric characters except hyphens
         base = re.sub(r'[^a-z0-9-]', '', base.lower())
         base = re.sub(r'-+', '-', base)  # Replace multiple hyphens with single
         base = base.strip('-')  # Remove leading/trailing hyphens
@@ -138,18 +192,35 @@ class RegistrationSerializer(serializers.ModelSerializer):
         if len(base) < 3:
             base = f"user-{base}"
         
+        # Truncate base to allow room for counter suffixes (leave 10 chars for counter)
+        base = base[:40]
+        
         # Check uniqueness and add suffix if needed
         subdomain = base
         counter = 1
         while Organization.objects.filter(sub_domain=subdomain).exists():
-            subdomain = f"{base}-{counter}"
+            # Ensure the full subdomain with counter doesn't exceed 50 chars
+            suffix = f"-{counter}"
+            if len(base) + len(suffix) > 50:
+                # Truncate base further to make room for suffix
+                truncated_base = base[:50 - len(suffix)]
+                subdomain = f"{truncated_base}{suffix}"
+            else:
+                subdomain = f"{base}{suffix}"
+            
             counter += 1
             if counter > 100:  # Safety break
                 import uuid
-                subdomain = f"{base}-{str(uuid.uuid4())[:8]}"
+                # Ensure UUID suffix doesn't exceed limit
+                uuid_suffix = str(uuid.uuid4())[:8]
+                if len(base) + len(uuid_suffix) + 1 > 50:
+                    truncated_base = base[:50 - len(uuid_suffix) - 1]
+                    subdomain = f"{truncated_base}-{uuid_suffix}"
+                else:
+                    subdomain = f"{base}-{uuid_suffix}"
                 break
         
-        return subdomain
+        return subdomain[:50]  # Final safety truncation
 
     @transaction.atomic
     def create(self, validated_data):
@@ -166,6 +237,9 @@ class RegistrationSerializer(serializers.ModelSerializer):
             last_name = validated_data.get('last_name', '')
             organization_name = f"{first_name} {last_name}".strip() or "Personal Organization"
         
+        # Ensure organization name doesn't exceed database limit
+        organization_name = organization_name[:100]
+        
         # Generate unique subdomain
         subdomain = self._generate_unique_subdomain(
             validated_data.get('first_name', ''),
@@ -173,35 +247,51 @@ class RegistrationSerializer(serializers.ModelSerializer):
             preferred_subdomain
         )
         
-        # Create organization first
+        # Create user account first (without organization)
+        validated_data['status'] = 'PENDING'  # Pending email verification
+        try:
+            user = Account.objects.create_user(password=password, **validated_data)
+        except IntegrityError as e:
+            if 'accounts_account_email_key' in str(e):
+                raise serializers.ValidationError({
+                    'email': _('An account with this email already exists.')
+                })
+            else:
+                raise serializers.ValidationError({
+                    'non_field_errors': _('Unable to create account. Please try again.')
+                })
+        
+        # Create organization and link via membership
         organization = Organization.objects.create(
             name=organization_name,
             slug=subdomain,  # Use subdomain as slug as well
             sub_domain=subdomain,
             creator_email=validated_data['email'],
             creator_name=f"{validated_data.get('first_name', '')} {validated_data.get('last_name', '')}".strip(),
+            created_by=user,
+            plan='free_trial',
             on_trial=True,
             trial_ends_on=timezone.now().date() + timedelta(days=14),  # 14-day trial
             is_active=True
         )
         
-        # Create user account linked to organization
-        validated_data['organization'] = organization
-        validated_data['is_org_creator'] = True
-        validated_data['is_org_admin'] = True
-        validated_data['can_invite_users'] = True
-        validated_data['can_manage_billing'] = True
-        validated_data['can_delete_org'] = True
-        validated_data['status'] = 'PENDING'  # Pending email verification
+        # Create owner membership
+        OrganizationMembership.objects.create(
+            organization=organization,
+            user=user,
+            role='owner',
+            status='active'
+        )
         
-        user = Account.objects.create_user(password=password, **validated_data)
+        # Set organization on user for backward compatibility
+        user.organization = organization
+        user.save(update_fields=['organization'])
         
         # Initialize trial subscription if there's a free trial plan
         try:
             trial_plan = Plan.objects.filter(amount=0, trial_period_days__gt=0).first()
             if trial_plan:
                 Subscription.objects.create(
-                    account=user,
                     organization=organization,
                     plan=trial_plan,
                     status=SubscriptionStatus.TRIALING,
@@ -233,23 +323,46 @@ class RegistrationResponseSerializer(serializers.Serializer):
     user = AccountSerializer(help_text="User information")
     organization = serializers.SerializerMethodField()
     
+    @extend_schema_field(serializers.DictField)
     def get_organization(self, obj):
         """Return basic organization information."""
         # Handle both dictionary structure and object attribute access
         if isinstance(obj, dict):
-            organization = obj.get('organization')
+            user = obj.get('user')
+            if user:
+                # Get primary organization from user's memberships
+                org = user.get_primary_organization()
+            else:
+                org = obj.get('organization')
         else:
-            organization = getattr(obj, 'organization', None)
+            # Get primary organization from user's memberships  
+            user = getattr(obj, 'user', obj)
+            org = user.get_primary_organization() if hasattr(user, 'get_primary_organization') else None
             
-        if organization:
+        if org:
             return {
-                'id': str(organization.id),
-                'name': organization.name,
-                'subdomain': organization.sub_domain,
-                'on_trial': organization.on_trial,
-                'trial_ends_on': organization.trial_ends_on
+                'id': str(org.id),
+                'name': org.name,
+                'subdomain': org.sub_domain,
+                'on_trial': org.on_trial,
+                'trial_ends_on': org.trial_ends_on.isoformat() if org.trial_ends_on else None
             }
         return None
+
+
+class ResendVerificationByEmailSerializer(serializers.Serializer):
+    """Serializer for resending email verification by email address (unauthenticated)."""
+    email = serializers.EmailField(
+        help_text="Email address to resend verification to",
+        required=True
+    )
+
+    def validate_email(self, value):
+        """Validate email format (but don't check existence for security)"""
+        # Basic email format validation is handled by EmailField
+        # We intentionally don't check if the email exists in the system
+        # to prevent email enumeration attacks
+        return value.lower().strip()
 
 
 class SocialRegistrationSerializer(serializers.Serializer):
@@ -363,39 +476,48 @@ class SocialRegistrationSerializer(serializers.Serializer):
         if not organization_name:
             organization_name = f"{first_name} {last_name}".strip() or f"{email.split('@')[0]}'s Organization"
         
-        # Generate unique subdomain (reuse from RegistrationSerializer)
-        subdomain = self._generate_unique_subdomain(first_name, last_name, preferred_subdomain)
+        # Generate unique subdomain (reuse method from RegistrationSerializer)
+        registration_serializer = RegistrationSerializer()
+        subdomain = registration_serializer._generate_unique_subdomain(first_name, last_name, preferred_subdomain)
         
-        # Create organization
-        organization = Organization.objects.create(
-            name=organization_name,
-            slug=subdomain,  # Use subdomain as slug as well
-            sub_domain=subdomain,
-            creator_email=email,
-            creator_name=f"{first_name} {last_name}".strip(),
-            on_trial=True,
-            trial_ends_on=timezone.now().date() + timedelta(days=14),  # 14-day trial
-            is_active=True
-        )
-        
-        # Create user account
+        # Create user account first (without organization)
         user_data = {
             'email': email,
             'first_name': first_name,
             'last_name': last_name,
             'avatar': validated_data.get('avatar', ''),
-            'organization': organization,
-            'is_org_creator': True,
-            'is_org_admin': True,
-            'can_invite_users': True,
-            'can_manage_billing': True,
-            'can_delete_org': True,
             'is_email_verified': True,  # Trust social provider email verification
             'status': 'ACTIVE'  # Skip email verification for social logins
         }
         
         # Create user without password (social login only)
         user = Account.objects.create(**user_data)
+        
+        # Create organization and link via membership
+        organization = Organization.objects.create(
+            name=organization_name,
+            slug=subdomain,  # Use subdomain as slug as well
+            sub_domain=subdomain,
+            creator_email=email,
+            creator_name=f"{first_name} {last_name}".strip(),
+            created_by=user,
+            plan='free_trial',
+            on_trial=True,
+            trial_ends_on=timezone.now().date() + timedelta(days=14),  # 14-day trial
+            is_active=True
+        )
+        
+        # Create owner membership
+        OrganizationMembership.objects.create(
+            organization=organization,
+            user=user,
+            role='owner',
+            status='active'
+        )
+        
+        # Set organization on user for backward compatibility
+        user.organization = organization
+        user.save(update_fields=['organization'])
         
         # Create auth provider record
         AccountAuthProvider.objects.create(
@@ -411,7 +533,6 @@ class SocialRegistrationSerializer(serializers.Serializer):
             trial_plan = Plan.objects.filter(amount=0, trial_period_days__gt=0).first()
             if trial_plan:
                 Subscription.objects.create(
-                    account=user,
                     organization=organization,
                     plan=trial_plan,
                     status=SubscriptionStatus.TRIALING,
@@ -426,37 +547,6 @@ class SocialRegistrationSerializer(serializers.Serializer):
             pass
         
         return user
-
-    def _generate_unique_subdomain(self, first_name, last_name, preferred=None):
-        """Generate a unique subdomain for the organization."""
-        if preferred:
-            return preferred
-        
-        # Create base subdomain from name
-        base = f"{first_name.lower()}-{last_name.lower()}" if first_name and last_name else "user"
-        
-        # Remove any non-alphanumeric characters except hyphens
-        import re
-        base = re.sub(r'[^a-z0-9-]', '', base.lower())
-        base = re.sub(r'-+', '-', base)  # Replace multiple hyphens with single
-        base = base.strip('-')  # Remove leading/trailing hyphens
-        
-        # Ensure minimum length
-        if len(base) < 3:
-            base = f"user-{base}"
-        
-        # Check uniqueness and add suffix if needed
-        subdomain = base
-        counter = 1
-        while Organization.objects.filter(sub_domain=subdomain).exists():
-            subdomain = f"{base}-{counter}"
-            counter += 1
-            if counter > 100:  # Safety break
-                import uuid
-                subdomain = f"{base}-{str(uuid.uuid4())[:8]}"
-                break
-        
-        return subdomain
 
 
 class SocialLoginSerializer(serializers.Serializer):

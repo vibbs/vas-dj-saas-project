@@ -1,4 +1,4 @@
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -9,7 +9,7 @@ from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError, AuthenticationFailed
+from rest_framework.exceptions import ValidationError
 from django.http import Http404
 
 from apps.accounts.models import Account
@@ -17,6 +17,7 @@ from apps.accounts.serializers import (
     AccountSerializer,
     RegistrationSerializer,
     RegistrationResponseSerializer,
+    ResendVerificationByEmailSerializer,
     SocialRegistrationSerializer,
     SocialLoginSerializer,
 )
@@ -26,8 +27,37 @@ from apps.core.exceptions import (
     AccountDisabledException,
     InvalidRefreshTokenException,
 )
+from apps.core.exceptions.client_errors import ValidationException
 from apps.core.responses import ok, created
 from apps.core.codes import APIResponseCodes
+from apps.core.utils.rate_limiting import rate_limit
+
+
+def convert_serializer_errors_to_rfc7807(serializer_errors):
+    """Convert Django serializer errors to RFC 7807 format with issues array."""
+    issues = []
+    
+    for field_name, field_errors in serializer_errors.items():
+        if not isinstance(field_errors, list):
+            field_errors = [field_errors]
+        
+        for error in field_errors:
+            issue = {
+                "message": str(error),
+                "path": [field_name] if field_name != "non_field_errors" else []
+            }
+            if field_name == "password" or "password" in str(error).lower():
+                issue["type"] = "password_validation"
+            elif field_name == "email":
+                issue["type"] = "email_validation"
+            elif field_name == "non_field_errors":
+                issue["type"] = "general_validation"
+            else:
+                issue["type"] = "field_validation"
+            
+            issues.append(issue)
+    
+    return issues
 
 
 # Serializers for documentation purposes
@@ -115,18 +145,73 @@ def login(request):
     password = request.data.get("password")
 
     if not email or not password:
+        missing_fields = []
+        if not email:
+            missing_fields.append("email")
+        if not password:
+            missing_fields.append("password")
         raise MissingRequiredFieldException(
             detail="Email and password are required",
-            extra_data={"missing_fields": ["email", "password"]},
+            extra_data={"missing_fields": missing_fields},
         )
 
     user = authenticate(email=email, password=password)
 
     if user is None:
-        raise InvalidCredentialsException()
+        # Check if user exists but might have other issues
+        try:
+            user_exists = Account.objects.get(email=email)
+            if not user_exists.is_email_verified:
+                # User exists but email not verified
+                issues = [{
+                    "message": "Please verify your email address before logging in. Check your inbox for the verification email.",
+                    "path": [],
+                    "type": "email_verification_required"
+                }]
+                raise ValidationException(
+                    detail="Email verification required",
+                    issues=issues,
+                    email_verification_required=True,
+                    user_id=str(user_exists.id)
+                )
+            elif user_exists.status == "PENDING":
+                # User account is pending
+                issues = [{
+                    "message": "Your account is pending approval. Please verify your email address or contact support.",
+                    "path": [],
+                    "type": "email_verification_required"
+                }]
+                raise ValidationException(
+                    detail="Account verification required",
+                    issues=issues,
+                    email_verification_required=True,
+                    user_id=str(user_exists.id)
+                )
+            elif not user_exists.is_active:
+                raise AccountDisabledException()
+            else:
+                # User exists and is active, so it's likely a password issue
+                raise InvalidCredentialsException()
+        except Account.DoesNotExist:
+            # User doesn't exist
+            raise InvalidCredentialsException()
 
     if not user.is_active:
         raise AccountDisabledException()
+
+    # Check if email is verified for login
+    if not user.is_email_verified and user.status == "PENDING":
+        issues = [{
+            "message": "Please verify your email address before logging in. Check your inbox for the verification email.",
+            "path": [],
+            "type": "email_verification_required"
+        }]
+        raise ValidationException(
+            detail="Email verification required",
+            issues=issues,
+            email_verification_required=True,
+            user_id=str(user.id)
+        )
 
     # Generate tokens
     refresh = RefreshToken.for_user(user)
@@ -254,6 +339,7 @@ def refresh_token(request):
     tags=["Authentication"],
 )
 @api_view(["POST"])
+@permission_classes([permissions.IsAuthenticated])
 def logout(request):
     """
     Logout endpoint that blacklists the refresh token
@@ -331,7 +417,7 @@ def verify_token(request):
             i18n_key="auth.verify.success",
         )
 
-    raise AuthenticationFailed("Token is invalid or expired")
+    raise InvalidCredentialsException("Token is invalid or expired")
 
 
 @extend_schema(
@@ -398,7 +484,11 @@ def register(request):
     serializer = RegistrationSerializer(data=request.data)
 
     if not serializer.is_valid():
-        raise ValidationError(serializer.errors)
+        issues = convert_serializer_errors_to_rfc7807(serializer.errors)
+        raise ValidationException(
+            detail="Validation failed",
+            issues=issues
+        )
 
     # Create user with organization and trial setup
     user = serializer.save()
@@ -511,7 +601,11 @@ def verify_email(request):
     serializer = EmailVerificationSerializer(data=request.data)
 
     if not serializer.is_valid():
-        raise ValidationError(serializer.errors)
+        issues = convert_serializer_errors_to_rfc7807(serializer.errors)
+        raise ValidationException(
+            detail="Validation failed",
+            issues=issues
+        )
 
     token = serializer.validated_data["token"]
 
@@ -534,10 +628,18 @@ def verify_email(request):
                 i18n_key="email.verification.success",
             )
         else:
-            raise ValidationError({"token": ["Invalid or expired verification token"]})
+            issues = [{"message": "Invalid or expired verification token", "path": ["token"], "type": "token_validation"}]
+            raise ValidationException(
+                detail="Validation failed",
+                issues=issues
+            )
 
     except Account.DoesNotExist:
-        raise ValidationError({"token": ["Invalid or expired verification token"]})
+        issues = [{"message": "Invalid or expired verification token", "path": ["token"], "type": "token_validation"}]
+        raise ValidationException(
+            detail="Validation failed", 
+            issues=issues
+        )
 
 
 @extend_schema(
@@ -573,15 +675,151 @@ def resend_verification_email(request):
             i18n_key="email.already_verified",
         )
 
-    if user.send_verification_email():
-        return ok(
-            data={"message": "Verification email sent successfully"},
-            code=APIResponseCodes.EMAIL_SENT_200,
-            i18n_key="email.verification.sent",
+    try:
+        if user.send_verification_email():
+            return ok(
+                data={"message": "Verification email sent successfully"},
+                code=APIResponseCodes.EMAIL_SENT_200,
+                i18n_key="email.verification.sent",
+            )
+        else:
+            # Email sending failed but user.send_verification_email() returned False
+            issues = [{
+                "message": "Unable to send verification email. Please check your email address or contact support.",
+                "path": [],
+                "type": "email_service_error"
+            }]
+            raise ValidationException(
+                detail="Email service error",
+                issues=issues,
+                email_service_error=True
+            )
+    except Exception as e:
+        # Catch any exception during email sending and provide helpful error
+        import logging
+
+        logger = logging.getLogger(__name__)
+        logger.error(f"Email verification failed for user {user.email}: {str(e)}")
+
+        issues = [{
+            "message": "Unable to send verification email due to system issues. Please try again later or contact support.",
+            "path": [],
+            "type": "email_service_error"
+        }]
+        raise ValidationException(
+            detail="Email service error",
+            issues=issues,
+            email_service_error=True,
+            technical_details=(
+                str(e)
+                if hasattr(e, "__str__")
+                else "Email service temporarily unavailable"
+            )
         )
-    else:
-        # This will be caught by the global exception handler as a 500 error
-        raise Exception("Failed to send verification email")
+
+
+@extend_schema(
+    summary="Resend Email Verification (Unauthenticated)",
+    description="Resend email verification email using only email address. This endpoint allows users who haven't verified their email to request a new verification email without needing to authenticate. Includes rate limiting to prevent abuse.",
+    request=ResendVerificationByEmailSerializer,
+    responses={
+        200: serializers.Serializer,
+    },
+    examples=[
+        OpenApiExample(
+            "Resend Verification by Email Request",
+            summary="Example request to resend verification email",
+            description="Provide email address to resend verification email",
+            value={"email": "user@example.com"},
+            request_only=True,
+        ),
+        OpenApiExample(
+            "Resend Verification Success Response",
+            summary="Successful resend response",
+            description="Always returns success to prevent email enumeration",
+            value={
+                "message": "If this email exists in our system, we've sent a verification email"
+            },
+            response_only=True,
+            status_codes=["200"],
+        ),
+    ],
+    tags=["Authentication"],
+)
+@api_view(["POST"])
+@permission_classes([AllowAny])
+@rate_limit(per_ip="100/hour", per_email="100/hour")
+def resend_verification_by_email(request):
+    """
+    Resend email verification email using email address (unauthenticated).
+
+    This endpoint allows users to request verification emails without authentication,
+    solving the UX problem where users can't log in without verification but can't
+    get verification emails without logging in.
+
+    Security features:
+    - Rate limited per IP and per email
+    - No information disclosure (same response regardless of email existence)
+    - Consistent response timing to prevent enumeration
+    - Input validation and sanitization
+    """
+    import time
+    import logging
+
+    logger = logging.getLogger(__name__)
+    start_time = time.time()
+
+    serializer = ResendVerificationByEmailSerializer(data=request.data)
+
+    if not serializer.is_valid():
+        issues = convert_serializer_errors_to_rfc7807(serializer.errors)
+        raise ValidationException(
+            detail="Validation failed",
+            issues=issues
+        )
+
+    email = serializer.validated_data["email"]
+
+    # Always return success response to prevent email enumeration
+    success_response = ok(
+        data={
+            "message": "If this email exists in our system, we've sent a verification email"
+        },
+        code=APIResponseCodes.EMAIL_SENT_200,
+        i18n_key="email.verification.sent",
+    )
+
+    try:
+        # Try to find user with this email
+        user = Account.objects.filter(email=email).first()
+
+        if user and not user.is_email_verified:
+            # User exists and needs verification - send email
+            try:
+                user.send_verification_email()
+                logger.info(f"Verification email resent for {email}")
+            except Exception as e:
+                # Log the error but don't expose it to prevent information disclosure
+                logger.error(f"Failed to send verification email to {email}: {str(e)}")
+        elif user and user.is_email_verified:
+            # User exists but already verified - log for monitoring
+            logger.info(
+                f"Verification email requested for already verified email: {email}"
+            )
+        else:
+            # User doesn't exist - log for monitoring
+            logger.info(f"Verification email requested for non-existent email: {email}")
+
+    except Exception as e:
+        # Don't expose any errors to prevent information disclosure
+        logger.error(f"Error in resend_verification_by_email for {email}: {str(e)}")
+
+    # Ensure consistent response timing (minimum 500ms to prevent timing attacks)
+    elapsed_time = time.time() - start_time
+    if elapsed_time < 0.5:
+        time.sleep(0.5 - elapsed_time)
+
+    return success_response
 
 
 @extend_schema(
@@ -649,7 +887,11 @@ def social_auth(request):
     serializer = SocialRegistrationSerializer(data=request.data)
 
     if not serializer.is_valid():
-        raise ValidationError(serializer.errors)
+        issues = convert_serializer_errors_to_rfc7807(serializer.errors)
+        raise ValidationException(
+            detail="Validation failed",
+            issues=issues
+        )
 
     # Check if user already exists with this provider
     provider = serializer.validated_data["provider"]
@@ -749,7 +991,11 @@ def social_login(request):
     serializer = SocialLoginSerializer(data=request.data)
 
     if not serializer.is_valid():
-        raise ValidationError(serializer.errors)
+        issues = convert_serializer_errors_to_rfc7807(serializer.errors)
+        raise ValidationException(
+            detail="Validation failed",
+            issues=issues
+        )
 
     user = serializer.validated_data["user"]
 

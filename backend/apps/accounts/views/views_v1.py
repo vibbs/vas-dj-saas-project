@@ -11,6 +11,7 @@ from apps.accounts.serializers import (
     AccountCreateSerializer,
     AccountAuthProviderSerializer,
 )
+from apps.core.exceptions.client_errors import ValidationException
 
 log = logging.getLogger(f"{settings.LOG_APP_PREFIX}.accounts.views")
 User = get_user_model()
@@ -81,7 +82,25 @@ class AccountViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["patch"])
     def update_profile(self, request):
         serializer = self.get_serializer(request.user, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            issues = []
+            for field_name, field_errors in serializer.errors.items():
+                if not isinstance(field_errors, list):
+                    field_errors = [field_errors]
+                
+                for error in field_errors:
+                    issue = {
+                        "message": str(error),
+                        "path": [field_name] if field_name != "non_field_errors" else [],
+                        "type": "field_validation"
+                    }
+                    issues.append(issue)
+            
+            raise ValidationException(
+                detail="Validation failed",
+                issues=issues
+            )
+        
         serializer.save()
         return Response(serializer.data)
 

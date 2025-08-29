@@ -2,7 +2,7 @@ from django.db import models
 from apps.accounts.enums import TeamRoleTypes
 from apps.accounts.models.account import Account
 from django.conf import settings
-from apps.organizations.models import BaseFields
+from apps.core.models import BaseFields
 
 
 class Team(BaseFields, models.Model):
