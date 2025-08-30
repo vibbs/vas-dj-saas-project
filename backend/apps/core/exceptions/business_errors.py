@@ -78,9 +78,9 @@ class AccountDisabledException(BaseHttpException):
         super().__init__(
             type="https://docs.yourapp.com/problems/account-disabled",
             title="Account disabled",
-            status=401,
+            status=403,
             detail=detail or "Your account has been disabled. Please contact support.",
-            code=kwargs.get("code", AccountResponseCodes.ACC_DISABLED_401),
+            code=kwargs.get("code", AccountResponseCodes.ACC_INACTIVE_403),
             i18n_key=kwargs.get("i18n_key", "account.disabled"),
             **{k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]}
         )
@@ -150,15 +150,27 @@ class MissingRequiredFieldException(BaseHttpException):
     """Required field is missing from the request."""
 
     def __init__(self, detail: Optional[str] = None, **kwargs):
+        # Handle extra_data by putting it in meta
+        meta = kwargs.get("meta", {})
+        if "extra_data" in kwargs:
+            meta.update(kwargs["extra_data"])
+        
+        # Filter kwargs to only valid BaseHttpException parameters
+        valid_kwargs = {
+            k: v for k, v in kwargs.items() 
+            if k in ["instance", "issues"] and k not in ["code", "i18n_key", "extra_data", "meta"]
+        }
+        
         super().__init__(
             type="https://docs.yourapp.com/problems/missing-required-field",
             title="Missing required field",
             status=400,
             detail=detail
             or "One or more required fields are missing from the request.",
-            code=kwargs.get("code", AccountResponseCodes.ACC_MISSING_FIELD_400),
+            code=kwargs.get("code", AccountResponseCodes.ACC_MISSING_400),
             i18n_key=kwargs.get("i18n_key", "validation.required_field_missing"),
-            **{k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]}
+            meta=meta,
+            **valid_kwargs
         )
 
 

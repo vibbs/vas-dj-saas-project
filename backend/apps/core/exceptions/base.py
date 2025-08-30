@@ -68,8 +68,8 @@ class BaseHttpException(APIException):
         self.issues = issues or []
         self.meta = meta or {}
 
-        # Call parent with title as the detail for DRF compatibility
-        super().__init__(detail=title, code=self.code)
+        # Call parent with detail for DRF compatibility
+        super().__init__(detail=self.detail or title, code=self.code)
 
     def to_dict(self, request=None) -> Dict[str, Any]:
         """
@@ -121,15 +121,25 @@ def flatten_validation_errors(detail, path_prefix=None) -> List[Dict[str, Any]]:
     Returns:
         List of issue dictionaries with path, message, and i18n_key
     """
+    if detail is None:
+        return []
+        
     path_prefix = path_prefix or []
     issues = []
 
     if isinstance(detail, dict):
+        if not detail:  # Empty dict
+            return []
         for key, value in detail.items():
             issues.extend(flatten_validation_errors(value, path_prefix + [key]))
     elif isinstance(detail, list):
         for idx, value in enumerate(detail):
-            issues.extend(flatten_validation_errors(value, path_prefix + [idx]))
+            # If the list contains dicts, use indices (list of objects being validated)
+            # If the list contains strings, don't use indices (list of error messages)
+            if isinstance(value, dict):
+                issues.extend(flatten_validation_errors(value, path_prefix + [idx]))
+            else:
+                issues.extend(flatten_validation_errors(value, path_prefix))
     else:
         issues.append(
             {

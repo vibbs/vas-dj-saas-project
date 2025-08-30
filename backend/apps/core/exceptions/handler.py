@@ -178,7 +178,7 @@ def _convert_drf_exception_to_rfc7807(exc, response) -> BaseHttpException:
         return BaseHttpException(
             type="https://docs.yourapp.com/problems/method-not-allowed",
             title="Method Not Allowed",
-            detail=f"The {exc.method} method is not allowed for this endpoint.",
+            detail=f"{exc.method} method is not allowed for this endpoint.",
             status=405,
             code=f"{APIResponseCodes.GEN_BAD_400.value.replace('400', '405')}",
             i18n_key="errors.method_not_allowed",

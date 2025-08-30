@@ -18,7 +18,7 @@ class BadRequestException(BaseHttpException):
             detail=detail or "The request could not be understood by the server.",
             code=kwargs.get("code", APIResponseCodes.GEN_BAD_400),
             i18n_key=kwargs.get("i18n_key", "errors.bad_request"),
-            **{k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]}
+            meta={k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]},
         )
 
 
@@ -34,7 +34,7 @@ class UnauthorizedException(BaseHttpException):
             or "Authentication credentials were not provided or are invalid.",
             code=kwargs.get("code", APIResponseCodes.GEN_UNAUTH_401),
             i18n_key=kwargs.get("i18n_key", "errors.unauthorized"),
-            **{k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]}
+            meta={k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]},
         )
 
 
@@ -49,7 +49,7 @@ class ForbiddenException(BaseHttpException):
             detail=detail or "You do not have permission to perform this action.",
             code=kwargs.get("code", APIResponseCodes.GEN_FORBID_403),
             i18n_key=kwargs.get("i18n_key", "errors.forbidden"),
-            **{k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]}
+            meta={k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]},
         )
 
 
@@ -64,7 +64,7 @@ class NotFoundException(BaseHttpException):
             detail=detail or "The requested resource was not found.",
             code=kwargs.get("code", APIResponseCodes.GEN_NOTFOUND_404),
             i18n_key=kwargs.get("i18n_key", "errors.not_found"),
-            **{k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]}
+            meta={k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]},
         )
 
 
@@ -79,7 +79,7 @@ class MethodNotAllowedException(BaseHttpException):
             detail=detail or "The request method is not supported for this resource.",
             code=kwargs.get("code", "VDJ-GEN-METHOD-405"),
             i18n_key=kwargs.get("i18n_key", "errors.method_not_allowed"),
-            **{k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]}
+            meta={k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]},
         )
 
 
@@ -95,22 +95,30 @@ class ConflictException(BaseHttpException):
             or "The request conflicts with the current state of the resource.",
             code=kwargs.get("code", APIResponseCodes.GEN_CONFLICT_409),
             i18n_key=kwargs.get("i18n_key", "errors.conflict"),
-            **{k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]}
+            meta={k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]},
         )
 
 
 class ValidationException(BaseHttpException):
-    """422 Unprocessable Entity - The request was well-formed but contains semantic errors."""
+    """400 Bad Request - The request contains invalid data (used for field validation errors)."""
 
     def __init__(self, detail: Optional[str] = None, **kwargs):
+        # Extract issues from kwargs and ensure they're at root level
+        issues = kwargs.pop("issues", [])
+        
+        # Extract meta separately, excluding handled keys
+        meta = {k: v for k, v in kwargs.items() if k not in ["code", "i18n_key", "instance"]}
+        
         super().__init__(
             type="https://docs.yourapp.com/problems/validation-error",
             title="Validation error",
-            status=422,
+            status=400,
             detail=detail or "The request contains invalid data.",
             code=kwargs.get("code", APIResponseCodes.GEN_VAL_422),
             i18n_key=kwargs.get("i18n_key", "errors.validation"),
-            **{k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]}
+            instance=kwargs.get("instance"),
+            issues=issues,
+            meta=meta,
         )
 
 
@@ -126,7 +134,7 @@ class UnprocessableEntityException(BaseHttpException):
             or "The request was well-formed but contains semantic errors.",
             code=kwargs.get("code", APIResponseCodes.GEN_VAL_422),
             i18n_key=kwargs.get("i18n_key", "errors.unprocessable_entity"),
-            **{k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]}
+            meta={k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]},
         )
 
 
@@ -134,6 +142,8 @@ class RateLimitException(BaseHttpException):
     """429 Too Many Requests - The user has sent too many requests in a given amount of time."""
 
     def __init__(self, detail: Optional[str] = None, **kwargs):
+        self.reset_time = kwargs.get("reset_time")
+        self.limit = kwargs.get("limit")
         super().__init__(
             type="https://docs.yourapp.com/problems/rate-limit-exceeded",
             title="Rate limit exceeded",
@@ -141,5 +151,5 @@ class RateLimitException(BaseHttpException):
             detail=detail or "Rate limit exceeded. Please try again later.",
             code=kwargs.get("code", APIResponseCodes.GEN_RATE_429),
             i18n_key=kwargs.get("i18n_key", "errors.rate_limit_exceeded"),
-            **{k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]}
+            meta={k: v for k, v in kwargs.items() if k not in ["code", "i18n_key", "reset_time", "limit"]},
         )

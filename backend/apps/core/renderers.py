@@ -16,21 +16,21 @@ class ConsistentDataRenderer(CamelCaseJSONRenderer):
         """
         Render the response data with consistent formatting.
         """
-        if data is not None:
-            # Check if this is already a paginated response (has 'pagination' key)
-            if isinstance(data, dict) and "pagination" in data:
-                # Already paginated, don't wrap again
-                response_data = data
-            elif isinstance(data, dict) and ("detail" in data or "error" in data or "status_code" in data or "field_errors" in data):
-                # Error responses, don't wrap
-                response_data = data
-            else:
-                # Wrap in data key for consistency
-                response_data = {"data": data}
-        else:
-            response_data = {"data": None}
+        # if data is not None:
+        #     # Check if this is already a paginated response (has 'pagination' key)
+        #     if isinstance(data, dict) and "pagination" in data:
+        #         # Already paginated, don't wrap again
+        #         response_data = data
+        #     elif isinstance(data, dict) and ("detail" in data or "error" in data or "status_code" in data or "field_errors" in data):
+        #         # Error responses, don't wrap
+        #         response_data = data
+        #     else:
+        #         # Wrap in data key for consistency
+        #         response_data = data
+        # # else:
+        #     # response_data = {"data": None}
 
-        return super().render(response_data, accepted_media_type, renderer_context)
+        return super().render(data, accepted_media_type, renderer_context)
 
 
 class ConsistentDataJSONRenderer(JSONRenderer):
@@ -42,18 +42,18 @@ class ConsistentDataJSONRenderer(JSONRenderer):
         """
         Render the response data with consistent formatting.
         """
-        if data is not None:
-            # Check if this is already a paginated response (has 'pagination' key)
-            if isinstance(data, dict) and "pagination" in data:
-                # Already paginated, don't wrap again
-                response_data = data
-            elif isinstance(data, dict) and ("detail" in data or "error" in data or "status_code" in data or "field_errors" in data):
-                # Error responses, don't wrap
-                response_data = data
-            else:
-                # Wrap in data key for consistency
-                response_data = {"data": data}
-        else:
-            response_data = {"data": None}
+        # if data is not None:
+        #     # Check if this is already a paginated response (has 'pagination' key)
+        #     if isinstance(data, dict) and "pagination" in data:
+        #         # Already paginated, don't wrap again
+        #         response_data = data
+        #     elif isinstance(data, dict) and ("detail" in data or "error" in data or "status_code" in data or "field_errors" in data):
+        #         # Error responses, don't wrap
+        #         response_data = data
+        #     else:
+        #         # Wrap in data key for consistency
+        #         response_data = {"data": data}
+        # else:
+        #     response_data = {"data": None}
 
-        return super().render(response_data, accepted_media_type, renderer_context)
+        return super().render(data, accepted_media_type, renderer_context)

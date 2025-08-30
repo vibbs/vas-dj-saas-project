@@ -30,4 +30,8 @@ class CustomEnum(Enum):
         """
         Check if the provided value is a valid choice for this enum.
         """
-        return value in [tag.value for tag in self]
+        return value in [tag.value for tag in self.__class__]
+    
+    def __hash__(self):
+        """Make enum instances hashable for use in sets and as dict keys."""
+        return hash((self.__class__.__name__, self.value))
