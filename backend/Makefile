@@ -1,4 +1,4 @@
-.PHONY: build start stop clean api-validate api-generate api-docs api-workflow api-list api-help help
+.PHONY: build start stop clean test test-verbose test-coverage test-parallel test-build test-clean api-validate api-generate api-docs api-workflow api-list api-help help
 
 build:
 	docker compose -f ./docker/docker-compose.yml  build
@@ -26,6 +26,66 @@ createsuperuser:
 
 check-system:
 	docker compose -f ./docker/docker-compose.yml run --rm web python manage.py check
+
+# Testing Commands
+
+test-build:
+	docker compose -f ./docker/docker-compose.test.yml build
+
+test:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest
+
+test-verbose:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest -v
+
+test-coverage:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest --cov=apps --cov-report=term-missing --cov-report=html
+
+test-parallel:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest -n auto
+
+test-unit:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest -m unit
+
+test-integration:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest -m integration
+
+test-api:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest -m api
+
+test-models:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest -m models
+
+test-views:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest -m views
+
+test-auth:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest -m auth
+
+test-fast:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest -m "not slow"
+
+test-slow:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest -m slow
+
+test-accounts:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest apps/accounts/tests/
+
+test-organizations:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest apps/organizations/tests/
+
+test-billing:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest apps/billing/tests/
+
+test-email:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest apps/email_service/tests/
+
+test-core:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest apps/core/tests/
+
+test-clean:
+	docker compose -f ./docker/docker-compose.test.yml down --volumes
+	docker volume prune -f
 
 # API Response Code Documentation Commands
 
@@ -103,4 +163,47 @@ api-help:
 	@echo "  make api-docs          # Full workflow"
 	@echo "  make api-help          # Show this help"
 
-help: api-help
+help: api-help test-help
+
+# Help command for testing system
+test-help:
+	@echo "Testing System Commands"
+	@echo "======================="
+	@echo ""
+	@echo "Setup Commands:"
+	@echo "  test-build             - Build test Docker containers"
+	@echo "  test-clean             - Clean up test containers and volumes"
+	@echo ""
+	@echo "Basic Test Commands:"
+	@echo "  test                   - Run all tests"
+	@echo "  test-verbose           - Run tests with verbose output"
+	@echo "  test-coverage          - Run tests with coverage report"
+	@echo "  test-parallel          - Run tests in parallel (faster)"
+	@echo ""
+	@echo "Test by Category:"
+	@echo "  test-unit              - Run unit tests only"
+	@echo "  test-integration       - Run integration tests only"
+	@echo "  test-api               - Run API tests only"
+	@echo "  test-models            - Run model tests only"
+	@echo "  test-views             - Run view tests only"
+	@echo "  test-auth              - Run authentication tests only"
+	@echo ""
+	@echo "Test by Speed:"
+	@echo "  test-fast              - Run fast tests (exclude slow tests)"
+	@echo "  test-slow              - Run slow tests only"
+	@echo ""
+	@echo "Test by App:"
+	@echo "  test-accounts          - Run accounts app tests"
+	@echo "  test-organizations     - Run organizations app tests"
+	@echo "  test-billing           - Run billing app tests"
+	@echo "  test-email             - Run email service tests"
+	@echo "  test-core              - Run core app tests"
+	@echo ""
+	@echo "Examples:"
+	@echo "  make test-build        # Build test environment"
+	@echo "  make test              # Run all tests"
+	@echo "  make test-coverage     # Run with coverage"
+	@echo "  make test-accounts     # Test accounts only"
+	@echo "  make test-fast         # Run fast tests only"
+	@echo ""
+	@echo "Coverage reports are saved to htmlcov/ directory"

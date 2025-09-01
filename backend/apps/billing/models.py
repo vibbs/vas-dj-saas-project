@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.conf import settings
 from decimal import Decimal
@@ -70,16 +71,27 @@ class Plan(BaseFields):
         return f"{self.interval_count} {self.get_interval_display().lower()}"
 
 
-class Subscription(BaseFields):
-    account = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="subscriptions"
+class Subscription(models.Model):
+    # Remove BaseFields inheritance to avoid organization FK circular dependency
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, unique=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # Organization-based subscription (1:1 relationship)
+    organization = models.OneToOneField(
+        'organizations.Organization',
+        on_delete=models.CASCADE,
+        related_name='subscription'
     )
     plan = models.ForeignKey(
         Plan, on_delete=models.PROTECT, related_name="subscriptions"
     )
-
-    stripe_subscription_id = models.CharField(max_length=255, unique=True)
-    stripe_customer_id = models.CharField(max_length=255)
+    
+    # Stripe external IDs
+    stripe_subscription_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
+    stripe_customer_id = models.CharField(max_length=255, null=True, blank=True)
 
     status = models.CharField(
         max_length=50,
@@ -104,7 +116,7 @@ class Subscription(BaseFields):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"{getattr(self.account, 'email', str(self.account))} - {self.plan.name} ({self.status})"
+        return f"{self.organization.name} - {self.plan.name} ({self.status})"
 
     @property
     def is_active(self):
@@ -119,16 +131,26 @@ class Subscription(BaseFields):
         return self.status == SubscriptionStatus.CANCELED
 
 
-class Invoice(BaseFields):
+class Invoice(models.Model):
+    # Remove BaseFields inheritance to avoid organization FK circular dependency
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, unique=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # Organization-based invoice
+    organization = models.ForeignKey(
+        'organizations.Organization',
+        on_delete=models.CASCADE,
+        related_name='invoices'
+    )
     subscription = models.ForeignKey(
         Subscription,
         on_delete=models.CASCADE,
         related_name="invoices",
         null=True,
         blank=True,
-    )
-    account = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="invoices"
     )
 
     stripe_invoice_id = models.CharField(max_length=255, unique=True)
@@ -161,7 +183,7 @@ class Invoice(BaseFields):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"Invoice {self.number} - {self.account.email if hasattr(self.account, 'email') else self.account} ({self.status})"
+        return f"Invoice {self.number} - {self.organization.name} ({self.status})"
 
     @property
     def is_paid(self):

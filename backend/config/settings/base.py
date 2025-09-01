@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     # Third party apps
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "djangorestframework_camel_case",
     # Local apps
@@ -72,7 +73,8 @@ MIDDLEWARE = [
     # Custom middleware
     "apps.core.middleware.RequestTimingMiddleware",
     "apps.core.middleware.TransactionIDMiddleware",
-    "apps.organizations.middleware.TenantMiddleware",
+    "apps.core.middleware.rate_limiting.RateLimitMiddleware",  # Rate limiting
+    "apps.organizations.middleware.tenant.TenantMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -168,14 +170,22 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
 
 # Email configuration
+# Email Configuration
+# For development, use MailHog SMTP server
 EMAIL_BACKEND = config(
-    "EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"
+    "EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend"
 )
-EMAIL_HOST = config("EMAIL_HOST", default="localhost")
-EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
-EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
-EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
-EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+EMAIL_HOST = config("EMAIL_HOST", default="mailhog")  # MailHog container name
+EMAIL_PORT = config("EMAIL_PORT", default=1025, cast=int)  # MailHog SMTP port
+EMAIL_USE_TLS = config(
+    "EMAIL_USE_TLS", default=False, cast=bool
+)  # MailHog doesn't use TLS
+EMAIL_USE_SSL = config("EMAIL_USE_SSL", default=False, cast=bool)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")  # MailHog doesn't require auth
+EMAIL_HOST_PASSWORD = config(
+    "EMAIL_HOST_PASSWORD", default=""
+)  # MailHog doesn't require auth
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@vas-dj.com")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@example.com")
 SUPPORT_EMAIL = config("SUPPORT_EMAIL", default="support@example.com")
 SITE_URL = config("SITE_URL", default="http://localhost:8000")
@@ -186,6 +196,60 @@ LOG_LEVEL = config("LOG_LEVEL", default="INFO").upper()
 
 # RFC 7807 and API response configuration
 PROJECT_CODE_PREFIX = "VDJ"
+
+# Rate Limiting Configuration
+RATE_LIMITING = {
+    "ENABLED": config("RATE_LIMITING_ENABLED", default=True, cast=bool),
+    "REDIS_URL": config("RATE_LIMITING_REDIS_URL", default="redis://redis:6379/1"),
+    "DEFAULT_LIMITS": {
+        "PER_IP": config(
+            "RATE_LIMITING_DEFAULT_IP_LIMIT", default="1000/hour"
+        ),  # Global IP limit
+        "PER_USER": config(
+            "RATE_LIMITING_DEFAULT_USER_LIMIT", default="2000/hour"
+        ),  # Per authenticated user
+    },
+    "ENDPOINT_LIMITS": {
+        # Authentication endpoints
+        "register": {
+            "PER_IP": config("RATE_LIMITING_REGISTER_IP_LIMIT", default="20/hour"),
+        },
+        "login": {
+            "PER_IP": config("RATE_LIMITING_LOGIN_IP_LIMIT", default="50/hour"),
+        },
+        "resend_verification_email": {
+            "PER_IP": config("RATE_LIMITING_RESEND_IP_LIMIT", default="10/hour"),
+            "PER_USER": config("RATE_LIMITING_RESEND_USER_LIMIT", default="5/hour"),
+        },
+        "resend_verification_by_email": {
+            "PER_IP": config(
+                "RATE_LIMITING_RESEND_BY_EMAIL_IP_LIMIT", default="10/hour"
+            ),
+            "PER_EMAIL": config(
+                "RATE_LIMITING_RESEND_BY_EMAIL_EMAIL_LIMIT", default="3/hour"
+            ),
+        },
+        # Password reset endpoints
+        "password_reset": {
+            "PER_IP": config(
+                "RATE_LIMITING_PASSWORD_RESET_IP_LIMIT", default="10/hour"
+            ),
+            "PER_EMAIL": config(
+                "RATE_LIMITING_PASSWORD_RESET_EMAIL_LIMIT", default="3/hour"
+            ),
+        },
+    },
+    "EXCLUDED_PATHS": [
+        "/admin/",
+        "/api/schema/",
+        "/api/docs/",
+        "/api/redoc/",
+        "/health/",
+        "/ping/",
+        "/static/",
+        "/media/",
+    ],
+}
 
 
 # Custom user model
@@ -244,4 +308,4 @@ from apps.core.jwt_config import get_jwt_settings
 SIMPLE_JWT = get_jwt_settings(SECRET_KEY)
 
 # Frontend URL for email verification links
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")

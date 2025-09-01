@@ -20,7 +20,8 @@ class PlanSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
-    account_email = serializers.CharField(source='account.email', read_only=True)
+    organization_name = serializers.CharField(source='organization.name', read_only=True)
+    organization_slug = serializers.CharField(source='organization.slug', read_only=True)
     plan_name = serializers.CharField(source='plan.name', read_only=True)
     plan_details = PlanSerializer(source='plan', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
@@ -43,7 +44,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
         fields = [
-            'id', 'account', 'account_email', 'plan', 'plan_name', 'plan_details',
+            'id', 'organization', 'organization_name', 'organization_slug', 'plan', 'plan_name', 'plan_details',
             'stripe_subscription_id', 'stripe_customer_id',
             'status', 'status_display',
             'current_period_start', 'current_period_end',
@@ -54,7 +55,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = [
-            'id', 'account_email', 'plan_name', 'plan_details', 'status_display',
+            'id', 'organization_name', 'organization_slug', 'plan_name', 'plan_details', 'status_display',
             'stripe_subscription_id', 'stripe_customer_id',
             'current_period_start', 'current_period_end',
             'trial_start', 'trial_end', 'canceled_at',
@@ -64,7 +65,8 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
-    account_email = serializers.CharField(source='account.email', read_only=True)
+    organization_name = serializers.CharField(source='organization.name', read_only=True)
+    organization_slug = serializers.CharField(source='organization.slug', read_only=True)
     subscription_plan = serializers.CharField(source='subscription.plan.name', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     is_paid = serializers.SerializerMethodField()
@@ -76,7 +78,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invoice
         fields = [
-            'id', 'subscription', 'account', 'account_email', 'subscription_plan',
+            'id', 'subscription', 'organization', 'organization_name', 'organization_slug', 'subscription_plan',
             'stripe_invoice_id', 'stripe_payment_intent_id',
             'number', 'status', 'status_display',
             'subtotal', 'tax', 'total', 'currency',
@@ -87,7 +89,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = [
-            'id', 'account_email', 'subscription_plan', 'status_display',
+            'id', 'organization_name', 'organization_slug', 'subscription_plan', 'status_display',
             'stripe_invoice_id', 'stripe_payment_intent_id',
             'number', 'status', 'subtotal', 'tax', 'total', 'currency',
             'period_start', 'period_end', 'due_date', 'paid_at',

@@ -86,101 +86,128 @@ class TemplateRenderer:
 
     def _load_template_from_db(self, template_slug: str) -> Optional[EmailTemplate]:
         """Load email template from database"""
+        # Skip database lookup if no organization
+        if not self.organization:
+            log.debug(f"No organization set, skipping database template lookup for '{template_slug}'")
+            return None
+            
         try:
-            return EmailTemplate.objects.get(
+            template = EmailTemplate.objects.get(
                 organization=self.organization, slug=template_slug, is_active=True
             )
+            log.debug(f"Found database template '{template_slug}' for organization {self.organization.id}")
+            return template
         except EmailTemplate.DoesNotExist:
-            log.warning(
-                f"Email template '{template_slug}' not found in database for organization {self.organization.id}"
-            )
+            log.debug(f"Email template '{template_slug}' not found in database for organization {self.organization.id}")
             return None
 
     def _load_template_from_file(self, template_slug: str) -> Optional[Dict[str, str]]:
         """Load default template from file system as fallback"""
         try:
+            log.debug(f"Attempting to load file template: {template_slug}")
+            
             # Try to load HTML template
             html_template_path = f"email_service/{template_slug}.html"
             html_template = get_template(html_template_path)
+            log.debug(f"Successfully loaded HTML template: {html_template_path}")
 
             # Try to load text template
             text_template_path = f"email_service/{template_slug}.txt"
             try:
                 text_template = get_template(text_template_path)
                 text_content = text_template.template.source
+                log.debug(f"Successfully loaded text template: {text_template_path}")
             except TemplateDoesNotExist:
                 text_content = ""
+                log.debug(f"Text template not found: {text_template_path}")
 
-            return {
+            # Set default subject for file templates
+            if template_slug == 'email_verification':
+                subject_content = "Verify Your Email Address - {% if organization %}{{ organization.name }}{% else %}VAS-DJ Platform{% endif %}"
+            else:
+                subject_content = "{{ subject | default('Notification from ' + (organization.name if organization else 'VAS-DJ Platform')) }}"
+
+            template_data = {
                 "html_content": html_template.template.source,
                 "text_content": text_content,
-                "subject": f"{{{{ subject | default('Notification from {self.organization.name}') }}}}",
+                "subject": subject_content,
             }
+            
+            log.debug(f"Template data loaded for {template_slug}: subject='{subject_content[:50]}...', html_length={len(template_data['html_content'])}, text_length={len(text_content)}")
+            return template_data
 
-        except TemplateDoesNotExist:
-            log.warning(f"Default template '{template_slug}' not found in file system")
+        except TemplateDoesNotExist as e:
+            log.warning(f"Default template '{template_slug}' not found in file system: {e}")
+            return None
+        except Exception as e:
+            log.error(f"Error loading template '{template_slug}' from file system: {e}", exc_info=True)
             return None
 
     def render_subject(self, template_slug: str, context: Dict[str, Any]) -> str:
         """Render email subject with context"""
         try:
-            # Try database template first
+            # Try database template first (use Jinja2)
             email_template = self._load_template_from_db(template_slug)
             if email_template:
                 subject_template = email_template.subject
+                # Use Jinja2 for database templates
+                template = self.jinja_env.from_string(subject_template)
+                base_context = self._get_base_context()
+                base_context.update(context)
+                return template.render(**base_context).strip()
             else:
-                # Fallback to file template
-                file_template = self._load_template_from_file(template_slug)
-                if file_template:
-                    subject_template = file_template["subject"]
+                # For file templates, use hardcoded subjects or context-based subjects
+                if template_slug == 'email_verification':
+                    org_name = context.get('organization', {}).get('name') if isinstance(context.get('organization'), dict) else getattr(context.get('organization'), 'name', None) if context.get('organization') else None
+                    return f"Verify Your Email Address - {org_name or 'VAS-DJ Platform'}"
                 else:
-                    return f"Notification from {self.organization.name}"
-
-            # Render with Jinja2
-            template = self.jinja_env.from_string(subject_template)
-            base_context = self._get_base_context()
-            base_context.update(context)
-
-            return template.render(**base_context).strip()
+                    # Default subject from context or fallback
+                    return context.get('subject', f"Notification from {self.organization.name if self.organization else 'VAS-DJ Platform'}")
 
         except (TemplateSyntaxError, Exception) as e:
             log.error(
                 f"Error rendering subject for template '{template_slug}': {e}",
                 exc_info=True,
             )
-            return f"Notification from {self.organization.name}"
+            return f"Notification from {self.organization.name if self.organization else 'VAS-DJ Platform'}"
 
     def render_html(self, template_slug: str, context: Dict[str, Any]) -> str:
         """Render HTML email content with context"""
         try:
-            # Try database template first
+            # Try database template first (use Jinja2)
             email_template = self._load_template_from_db(template_slug)
             if email_template and email_template.html_content:
                 html_content = email_template.html_content
+                # Use Jinja2 for database templates
+                template = self.jinja_env.from_string(html_content)
+                base_context = self._get_base_context()
+                base_context.update(context)
+                return template.render(**base_context)
             else:
-                # Fallback to file template
-                file_template = self._load_template_from_file(template_slug)
-                if file_template:
-                    html_content = file_template["html_content"]
-                else:
-                    # Final fallback - basic template
+                # Try file template (use Django templates)
+                try:
+                    html_template_path = f"email_service/{template_slug}.html"
+                    django_template = get_template(html_template_path)
+                    # Merge base context with provided context for Django templates
+                    base_context = self._get_base_context()
+                    base_context.update(context)
+                    return django_template.render(base_context)
+                except TemplateDoesNotExist:
+                    # Final fallback - basic template with Jinja2
                     html_content = """
                     <html>
                         <body>
                             <h2>{{ subject }}</h2>
                             <p>{{ message | default('No message content available.') }}</p>
                             <hr>
-                            <p><small>Sent from {{ organization.name }}</small></p>
+                            <p><small>Sent from {{ organization.name if organization else 'VAS-DJ Platform' }}</small></p>
                         </body>
                     </html>
                     """
-
-            # Render with Jinja2
-            template = self.jinja_env.from_string(html_content)
-            base_context = self._get_base_context()
-            base_context.update(context)
-
-            return template.render(**base_context)
+                    template = self.jinja_env.from_string(html_content)
+                    base_context = self._get_base_context()
+                    base_context.update(context)
+                    return template.render(**base_context)
 
         except (TemplateSyntaxError, Exception) as e:
             log.error(
@@ -191,7 +218,7 @@ class TemplateRenderer:
             return f"""
             <html>
                 <body>
-                    <h2>Notification from {self.organization.name}</h2>
+                    <h2>Notification from {self.organization.name if self.organization else 'VAS-DJ Platform'}</h2>
                     <p>There was an error rendering this email content.</p>
                 </body>
             </html>
@@ -200,30 +227,32 @@ class TemplateRenderer:
     def render_text(self, template_slug: str, context: Dict[str, Any]) -> str:
         """Render plain text email content with context"""
         try:
-            # Try database template first
+            # Try database template first (use Jinja2)
             email_template = self._load_template_from_db(template_slug)
             if email_template and email_template.text_content:
                 text_content = email_template.text_content
+                # Use Jinja2 for database templates
+                template = self.jinja_env.from_string(text_content)
+                base_context = self._get_base_context()
+                base_context.update(context)
+                return template.render(**base_context)
             else:
-                # Fallback to file template
-                file_template = self._load_template_from_file(template_slug)
-                if file_template and file_template["text_content"]:
-                    text_content = file_template["text_content"]
-                else:
-                    # Generate text from HTML
+                # Try file template (use Django templates)
+                try:
+                    text_template_path = f"email_service/{template_slug}.txt"
+                    django_template = get_template(text_template_path)
+                    # Merge base context with provided context for Django templates
+                    base_context = self._get_base_context()
+                    base_context.update(context)
+                    return django_template.render(base_context)
+                except TemplateDoesNotExist:
+                    # Generate text from HTML as fallback
                     html_content = self.render_html(template_slug, context)
                     # Basic HTML to text conversion
                     import re
-
                     text_content = re.sub(r"<[^>]+>", "", html_content)
                     text_content = re.sub(r"\s+", " ", text_content).strip()
-
-            # Render with Jinja2
-            template = self.jinja_env.from_string(text_content)
-            base_context = self._get_base_context()
-            base_context.update(context)
-
-            return template.render(**base_context)
+                    return text_content
 
         except (TemplateSyntaxError, Exception) as e:
             log.error(
@@ -231,7 +260,7 @@ class TemplateRenderer:
                 exc_info=True,
             )
             # Return basic text as fallback
-            return f"Notification from {self.organization.name}\n\n{context.get('message', 'No message content available.')}"
+            return f"Notification from {self.organization.name if self.organization else 'VAS-DJ Platform'}\n\n{context.get('message', 'No message content available.')}"
 
     def render_email(
         self, template_slug: str, context: Dict[str, Any], user=None

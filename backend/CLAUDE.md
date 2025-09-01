@@ -17,8 +17,48 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `docker compose -f ./docker/docker-compose.yml run --rm web python manage.py <command>`
 - `docker compose -f ./docker/docker-compose.yml exec web python manage.py <command>` (if container is running)
 
+### Testing Framework
+This project uses pytest with comprehensive test coverage:
+
+#### Test Setup Commands
+- `make test-build` - Build test Docker containers with isolated test database
+- `make test-clean` - Clean up test containers and volumes
+
+#### Basic Test Commands
+- `make test` - Run all tests with pytest
+- `make test-verbose` - Run tests with verbose output
+- `make test-coverage` - Run tests with coverage report (saves to htmlcov/)
+- `make test-parallel` - Run tests in parallel for faster execution
+
+#### Test Categories (using pytest markers)
+- `make test-unit` - Unit tests only
+- `make test-integration` - Integration tests only  
+- `make test-api` - API endpoint tests only
+- `make test-models` - Model tests only
+- `make test-views` - View tests only
+- `make test-auth` - Authentication tests only
+- `make test-fast` - Fast tests only (excludes slow tests)
+- `make test-slow` - Slow/complex tests only
+
+#### Test by Django App
+- `make test-accounts` - Accounts app tests
+- `make test-organizations` - Organizations app tests
+- `make test-billing` - Billing app tests
+- `make test-email` - Email service tests
+- `make test-core` - Core app tests
+
+#### Test Infrastructure
+- **Test Database**: Isolated PostgreSQL instance with tmpfs for speed
+- **Factory Boy**: Test data factories for all models
+- **pytest-django**: Django integration with database fixtures
+- **pytest-cov**: Coverage reporting with HTML output
+- **pytest-xdist**: Parallel test execution
+- **freezegun**: Time mocking for deterministic tests
+- **Fixtures**: Comprehensive pytest fixtures in conftest.py files
+- **Markers**: Organized test categorization for selective running
+
 ### Testing and Development
-- Run tests: `docker compose -f ./docker/docker-compose.yml run --rm web python manage.py test`
+- Run tests: `make test` (uses pytest framework)
 - Create superuser: `docker compose -f ./docker/docker-compose.yml run --rm web python manage.py createsuperuser`
 - Django shell: `docker compose -f ./docker/docker-compose.yml run --rm web python manage.py shell`
 
