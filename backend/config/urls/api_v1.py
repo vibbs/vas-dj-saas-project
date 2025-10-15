@@ -13,4 +13,6 @@ urlpatterns = [
     path("billing/", include("apps.billing.urls.api_v1")),
     # Email Service API endpoints
     path("email_service/", include("apps.email_service.urls.api_v1")),
+    # Feature Flags API endpoints
+    path("feature-flags/", include("apps.feature_flags.urls.api_v1")),
 ]

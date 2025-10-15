@@ -10,7 +10,8 @@
       "Bash(mv:*)",
       "Bash(make:*)",
       "Bash(rm:*)",
-      "Bash(poetry lock:*)"
+      "Bash(poetry lock:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

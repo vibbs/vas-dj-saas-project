@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.billing",
     "apps.email_service",
+    "apps.feature_flags",
 ]
 
 MIDDLEWARE = [

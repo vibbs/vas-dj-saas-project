@@ -1,4 +1,4 @@
-.PHONY: build start stop clean test test-verbose test-coverage test-parallel test-build test-clean api-validate api-generate api-docs api-workflow api-list api-help help
+.PHONY: build start stop clean test test-verbose test-coverage test-parallel test-build test-clean test-feature-flags test-feature-flags-coverage test-feature-flags-models test-feature-flags-services test-feature-flags-api test-feature-flags-utils test-feature-flags-integration api-validate api-generate api-docs api-workflow api-list api-help help
 
 build:
 	docker compose -f ./docker/docker-compose.yml  build
@@ -82,6 +82,27 @@ test-email:
 
 test-core:
 	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest apps/core/tests/
+
+test-feature-flags:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest apps/feature_flags/tests/
+
+test-feature-flags-coverage:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest apps/feature_flags/tests/ --cov=apps.feature_flags --cov-report=term-missing --cov-report=html:htmlcov/feature_flags
+
+test-feature-flags-models:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest apps/feature_flags/tests/ -k "test_model or TestModel"
+
+test-feature-flags-services:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest apps/feature_flags/tests/ -k "test_service or TestService"
+
+test-feature-flags-api:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest apps/feature_flags/tests/ -k "test_api or TestAPI or test_view"
+
+test-feature-flags-utils:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest apps/feature_flags/tests/ -k "test_util or TestUtil or test_decorator or test_mixin"
+
+test-feature-flags-integration:
+	docker compose -f ./docker/docker-compose.test.yml run --rm web pytest apps/feature_flags/tests/ -k "test_integration or TestIntegration"
 
 test-clean:
 	docker compose -f ./docker/docker-compose.test.yml down --volumes
