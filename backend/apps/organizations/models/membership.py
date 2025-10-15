@@ -83,6 +83,13 @@ class OrganizationMembership(models.Model):
         verbose_name = 'Organization Membership'
         verbose_name_plural = 'Organization Memberships'
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'organization'], name='membership_user_org_idx'),
+            models.Index(fields=['organization', 'status'], name='membership_org_status_idx'),
+            models.Index(fields=['user', 'status'], name='membership_user_status_idx'),
+            models.Index(fields=['role', 'status'], name='membership_role_status_idx'),
+            models.Index(fields=['status'], name='membership_status_idx'),
+        ]
     
     def __str__(self):
         return f"{self.user.email} - {self.organization.name} ({self.role})"

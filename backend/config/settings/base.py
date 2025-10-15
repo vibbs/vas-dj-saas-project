@@ -30,10 +30,15 @@ APP_ENV = config("APP_ENV", default="dev")
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-vedw$*as9s=(=_(vv)8&a94(u8k_s-f%17m9204l*)+f3k3+yk"
+SECRET_KEY = config("SECRET_KEY", default=None)
+if not SECRET_KEY:
+    raise ValueError(
+        "SECRET_KEY environment variable must be set. "
+        "Generate one with: python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'"
+    )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="", cast=Csv())
 
@@ -48,6 +53,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # Third party apps
+    "corsheaders",  # CORS support for API
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
@@ -64,6 +70,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # CORS - must be before CommonMiddleware
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -187,7 +194,6 @@ EMAIL_HOST_PASSWORD = config(
     "EMAIL_HOST_PASSWORD", default=""
 )  # MailHog doesn't require auth
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@vas-dj.com")
-DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@example.com")
 SUPPORT_EMAIL = config("SUPPORT_EMAIL", default="support@example.com")
 SITE_URL = config("SITE_URL", default="http://localhost:8000")
 
@@ -310,3 +316,23 @@ SIMPLE_JWT = get_jwt_settings(SECRET_KEY)
 
 # Frontend URL for email verification links
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+
+# CORS Configuration
+CORS_ALLOWED_ORIGINS = config(
+    "CORS_ALLOWED_ORIGINS",
+    default="http://localhost:3000,http://localhost:3001",
+    cast=lambda v: [s.strip() for s in v.split(",") if s.strip()]
+)
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'x-org-slug',  # Custom header for tenant resolution
+]

@@ -489,9 +489,11 @@ class SocialRegistrationSerializer(serializers.Serializer):
             'is_email_verified': True,  # Trust social provider email verification
             'status': 'ACTIVE'  # Skip email verification for social logins
         }
-        
-        # Create user without password (social login only)
-        user = Account.objects.create(**user_data)
+
+        # Create user without password (social login only) using create_user to ensure proper handling
+        user = Account.objects.create_user(password=None, **user_data)
+        user.set_unusable_password()  # Explicitly mark password as unusable for social-only accounts
+        user.save(update_fields=['password'])
         
         # Create organization and link via membership
         organization = Organization.objects.create(

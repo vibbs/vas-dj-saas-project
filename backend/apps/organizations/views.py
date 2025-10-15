@@ -39,10 +39,30 @@ from .serializers import OrganizationSerializer
     ),
 )
 class OrganizationViewSet(viewsets.ModelViewSet):
-    queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
     permission_classes = [permissions.IsAuthenticated]
-    
+
+    def get_queryset(self):
+        """
+        Filter organizations to only those where the user has active membership.
+        Superusers can see all organizations.
+        """
+        user = self.request.user
+
+        # Superusers can see all organizations
+        if user.is_superuser:
+            return Organization.objects.all()
+
+        # Get all organizations where the user has active membership
+        user_org_ids = user.get_active_memberships().values_list(
+            'organization_id', flat=True
+        )
+
+        return Organization.objects.filter(
+            id__in=user_org_ids,
+            is_active=True
+        ).distinct()
+
     @extend_schema(
         summary="Get organization stats",
         description="Retrieve statistics and metrics for the organization.",
@@ -54,8 +74,8 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         organization = self.get_object()
         # Example stats - you can customize based on your needs
         stats = {
-            'total_users': organization.account_set.count(),
-            'active_users': organization.account_set.filter(is_active=True).count(),
+            'total_users': organization.memberships.filter(status='active').count(),
+            'active_users': organization.memberships.filter(status='active').count(),
             'created_at': organization.created_at,
             'is_on_trial': organization.on_trial,
             'trial_ends_on': organization.trial_ends_on,

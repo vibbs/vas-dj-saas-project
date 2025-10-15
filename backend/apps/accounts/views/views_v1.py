@@ -52,9 +52,30 @@ User = get_user_model()
     ),
 )
 class AccountViewSet(viewsets.ModelViewSet):
-    queryset = Account.objects.all()
     serializer_class = AccountSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        Filter accounts to only those in organizations where the user is a member.
+        Superusers can see all accounts.
+        """
+        user = self.request.user
+
+        # Superusers can see all accounts
+        if user.is_superuser:
+            return Account.objects.all()
+
+        # Get all organizations where the user has active membership
+        user_org_ids = user.get_active_memberships().values_list(
+            'organization_id', flat=True
+        )
+
+        # Return accounts that have memberships in any of those organizations
+        return Account.objects.filter(
+            organization_memberships__organization_id__in=user_org_ids,
+            organization_memberships__status='active'
+        ).distinct()
 
     def get_serializer_class(self):
         if self.action == "create":

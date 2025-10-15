@@ -52,6 +52,11 @@ class AccountAuthProvider(BaseFields, models.Model):
 
     class Meta:
         unique_together = ("provider", "provider_user_id")  # ensures no dupes
+        indexes = [
+            models.Index(fields=['user', 'provider'], name='authprov_user_prov_idx'),
+            models.Index(fields=['provider', 'provider_user_id'], name='authprov_prov_uid_idx'),
+            models.Index(fields=['email'], name='authprov_email_idx'),
+        ]
 
     def __str__(self):
         return f"{self.provider} ({self.email})"
@@ -141,32 +146,42 @@ class Account(BaseFields, AbstractBaseUser, PermissionsMixin):
             return str(self.email)[0].upper() if self.email else "UKN"
 
     def generate_email_verification_token(self):
-        """Generate a new email verification token."""
-        self.email_verification_token = secrets.token_urlsafe(32)
+        """Generate a cryptographically secure email verification token (512 bits)."""
+        self.email_verification_token = secrets.token_urlsafe(64)  # 64 bytes = 512 bits
         self.email_verification_token_expires = timezone.now() + timedelta(hours=24)
         self.save(update_fields=['email_verification_token', 'email_verification_token_expires'])
         return self.email_verification_token
 
     def verify_email(self, token):
-        """Verify email using the provided token."""
+        """
+        Verify email using the provided token.
+        Uses constant-time comparison to prevent timing attacks.
+        """
+        import hmac
+
         if not self.email_verification_token or not self.email_verification_token_expires:
             return False
-        
-        if self.email_verification_token != token:
+
+        # Use constant-time comparison to prevent timing attacks
+        if not hmac.compare_digest(
+            str(self.email_verification_token),
+            str(token)
+        ):
             return False
-        
+
+        # Check expiration
         if timezone.now() > self.email_verification_token_expires:
             return False
-        
+
         # Mark email as verified and clear token
         self.is_email_verified = True
         self.status = UserStatusTypes.ACTIVE.value
         self.email_verification_token = None
         self.email_verification_token_expires = None
         self.save(update_fields=[
-            'is_email_verified', 
-            'status', 
-            'email_verification_token', 
+            'is_email_verified',
+            'status',
+            'email_verification_token',
             'email_verification_token_expires'
         ])
         return True
@@ -328,3 +343,10 @@ class Account(BaseFields, AbstractBaseUser, PermissionsMixin):
         verbose_name_plural = "Accounts"
         ordering = ["-date_joined"]
         # Removed unique_together constraint - users can exist across multiple orgs
+        indexes = [
+            models.Index(fields=['email'], name='account_email_idx'),
+            models.Index(fields=['email_verification_token'], name='account_verify_token_idx'),
+            models.Index(fields=['status', 'is_active'], name='account_status_active_idx'),
+            models.Index(fields=['is_email_verified'], name='account_email_verified_idx'),
+            models.Index(fields=['date_joined'], name='account_date_joined_idx'),
+        ]
