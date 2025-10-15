@@ -1,5 +1,9 @@
 from .base import *
 from decouple import config
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
 
 DEBUG = config("DEBUG", default=False, cast=bool)
 
@@ -92,3 +96,58 @@ LOGGING = {
         },
     },
 }
+
+# Sentry Error Tracking
+SENTRY_DSN = config("SENTRY_DSN", default=None)
+SENTRY_ENVIRONMENT = config("SENTRY_ENVIRONMENT", default="production")
+SENTRY_TRACES_SAMPLE_RATE = config("SENTRY_TRACES_SAMPLE_RATE", default=0.1, cast=float)
+
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[
+            DjangoIntegration(),
+            CeleryIntegration(),
+            RedisIntegration(),
+        ],
+        # Set traces_sample_rate to capture performance data
+        # 0.1 means 10% of transactions
+        traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
+
+        # If you wish to associate users to errors (assuming you are using
+        # django.contrib.auth) you may enable sending PII data.
+        send_default_pii=False,  # Do not send PII for privacy
+
+        # Environment name
+        environment=SENTRY_ENVIRONMENT,
+
+        # Release tracking (useful with CI/CD)
+        release=config("SENTRY_RELEASE", default=None),
+
+        # Before send hook to filter sensitive data
+        before_send=lambda event, hint: _filter_sensitive_data(event, hint),
+    )
+
+
+def _filter_sensitive_data(event, hint):
+    """
+    Filter sensitive data from Sentry events before sending.
+
+    Removes passwords, tokens, and other sensitive information.
+    """
+    if 'request' in event:
+        if 'data' in event['request']:
+            # Remove sensitive fields
+            sensitive_fields = ['password', 'token', 'secret', 'api_key', 'authorization']
+            for field in sensitive_fields:
+                if field in event['request']['data']:
+                    event['request']['data'][field] = '[Filtered]'
+
+        # Filter headers
+        if 'headers' in event['request']:
+            sensitive_headers = ['Authorization', 'Cookie', 'X-Api-Key']
+            for header in sensitive_headers:
+                if header in event['request']['headers']:
+                    event['request']['headers'][header] = '[Filtered]'
+
+    return event

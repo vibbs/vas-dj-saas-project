@@ -336,3 +336,18 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
     'x-org-slug',  # Custom header for tenant resolution
 ]
+
+# Cache Configuration (Development uses in-memory, Production uses Redis)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'default-cache',
+        'TIMEOUT': 300,  # 5 minutes default
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000
+        }
+    }
+}
+
+# Cache key prefix
+CACHE_KEY_PREFIX = 'vasdj'

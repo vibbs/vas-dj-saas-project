@@ -79,7 +79,7 @@ def user_with_org(db, organization):
 @pytest.fixture
 def admin_with_org(db, organization):
     """Create an admin user with an organization."""
-    user = UserFactory(is_org_admin=True)
+    user = UserFactory(is_staff=True)  # Django staff user for DRF IsAdminUser permission
     from apps.organizations.models import OrganizationMembership
     OrganizationMembership.objects.create(
         user=user,

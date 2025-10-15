@@ -13,14 +13,14 @@ ENV PYTHONUNBUFFERED=1
 # Set the working directory to /app
 WORKDIR /app
 
-RUN pip install poetry
+# Install UV for 10-100x faster package installation
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-# Install dependencies via poetry
-COPY pyproject.toml poetry.lock ./
+# Install dependencies via UV (much faster than poetry/pip)
+COPY pyproject.toml ./
 
-RUN poetry config virtualenvs.create false && \
-    poetry install --no-root --no-interaction --no-ansi
-
+# Install packages directly from pyproject.toml
+RUN uv pip install --system --no-cache -r pyproject.toml
 
 # Copy the rest of the application code
 COPY . .

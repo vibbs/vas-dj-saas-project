@@ -3,15 +3,28 @@ Global pytest fixtures for the entire project.
 """
 
 import pytest
+from django.core.management import call_command
 from django.test import Client
 from rest_framework.test import APIClient
 from apps.accounts.tests.factories import (
-    AccountFactory, 
-    AdminAccountFactory, 
+    AccountFactory,
+    AdminAccountFactory,
     SuperuserAccountFactory,
     UnverifiedAccountFactory
 )
 from apps.organizations.tests.factories import OrganizationFactory, OrganizationMembershipFactory
+
+
+@pytest.fixture(scope='session')
+def django_db_setup(django_db_setup, django_db_blocker):
+    """
+    Custom database setup that runs migrations at the start of test session.
+    This ensures the test database has all tables including audit logs.
+    """
+    with django_db_blocker.unblock():
+        # Migrations are automatically run by pytest-django with --create-db
+        # This fixture just ensures proper ordering and can be extended if needed
+        pass
 
 
 @pytest.fixture

@@ -12,7 +12,14 @@ class OrganizationSerializer(serializers.ModelSerializer):
     
     @extend_schema_field(serializers.IntegerField)
     def get_member_count(self, obj):
-        """Get the number of active members in this organization."""
+        """
+        Get the number of active members in this organization.
+        Uses annotation from queryset if available, otherwise falls back to query.
+        """
+        # Check if the queryset was annotated with member_count
+        if hasattr(obj, 'active_member_count'):
+            return obj.active_member_count
+        # Fallback to query (slower, but works if annotation not provided)
         return obj.memberships.filter(status='active').count()
     
     @extend_schema_field(serializers.CharField)

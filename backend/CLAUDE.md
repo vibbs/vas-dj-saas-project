@@ -128,11 +128,83 @@ This is a Django SaaS project with multi-tenancy support:
 
 ### Dependencies
 - Django 5.2+ with DRF for API development
-- django-tenants for multi-tenancy
+- django-cors-headers for CORS support
+- django-ratelimit for rate limiting
+- django-redis for caching
+- sentry-sdk for error tracking
 - Celery + Redis for background tasks
 - PostgreSQL with psycopg2-binary
 - drf-spectacular for OpenAPI/Swagger documentation
-- Poetry for dependency management
+- UV for ultra-fast package installation (10-100x faster than pip/poetry)
+
+## Security & Production Readiness
+
+### Security Features Implemented
+1. **Environment Security**
+   - SECRET_KEY must be set via environment variable (no hardcoded secrets)
+   - DEBUG=False by default (secure by default)
+   - Comprehensive environment variable validation on startup
+   - CORS properly configured with django-cors-headers
+
+2. **Tenant Isolation**
+   - All ViewSets filter data by user's organization memberships
+   - Cross-tenant data leaks prevented via `get_queryset()` scoping
+   - `IsOrgMember` permission class for organization-scoped access
+   - Middleware validates organization membership on every request
+
+3. **Authentication Security**
+   - Timing attack protection using `hmac.compare_digest()` for token verification
+   - 512-bit (64-byte) tokens for email verification
+   - Rate limiting on all authentication endpoints
+   - Audit logging for all login attempts (success and failure)
+   - Social auth users properly created with `set_unusable_password()`
+
+4. **Audit Logging** (`apps/core/audit/`)
+   - Comprehensive audit trail for all security events
+   - Tracks: who, what, when, where for compliance (SOC 2, GDPR)
+   - Automatic logging of:
+     - Authentication events (login, logout, failures)
+     - Authorization failures (org access denied)
+     - Superuser access to all endpoints
+     - Permission changes and role updates
+   - Admin interface for viewing audit logs
+   - 6 database indexes for fast audit log queries
+
+5. **Production Infrastructure**
+   - **Sentry Integration**: Error tracking with Django, Celery, Redis integrations
+   - **Security Headers**: HTTPS enforcement, HSTS, secure cookies
+   - **Redis Caching**: Performance optimization with django-redis
+   - **Database Indexes**: 13 composite indexes for optimal performance
+   - **Connection Pooling**: Configured for production scalability
+
+6. **Performance Optimization**
+   - N+1 query prevention with `select_related()` and `prefetch_related()`
+   - Query annotations for computed fields (no per-row queries)
+   - Caching utilities in `apps/core/cache/`
+   - User permission caching with invalidation
+
+7. **Transaction Safety**
+   - `@transaction.atomic` on all multi-step operations (registration, org creation)
+   - Ensures data consistency: all-or-nothing semantics
+
+### Security Test Suite
+Located in `apps/core/tests/security/`:
+- **Tenant Isolation Tests**: Verifies cross-tenant data access prevention
+- **Authentication Tests**: Brute force, timing attacks, token security
+- **SQL Injection Tests**: Validates ORM protection
+- **CSRF Tests**: Documents CSRF behavior
+
+### Production Deployment Checklist
+1. ✅ Set `SECRET_KEY` environment variable
+2. ✅ Set `DEBUG=False` in production
+3. ✅ Configure `ALLOWED_HOSTS`
+4. ✅ Set up Sentry (`SENTRY_DSN`)
+5. ✅ Configure CORS origins for frontend
+6. ✅ Set up HTTPS with proper certificates
+7. ✅ Configure Redis for caching and rate limiting
+8. ✅ Set up database backups
+9. ✅ Review audit logs regularly
+10. ✅ Run security tests: `make test-security`
 
 ## API Documentation
 

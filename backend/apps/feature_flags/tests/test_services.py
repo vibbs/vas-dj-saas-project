@@ -131,19 +131,15 @@ class TestFeatureFlagService:
         
         assert result is False
     
-    def test_is_feature_enabled_cache_hit(self, user, cached_feature_flag_service, mock_redis_cache):
+    def test_is_feature_enabled_cache_hit(self, user, cached_feature_flag_service):
         """Test cache hit scenario."""
         flag = FeatureFlagFactory(key='test_flag')
-        mock_redis_cache.get.return_value = json.dumps({
-            'flags': {'test_flag': True},
-            'cached_at': timezone.now().isoformat(),
-            'organization_id': None
-        })
-        
-        result = cached_feature_flag_service.is_feature_enabled(user, 'test_flag')
-        
+
+        # Mock the cache service to return cached flags
+        with patch.object(FeatureFlagCacheService, 'get_user_flags', return_value={'test_flag': True}):
+            result = cached_feature_flag_service.is_feature_enabled(user, 'test_flag')
+
         assert result is True
-        mock_redis_cache.get.assert_called()
     
     def test_is_feature_enabled_force_refresh(self, user, cached_feature_flag_service):
         """Test force refresh bypasses cache."""

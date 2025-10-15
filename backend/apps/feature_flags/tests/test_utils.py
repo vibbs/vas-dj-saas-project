@@ -44,20 +44,18 @@ class TestRequireFeatureFlagDecorator:
     def test_decorator_allows_access_when_flag_enabled(self, user):
         """Test decorator allows access when feature flag is enabled."""
         flag = FeatureFlagFactory(key='test_feature', is_enabled_globally=True)
-        
+
         @require_feature_flag('test_feature')
         def test_view(request):
             return 'success'
-        
-        # Mock request
-        request = Mock()
+
+        # Use RequestFactory for proper request object
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.return_value = None
-        request.headers = {}
-        
+
         result = test_view(request)
-        
+
         assert result == 'success'
     
     def test_decorator_denies_access_when_flag_disabled(self, user):
@@ -68,11 +66,9 @@ class TestRequireFeatureFlagDecorator:
         def test_view(request):
             return 'success'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.return_value = None
-        request.headers = {}
         
         with pytest.raises(PermissionDenied):
             test_view(request)
@@ -85,11 +81,9 @@ class TestRequireFeatureFlagDecorator:
         def test_view(request):
             return 'success'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.return_value = None
-        request.headers = {}
         
         with pytest.raises(Http404):
             test_view(request)
@@ -102,11 +96,9 @@ class TestRequireFeatureFlagDecorator:
         def test_view(request):
             return 'success'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/', HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.return_value = None
-        request.headers = {'X-Requested-With': 'XMLHttpRequest'}
         
         result = test_view(request)
         
@@ -124,11 +116,9 @@ class TestRequireFeatureFlagDecorator:
         def test_view(request):
             return 'success'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.return_value = None
-        request.headers = {}
         
         result = test_view(request)
         
@@ -171,11 +161,9 @@ class TestMultipleFeatureFlagsDecorator:
         def test_view(request):
             return 'success'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.return_value = None
-        request.headers = {}
         
         result = test_view(request)
         
@@ -193,11 +181,9 @@ class TestMultipleFeatureFlagsDecorator:
         def test_view(request):
             return 'success'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.return_value = None
-        request.headers = {}
         
         with pytest.raises(PermissionDenied):
             test_view(request)
@@ -211,11 +197,9 @@ class TestMultipleFeatureFlagsDecorator:
         def test_view(request):
             return 'success'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.return_value = None
-        request.headers = {}
         
         result = test_view(request)
         
@@ -232,11 +216,9 @@ class TestMultipleFeatureFlagsDecorator:
         def test_view(request):
             return 'success'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/', HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.return_value = None
-        request.headers = {'X-Requested-With': 'XMLHttpRequest'}
         
         result = test_view(request)
         
@@ -262,10 +244,9 @@ class TestOnboardingStageRequiredDecorator:
         def test_view(request):
             return 'success'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.headers = {}
         
         result = test_view(request)
         
@@ -286,10 +267,9 @@ class TestOnboardingStageRequiredDecorator:
         def test_view(request):
             return 'success'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.headers = {}
         
         result = test_view(request)
         
@@ -306,10 +286,9 @@ class TestOnboardingStageRequiredDecorator:
         def test_view(request):
             return 'success'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.headers = {}
         
         with pytest.raises(PermissionDenied):
             test_view(request)
@@ -320,10 +299,9 @@ class TestOnboardingStageRequiredDecorator:
         def test_view(request):
             return 'success'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.headers = {}
         
         with pytest.raises(PermissionDenied):
             test_view(request)
@@ -341,10 +319,9 @@ class TestFeatureGatedMixin:
             required_feature_flag = 'test_feature'
             template_name = 'test.html'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.return_value = None
         request.method = 'GET'
         
         view = TestView()
@@ -363,10 +340,9 @@ class TestFeatureGatedMixin:
             required_feature_flag = 'test_feature'
             template_name = 'test.html'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.return_value = None
         
         view = TestView()
         
@@ -379,7 +355,8 @@ class TestFeatureGatedMixin:
             template_name = 'test.html'
             # Missing required_feature_flag
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = Mock()
         request.user.is_authenticated = True
         
@@ -400,10 +377,9 @@ class TestFeatureGatedMixin:
             def custom_denied_response(self, request, flag_key):
                 return f'Custom response for {flag_key}'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.return_value = None
         
         view = TestView()
         result = view.dispatch(request)
@@ -425,10 +401,9 @@ class TestMultipleFeatureGatedMixin:
             feature_flags_require_all = True
             template_name = 'test.html'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.return_value = None
         request.method = 'GET'
         
         view = TestView()
@@ -452,10 +427,9 @@ class TestMultipleFeatureGatedMixin:
             feature_flags_require_all = True
             template_name = 'test.html'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.return_value = None
         
         view = TestView()
         
@@ -472,10 +446,9 @@ class TestMultipleFeatureGatedMixin:
             feature_flags_require_all = False
             template_name = 'test.html'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.return_value = None
         request.method = 'GET'
         
         view = TestView()
@@ -499,10 +472,9 @@ class TestFeatureContextMixin:
         class TestView(FeatureContextMixin, TemplateView):
             template_name = 'test.html'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.return_value = None
         request.method = 'GET'
         
         view = TestView()
@@ -521,7 +493,8 @@ class TestFeatureContextMixin:
         class TestView(FeatureContextMixin, TemplateView):
             template_name = 'test.html'
         
-        request = Mock()
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = AnonymousUser()
         request.method = 'GET'
         
@@ -540,10 +513,13 @@ class TestFeatureContextMixin:
         class TestView(FeatureContextMixin, TemplateView):
             template_name = 'test.html'
         
+        factory = RequestFactory()
+        request = factory.get('/')
+        request.feature_flags = {'test_feature': True}
+        request.enabled_feature_flags = ['test_feature']
+
         view = TestView()
-        view.request = Mock()
-        view.request.feature_flags = {'test_feature': True}
-        view.request.enabled_feature_flags = ['test_feature']
+        view.request = request
         
         with patch('django.views.generic.base.TemplateView.get_context_data') as mock_context:
             mock_context.return_value = {}
@@ -781,63 +757,72 @@ class TestErrorHandling:
     def test_decorator_error_handling_development(self, user):
         """Test decorator error handling in development mode."""
         flag = FeatureFlagFactory(key='test_feature')
-        
+
         @require_feature_flag('test_feature')
         def test_view(request):
             return 'success'
-        
-        request = Mock()
+
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.side_effect = Exception('Org error')
-        
-        # In development, errors should propagate
-        with patch('django.conf.settings.DEBUG', True):
-            with pytest.raises(Exception, match='Org error'):
-                test_view(request)
+
+        # Mock the feature service to raise an error
+        with patch('apps.feature_flags.services.feature_service.FeatureFlagService.is_feature_enabled') as mock_service:
+            mock_service.side_effect = Exception('Org error')
+
+            # In development, errors should propagate
+            with patch('django.conf.settings.DEBUG', True):
+                with pytest.raises(Exception, match='Org error'):
+                    test_view(request)
     
     def test_decorator_error_handling_production(self, user):
         """Test decorator error handling in production mode."""
         flag = FeatureFlagFactory(key='test_feature')
-        
+
         @require_feature_flag('test_feature')
         def test_view(request):
             return 'success'
-        
-        request = Mock()
+
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.side_effect = Exception('Org error')
-        
-        # In production, should fail securely with PermissionDenied
-        with patch('django.conf.settings.DEBUG', False):
-            with pytest.raises(PermissionDenied, match='Feature access could not be verified'):
-                test_view(request)
+
+        # Mock the feature service to raise an error
+        with patch('apps.feature_flags.services.feature_service.FeatureFlagService.is_feature_enabled') as mock_service:
+            mock_service.side_effect = Exception('Org error')
+
+            # In production, should fail securely with PermissionDenied
+            with patch('django.conf.settings.DEBUG', False):
+                with pytest.raises(PermissionDenied, match='Feature access could not be verified'):
+                    test_view(request)
     
     def test_mixin_error_handling(self, user):
         """Test mixin error handling."""
         flag = FeatureFlagFactory(key='test_feature')
-        
+
         class TestView(FeatureGatedMixin, TemplateView):
             required_feature_flag = 'test_feature'
             template_name = 'test.html'
-        
-        request = Mock()
+
+        factory = RequestFactory()
+        request = factory.get('/')
         request.user = user
-        request.user.is_authenticated = True
-        request.user.get_primary_organization.side_effect = Exception('Error')
-        
+
         view = TestView()
-        
-        # In production mode, should fail securely
-        with patch('django.conf.settings.DEBUG', False):
-            with pytest.raises(PermissionDenied):
-                view.dispatch(request)
+
+        # Mock the feature service to raise an error
+        with patch('apps.feature_flags.services.feature_service.FeatureFlagService.is_feature_enabled') as mock_service:
+            mock_service.side_effect = Exception('Error')
+
+            # In production mode, should fail securely
+            with patch('django.conf.settings.DEBUG', False):
+                with pytest.raises(PermissionDenied):
+                    view.dispatch(request)
 
 
 class TestFeatureRequiredMixin:
     """Test suite for FeatureRequiredMixin (alias)."""
     
     def test_mixin_is_alias(self):
-        """Test that FeatureRequiredMixin is an alias for FeatureGatedMixin."""
-        assert FeatureRequiredMixin is FeatureGatedMixin
+        """Test that FeatureRequiredMixin inherits from FeatureGatedMixin."""
+        assert issubclass(FeatureRequiredMixin, FeatureGatedMixin)

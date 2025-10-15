@@ -39,15 +39,38 @@ class TenantMiddleware(MiddlewareMixin):
                 request.org = organization
                 
                 # For authenticated non-superuser, validate membership
-                if (request.user.is_authenticated and 
+                if (request.user.is_authenticated and
                     not request.user.is_superuser):
-                    
+
                     membership = request.user.get_membership_in(organization)
                     if not membership or not membership.is_active():
                         logger.warning(
                             f"User {request.user.email} attempted to access "
                             f"organization {org_slug} without valid membership"
                         )
+
+                        # Log audit event for failed access attempt
+                        try:
+                            from apps.core.audit.models import AuditAction
+                            from apps.core.audit.utils import log_audit_event
+
+                            log_audit_event(
+                                action=AuditAction.ORG_ACCESS_DENIED,
+                                request=request,
+                                organization=organization,
+                                resource_type='organization',
+                                resource_id=organization.id,
+                                success=False,
+                                details={
+                                    'org_slug': org_slug,
+                                    'path': request.path,
+                                    'has_membership': membership is not None,
+                                    'membership_active': membership.is_active() if membership else False
+                                }
+                            )
+                        except Exception as e:
+                            logger.error(f"Failed to log audit event: {e}")
+
                         return HttpResponseForbidden(
                             "You don't have access to this organization"
                         )

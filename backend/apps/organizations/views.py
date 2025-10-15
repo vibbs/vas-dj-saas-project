@@ -2,7 +2,8 @@ from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from .models import Organization
+from django.db.models import Count, Q, Prefetch
+from .models import Organization, OrganizationMembership
 from .serializers import OrganizationSerializer
 
 
@@ -46,19 +47,41 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         """
         Filter organizations to only those where the user has active membership.
         Superusers can see all organizations.
+        Optimized with annotations to prevent N+1 queries.
         """
         user = self.request.user
 
+        # Base queryset with performance optimizations
+        queryset = Organization.objects.annotate(
+            # Count active members (used by serializer)
+            active_member_count=Count(
+                'memberships',
+                filter=Q(memberships__status='active'),
+                distinct=True
+            )
+        ).select_related(
+            'created_by'  # Avoid extra query for creator
+        ).prefetch_related(
+            # Prefetch active memberships efficiently
+            Prefetch(
+                'memberships',
+                queryset=OrganizationMembership.objects.filter(
+                    status='active'
+                ).select_related('user'),
+                to_attr='active_memberships_list'
+            )
+        )
+
         # Superusers can see all organizations
         if user.is_superuser:
-            return Organization.objects.all()
+            return queryset
 
         # Get all organizations where the user has active membership
         user_org_ids = user.get_active_memberships().values_list(
             'organization_id', flat=True
         )
 
-        return Organization.objects.filter(
+        return queryset.filter(
             id__in=user_org_ids,
             is_active=True
         ).distinct()

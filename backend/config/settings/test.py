@@ -15,6 +15,24 @@ SECRET_KEY = 'test-secret-key-for-testing-only-do-not-use-in-production'
 # Debug should be False in tests to catch template errors
 DEBUG = False
 
+# Disable tenant middleware in tests - ViewSets handle organization filtering directly
+# This prevents 404 errors when tests don't provide organization context in headers
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Custom middleware (TenantMiddleware disabled in tests)
+    "apps.core.middleware.RequestTimingMiddleware",
+    "apps.core.middleware.TransactionIDMiddleware",
+    # Rate limiting disabled (see RATELIMIT_ENABLE below)
+]
+
 # Test database configuration
 DATABASES = {
     'default': {

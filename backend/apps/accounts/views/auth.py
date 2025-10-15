@@ -6,6 +6,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 from django.utils import timezone
+from django.db import transaction
 from drf_spectacular.utils import extend_schema, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 from rest_framework import serializers
@@ -31,6 +32,8 @@ from apps.core.exceptions.client_errors import ValidationException
 from apps.core.responses import ok, created
 from apps.core.codes import APIResponseCodes
 from apps.core.utils.rate_limiting import rate_limit
+from apps.core.audit.models import AuditAction
+from apps.core.audit.utils import log_authentication_event
 
 
 def convert_serializer_errors_to_rfc7807(serializer_errors):
@@ -158,11 +161,27 @@ def login(request):
     user = authenticate(email=email, password=password)
 
     if user is None:
+        # Log failed login attempt
+        log_authentication_event(
+            request=request,
+            action=AuditAction.LOGIN_FAILED,
+            success=False,
+            details={'email': email, 'reason': 'invalid_credentials'},
+            error_message='Invalid email or password'
+        )
+
         # Check if user exists but might have other issues
         try:
             user_exists = Account.objects.get(email=email)
             if not user_exists.is_email_verified:
                 # User exists but email not verified
+                log_authentication_event(
+                    request=request,
+                    action=AuditAction.LOGIN_FAILED,
+                    user=user_exists,
+                    success=False,
+                    details={'email': email, 'reason': 'email_not_verified'}
+                )
                 issues = [{
                     "message": "Please verify your email address before logging in. Check your inbox for the verification email.",
                     "path": [],
@@ -176,6 +195,13 @@ def login(request):
                 )
             elif user_exists.status == "PENDING":
                 # User account is pending
+                log_authentication_event(
+                    request=request,
+                    action=AuditAction.LOGIN_FAILED,
+                    user=user_exists,
+                    success=False,
+                    details={'email': email, 'reason': 'account_pending'}
+                )
                 issues = [{
                     "message": "Your account is pending approval. Please verify your email address or contact support.",
                     "path": [],
@@ -188,12 +214,26 @@ def login(request):
                     user_id=str(user_exists.id)
                 )
             elif not user_exists.is_active:
+                log_authentication_event(
+                    request=request,
+                    action=AuditAction.LOGIN_FAILED,
+                    user=user_exists,
+                    success=False,
+                    details={'email': email, 'reason': 'account_disabled'}
+                )
                 raise AccountDisabledException()
             else:
                 # User exists and is active, so it's likely a password issue
+                log_authentication_event(
+                    request=request,
+                    action=AuditAction.LOGIN_FAILED,
+                    user=user_exists,
+                    success=False,
+                    details={'email': email, 'reason': 'invalid_password'}
+                )
                 raise InvalidCredentialsException()
         except Account.DoesNotExist:
-            # User doesn't exist
+            # User doesn't exist - already logged above
             raise InvalidCredentialsException()
 
     if not user.is_active:
@@ -229,6 +269,15 @@ def login(request):
 
     # Update last login
     update_last_login(None, user)
+
+    # Log successful login
+    log_authentication_event(
+        request=request,
+        action=AuditAction.LOGIN_SUCCESS,
+        user=user,
+        success=True,
+        details={'email': email, 'method': 'email_password'}
+    )
 
     # Serialize user data
     user_serializer = AccountSerializer(user)
@@ -477,9 +526,11 @@ def verify_token(request):
 )
 @api_view(["POST"])
 @permission_classes([AllowAny])
+@transaction.atomic  # Ensure all-or-nothing: user, org, membership creation
 def register(request):
     """
-    Registration endpoint that creates a new user account with automatic organization setup
+    Registration endpoint that creates a new user account with automatic organization setup.
+    Uses transaction to ensure atomicity: if any step fails, everything rolls back.
     """
     serializer = RegistrationSerializer(data=request.data)
 
@@ -880,9 +931,11 @@ def resend_verification_by_email(request):
 )
 @api_view(["POST"])
 @permission_classes([AllowAny])
+@transaction.atomic  # Ensure atomicity for user/org creation in social auth
 def social_auth(request):
     """
-    Social authentication endpoint that handles both registration and login
+    Social authentication endpoint that handles both registration and login.
+    Uses transaction to ensure atomicity if creating new account + organization.
     """
     serializer = SocialRegistrationSerializer(data=request.data)
 

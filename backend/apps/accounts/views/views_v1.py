@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from django.contrib.auth import get_user_model
 from django.conf import settings
+from django.db.models import Prefetch, Q
 from apps.accounts.models import Account, AccountAuthProvider
 from apps.accounts.serializers import (
     AccountSerializer,
@@ -12,6 +13,7 @@ from apps.accounts.serializers import (
     AccountAuthProviderSerializer,
 )
 from apps.core.exceptions.client_errors import ValidationException
+from apps.organizations.models import OrganizationMembership
 
 log = logging.getLogger(f"{settings.LOG_APP_PREFIX}.accounts.views")
 User = get_user_model()
@@ -59,12 +61,27 @@ class AccountViewSet(viewsets.ModelViewSet):
         """
         Filter accounts to only those in organizations where the user is a member.
         Superusers can see all accounts.
+        Optimized with prefetch_related to prevent N+1 queries.
         """
         user = self.request.user
 
+        # Base queryset with performance optimizations
+        queryset = Account.objects.prefetch_related(
+            # Prefetch active memberships with organization details
+            Prefetch(
+                'organization_memberships',
+                queryset=OrganizationMembership.objects.filter(
+                    status='active'
+                ).select_related('organization'),
+                to_attr='active_memberships_list'
+            ),
+            # Prefetch auth providers
+            'auth_providers'
+        )
+
         # Superusers can see all accounts
         if user.is_superuser:
-            return Account.objects.all()
+            return queryset
 
         # Get all organizations where the user has active membership
         user_org_ids = user.get_active_memberships().values_list(
@@ -72,7 +89,7 @@ class AccountViewSet(viewsets.ModelViewSet):
         )
 
         # Return accounts that have memberships in any of those organizations
-        return Account.objects.filter(
+        return queryset.filter(
             organization_memberships__organization_id__in=user_org_ids,
             organization_memberships__status='active'
         ).distinct()

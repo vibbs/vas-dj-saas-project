@@ -11,7 +11,9 @@
       "Bash(make:*)",
       "Bash(rm:*)",
       "Bash(poetry lock:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(python3:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

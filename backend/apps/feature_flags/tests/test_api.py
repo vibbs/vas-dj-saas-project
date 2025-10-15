@@ -88,16 +88,16 @@ class TestFeatureFlagViewSet:
     
     def test_retrieve_feature_flag(self, authenticated_api_client, feature_flag):
         """Test retrieving a specific feature flag."""
-        url = reverse('feature_flags:featureflag-detail', kwargs={'pk': feature_flag.id})
+        url = reverse('feature_flags:featureflag-detail', kwargs={'key': feature_flag.key})
         response = authenticated_api_client.get(url)
-        
+
         assert response.status_code == status.HTTP_200_OK
         assert response.data['key'] == feature_flag.key
         assert response.data['name'] == feature_flag.name
-    
+
     def test_retrieve_nonexistent_feature_flag(self, authenticated_api_client):
         """Test retrieving nonexistent feature flag."""
-        url = reverse('feature_flags:featureflag-detail', kwargs={'pk': 999})
+        url = reverse('feature_flags:featureflag-detail', kwargs={'key': 'nonexistent-flag'})
         response = authenticated_api_client.get(url)
         
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -110,7 +110,7 @@ class TestFeatureFlagViewSet:
             'is_enabled_globally': True
         }
         
-        url = reverse('feature_flags:featureflag-detail', kwargs={'pk': feature_flag.id})
+        url = reverse('feature_flags:featureflag-detail', kwargs={'key': feature_flag.key})
         response = admin_api_client.patch(url, update_data, format='json')
         
         assert response.status_code == status.HTTP_200_OK
@@ -124,14 +124,14 @@ class TestFeatureFlagViewSet:
         """Test updating feature flag as non-admin."""
         update_data = {'name': 'Updated Name'}
         
-        url = reverse('feature_flags:featureflag-detail', kwargs={'pk': feature_flag.id})
+        url = reverse('feature_flags:featureflag-detail', kwargs={'key': feature_flag.key})
         response = authenticated_api_client.patch(url, update_data, format='json')
         
         assert response.status_code == status.HTTP_403_FORBIDDEN
     
     def test_delete_feature_flag_admin(self, admin_api_client, feature_flag):
         """Test deleting feature flag as admin."""
-        url = reverse('feature_flags:featureflag-detail', kwargs={'pk': feature_flag.id})
+        url = reverse('feature_flags:featureflag-detail', kwargs={'key': feature_flag.key})
         response = admin_api_client.delete(url)
         
         assert response.status_code == status.HTTP_204_NO_CONTENT
@@ -139,7 +139,7 @@ class TestFeatureFlagViewSet:
     
     def test_delete_feature_flag_non_admin(self, authenticated_api_client, feature_flag):
         """Test deleting feature flag as non-admin."""
-        url = reverse('feature_flags:featureflag-detail', kwargs={'pk': feature_flag.id})
+        url = reverse('feature_flags:featureflag-detail', kwargs={'key': feature_flag.key})
         response = authenticated_api_client.delete(url)
         
         assert response.status_code == status.HTTP_403_FORBIDDEN

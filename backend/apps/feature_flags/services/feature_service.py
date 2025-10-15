@@ -332,74 +332,84 @@ class FeatureFlagService:
     def _evaluate_flag_for_user(self, user, flag_key: str, organization=None) -> Optional[bool]:
         """
         Internal method to evaluate a single flag for a user.
-        
+
+        Evaluation order (most specific to least specific):
+        1. Scheduling checks (active_from/active_until)
+        2. User-specific overrides (most specific)
+        3. Role-based access
+        4. Organization-specific access
+        5. Global flag setting
+        6. Rollout percentage
+        7. Progressive onboarding unlocks
+
         Args:
             user: User instance
             flag_key: Feature flag key
             organization: Optional organization context
-            
+
         Returns:
             True/False if flag found, None if not found
         """
         try:
             flag = FeatureFlag.objects.get(key=flag_key)
-            
+
             # Check if flag is active based on scheduling
             if not flag.is_active_now():
                 return False
-            
-            # 1. Check global flag
-            if flag.is_enabled_globally:
-                return True
-            
-            # 2. Check rollout percentage
-            if flag.rollout_percentage > 0:
-                if flag.is_in_rollout_percentage(str(user.id)):
-                    return True
-            
-            # 3. Check user-specific overrides
+
+            # 1. Check user-specific overrides FIRST (highest priority)
             user_access = FeatureAccess.objects.filter(
                 feature=flag,
                 user=user
             ).first()
-            
+
             if user_access:
                 if user_access.enabled and user_access.check_conditions(user):
                     return True
                 elif not user_access.enabled:
+                    # User-specific disable overrides everything
                     return False
-            
-            # 4. Check role-based access
+
+            # 2. Check role-based access
             if hasattr(user, 'role') and user.role:
                 role_access = FeatureAccess.objects.filter(
                     feature=flag,
                     role=user.role
                 ).first()
-                
+
                 if role_access:
                     if role_access.enabled and role_access.check_conditions(user):
                         return True
                     elif not role_access.enabled:
                         return False
-            
-            # 5. Check organization-specific access (if organization context provided)
+
+            # 3. Check organization-specific access (if organization context provided)
             if organization:
                 org_access = FeatureAccess.objects.filter(
                     feature=flag,
                     organization=organization
                 ).first()
-                
+
                 if org_access and org_access.enabled:
                     return True
-            
+
+            # 4. Check global flag
+            if flag.is_enabled_globally:
+                return True
+
+            # 5. Check rollout percentage
+            if flag.rollout_percentage > 0:
+                if flag.is_in_rollout_percentage(str(user.id)):
+                    return True
+
             # 6. Check progressive onboarding unlocks
             onboarding_unlocked = self._check_onboarding_unlock(user, flag_key)
             if onboarding_unlocked:
                 return True
-            
+
             # Default to disabled
             return False
-            
+
         except FeatureFlag.DoesNotExist:
             logger.debug(f"Feature flag {flag_key} not found")
             return None
