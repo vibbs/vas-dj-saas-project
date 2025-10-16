@@ -3,11 +3,13 @@ Audit logging middleware for automatic event tracking.
 """
 
 import logging
+
 from django.utils.deprecation import MiddlewareMixin
+
 from .models import AuditAction
 from .utils import log_audit_event
 
-logger = logging.getLogger('security.audit')
+logger = logging.getLogger("security.audit")
 
 
 class AuditLoggingMiddleware(MiddlewareMixin):
@@ -26,18 +28,18 @@ class AuditLoggingMiddleware(MiddlewareMixin):
             return None
 
         # Log superuser access for audit trail
-        if hasattr(request, 'user') and request.user.is_authenticated:
+        if hasattr(request, "user") and request.user.is_authenticated:
             if request.user.is_superuser:
-                org_context = getattr(request, 'org', None)
+                org_context = getattr(request, "org", None)
                 log_audit_event(
                     action=AuditAction.SUPERUSER_ACCESS,
                     request=request,
-                    resource_type='endpoint',
+                    resource_type="endpoint",
                     details={
-                        'path': request.path,
-                        'method': request.method,
-                        'organization': org_context.slug if org_context else None
-                    }
+                        "path": request.path,
+                        "method": request.method,
+                        "organization": org_context.slug if org_context else None,
+                    },
                 )
 
         return None
@@ -48,12 +50,12 @@ class AuditLoggingMiddleware(MiddlewareMixin):
 
         # Skip static files, admin media, health checks
         skip_prefixes = [
-            '/static/',
-            '/media/',
-            '/health/',
-            '/ready/',
-            '/__debug__/',
-            '/favicon.ico'
+            "/static/",
+            "/media/",
+            "/health/",
+            "/ready/",
+            "/__debug__/",
+            "/favicon.ico",
         ]
 
         for prefix in skip_prefixes:

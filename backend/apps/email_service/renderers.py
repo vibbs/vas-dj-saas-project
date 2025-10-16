@@ -1,11 +1,11 @@
-import os
 import logging
-from typing import Dict, Any, Optional
+from typing import Any
+
 from django.conf import settings
-from django.template import Template, Context
-from django.template.loader import get_template
 from django.template.exceptions import TemplateDoesNotExist
-from jinja2 import Environment, BaseLoader, TemplateNotFound, TemplateSyntaxError
+from django.template.loader import get_template
+from jinja2 import BaseLoader, Environment, TemplateNotFound, TemplateSyntaxError
+
 from .models import EmailTemplate
 
 log = logging.getLogger(f"{settings.LOG_APP_PREFIX}.email_service.renderers")
@@ -84,28 +84,34 @@ class TemplateRenderer:
 
         return context
 
-    def _load_template_from_db(self, template_slug: str) -> Optional[EmailTemplate]:
+    def _load_template_from_db(self, template_slug: str) -> EmailTemplate | None:
         """Load email template from database"""
         # Skip database lookup if no organization
         if not self.organization:
-            log.debug(f"No organization set, skipping database template lookup for '{template_slug}'")
+            log.debug(
+                f"No organization set, skipping database template lookup for '{template_slug}'"
+            )
             return None
-            
+
         try:
             template = EmailTemplate.objects.get(
                 organization=self.organization, slug=template_slug, is_active=True
             )
-            log.debug(f"Found database template '{template_slug}' for organization {self.organization.id}")
+            log.debug(
+                f"Found database template '{template_slug}' for organization {self.organization.id}"
+            )
             return template
         except EmailTemplate.DoesNotExist:
-            log.debug(f"Email template '{template_slug}' not found in database for organization {self.organization.id}")
+            log.debug(
+                f"Email template '{template_slug}' not found in database for organization {self.organization.id}"
+            )
             return None
 
-    def _load_template_from_file(self, template_slug: str) -> Optional[Dict[str, str]]:
+    def _load_template_from_file(self, template_slug: str) -> dict[str, str] | None:
         """Load default template from file system as fallback"""
         try:
             log.debug(f"Attempting to load file template: {template_slug}")
-            
+
             # Try to load HTML template
             html_template_path = f"email_service/{template_slug}.html"
             html_template = get_template(html_template_path)
@@ -122,7 +128,7 @@ class TemplateRenderer:
                 log.debug(f"Text template not found: {text_template_path}")
 
             # Set default subject for file templates
-            if template_slug == 'email_verification':
+            if template_slug == "email_verification":
                 subject_content = "Verify Your Email Address - {% if organization %}{{ organization.name }}{% else %}VAS-DJ Platform{% endif %}"
             else:
                 subject_content = "{{ subject | default('Notification from ' + (organization.name if organization else 'VAS-DJ Platform')) }}"
@@ -132,18 +138,25 @@ class TemplateRenderer:
                 "text_content": text_content,
                 "subject": subject_content,
             }
-            
-            log.debug(f"Template data loaded for {template_slug}: subject='{subject_content[:50]}...', html_length={len(template_data['html_content'])}, text_length={len(text_content)}")
+
+            log.debug(
+                f"Template data loaded for {template_slug}: subject='{subject_content[:50]}...', html_length={len(template_data['html_content'])}, text_length={len(text_content)}"
+            )
             return template_data
 
         except TemplateDoesNotExist as e:
-            log.warning(f"Default template '{template_slug}' not found in file system: {e}")
+            log.warning(
+                f"Default template '{template_slug}' not found in file system: {e}"
+            )
             return None
         except Exception as e:
-            log.error(f"Error loading template '{template_slug}' from file system: {e}", exc_info=True)
+            log.error(
+                f"Error loading template '{template_slug}' from file system: {e}",
+                exc_info=True,
+            )
             return None
 
-    def render_subject(self, template_slug: str, context: Dict[str, Any]) -> str:
+    def render_subject(self, template_slug: str, context: dict[str, Any]) -> str:
         """Render email subject with context"""
         try:
             # Try database template first (use Jinja2)
@@ -157,12 +170,25 @@ class TemplateRenderer:
                 return template.render(**base_context).strip()
             else:
                 # For file templates, use hardcoded subjects or context-based subjects
-                if template_slug == 'email_verification':
-                    org_name = context.get('organization', {}).get('name') if isinstance(context.get('organization'), dict) else getattr(context.get('organization'), 'name', None) if context.get('organization') else None
-                    return f"Verify Your Email Address - {org_name or 'VAS-DJ Platform'}"
+                if template_slug == "email_verification":
+                    org_name = (
+                        context.get("organization", {}).get("name")
+                        if isinstance(context.get("organization"), dict)
+                        else (
+                            getattr(context.get("organization"), "name", None)
+                            if context.get("organization")
+                            else None
+                        )
+                    )
+                    return (
+                        f"Verify Your Email Address - {org_name or 'VAS-DJ Platform'}"
+                    )
                 else:
                     # Default subject from context or fallback
-                    return context.get('subject', f"Notification from {self.organization.name if self.organization else 'VAS-DJ Platform'}")
+                    return context.get(
+                        "subject",
+                        f"Notification from {self.organization.name if self.organization else 'VAS-DJ Platform'}",
+                    )
 
         except (TemplateSyntaxError, Exception) as e:
             log.error(
@@ -171,7 +197,7 @@ class TemplateRenderer:
             )
             return f"Notification from {self.organization.name if self.organization else 'VAS-DJ Platform'}"
 
-    def render_html(self, template_slug: str, context: Dict[str, Any]) -> str:
+    def render_html(self, template_slug: str, context: dict[str, Any]) -> str:
         """Render HTML email content with context"""
         try:
             # Try database template first (use Jinja2)
@@ -224,7 +250,7 @@ class TemplateRenderer:
             </html>
             """
 
-    def render_text(self, template_slug: str, context: Dict[str, Any]) -> str:
+    def render_text(self, template_slug: str, context: dict[str, Any]) -> str:
         """Render plain text email content with context"""
         try:
             # Try database template first (use Jinja2)
@@ -250,6 +276,7 @@ class TemplateRenderer:
                     html_content = self.render_html(template_slug, context)
                     # Basic HTML to text conversion
                     import re
+
                     text_content = re.sub(r"<[^>]+>", "", html_content)
                     text_content = re.sub(r"\s+", " ", text_content).strip()
                     return text_content
@@ -263,8 +290,8 @@ class TemplateRenderer:
             return f"Notification from {self.organization.name if self.organization else 'VAS-DJ Platform'}\n\n{context.get('message', 'No message content available.')}"
 
     def render_email(
-        self, template_slug: str, context: Dict[str, Any], user=None
-    ) -> Dict[str, str]:
+        self, template_slug: str, context: dict[str, Any], user=None
+    ) -> dict[str, str]:
         """
         Render complete email (subject, HTML, text) with context.
 

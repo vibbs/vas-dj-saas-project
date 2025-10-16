@@ -1,16 +1,18 @@
 import logging
-from rest_framework import viewsets, permissions
+
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.db.models import Prefetch
+from drf_spectacular.utils import extend_schema, extend_schema_view
+from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema, extend_schema_view
-from django.contrib.auth import get_user_model
-from django.conf import settings
-from django.db.models import Prefetch, Q
+
 from apps.accounts.models import Account, AccountAuthProvider
 from apps.accounts.serializers import (
-    AccountSerializer,
-    AccountCreateSerializer,
     AccountAuthProviderSerializer,
+    AccountCreateSerializer,
+    AccountSerializer,
 )
 from apps.core.exceptions.client_errors import ValidationException
 from apps.organizations.models import OrganizationMembership
@@ -69,14 +71,14 @@ class AccountViewSet(viewsets.ModelViewSet):
         queryset = Account.objects.prefetch_related(
             # Prefetch active memberships with organization details
             Prefetch(
-                'organization_memberships',
+                "organization_memberships",
                 queryset=OrganizationMembership.objects.filter(
-                    status='active'
-                ).select_related('organization'),
-                to_attr='active_memberships_list'
+                    status="active"
+                ).select_related("organization"),
+                to_attr="active_memberships_list",
             ),
             # Prefetch auth providers
-            'auth_providers'
+            "auth_providers",
         )
 
         # Superusers can see all accounts
@@ -85,13 +87,13 @@ class AccountViewSet(viewsets.ModelViewSet):
 
         # Get all organizations where the user has active membership
         user_org_ids = user.get_active_memberships().values_list(
-            'organization_id', flat=True
+            "organization_id", flat=True
         )
 
         # Return accounts that have memberships in any of those organizations
         return queryset.filter(
             organization_memberships__organization_id__in=user_org_ids,
-            organization_memberships__status='active'
+            organization_memberships__status="active",
         ).distinct()
 
     def get_serializer_class(self):
@@ -125,20 +127,19 @@ class AccountViewSet(viewsets.ModelViewSet):
             for field_name, field_errors in serializer.errors.items():
                 if not isinstance(field_errors, list):
                     field_errors = [field_errors]
-                
+
                 for error in field_errors:
                     issue = {
                         "message": str(error),
-                        "path": [field_name] if field_name != "non_field_errors" else [],
-                        "type": "field_validation"
+                        "path": (
+                            [field_name] if field_name != "non_field_errors" else []
+                        ),
+                        "type": "field_validation",
                     }
                     issues.append(issue)
-            
-            raise ValidationException(
-                detail="Validation failed",
-                issues=issues
-            )
-        
+
+            raise ValidationException(detail="Validation failed", issues=issues)
+
         serializer.save()
         return Response(serializer.data)
 

@@ -1,24 +1,24 @@
 import logging
-from rest_framework import viewsets, status, permissions
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
+
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from .models import Plan, Subscription, Invoice
+from rest_framework import permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
+from .models import Invoice, Plan, Subscription
 from .serializers import (
-    PlanSerializer,
-    SubscriptionSerializer,
-    InvoiceSerializer,
-    CreateCheckoutSessionSerializer,
-    SubscriptionActionSerializer,
     BillingOverviewSerializer,
+    CreateCheckoutSessionSerializer,
+    InvoiceSerializer,
+    PlanSerializer,
+    SubscriptionActionSerializer,
+    SubscriptionSerializer,
 )
-from .services import StripeService, BillingService
+from .services import BillingService
 
 log = logging.getLogger(f"{settings.LOG_APP_PREFIX}.billing.views")
-from .webhooks import StripeWebhookView
 
 
 @extend_schema_view(
@@ -31,9 +31,12 @@ class PlanViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Plan.objects.filter(
-            is_active=True, organization=self.request.user.current_organization
-        )
+        """Get plans scoped to the current organization."""
+        organization = getattr(self.request, "org", None)
+        if organization:
+            return Plan.objects.filter(is_active=True, organization=organization)
+        # If no organization context, return public plans or all plans
+        return Plan.objects.filter(is_active=True)
 
 
 @extend_schema_view(
@@ -42,26 +45,26 @@ class PlanViewSet(viewsets.ReadOnlyModelViewSet):
         tags=["Billing"],
         parameters=[
             {
-                'name': 'id',
-                'in': 'path',
-                'required': True,
-                'description': 'Subscription UUID',
-                'schema': {'type': 'string', 'format': 'uuid'}
+                "name": "id",
+                "in": "path",
+                "required": True,
+                "description": "Subscription UUID",
+                "schema": {"type": "string", "format": "uuid"},
             }
-        ]
+        ],
     ),
     create_checkout_session=extend_schema(tags=["Billing"]),
     manage_subscription=extend_schema(
         tags=["Billing"],
         parameters=[
             {
-                'name': 'id',
-                'in': 'path',
-                'required': True,
-                'description': 'Subscription UUID',
-                'schema': {'type': 'string', 'format': 'uuid'}
+                "name": "id",
+                "in": "path",
+                "required": True,
+                "description": "Subscription UUID",
+                "schema": {"type": "string", "format": "uuid"},
             }
-        ]
+        ],
     ),
     current=extend_schema(tags=["Billing"]),
     overview=extend_schema(tags=["Billing"]),
@@ -71,36 +74,48 @@ class SubscriptionViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Subscription.objects.filter(
-            account=self.request.user,
-            organization=self.request.user.current_organization,
-        )
+        """Get subscriptions for the current user and organization."""
+        queryset = Subscription.objects.filter(account=self.request.user)
+        organization = getattr(self.request, "org", None)
+        if organization:
+            queryset = queryset.filter(organization=organization)
+        return queryset
 
     @action(detail=False, methods=["post"])
     def create_checkout_session(self, request):
+        """Create a checkout session for subscription purchase."""
         serializer = CreateCheckoutSessionSerializer(data=request.data)
         if serializer.is_valid():
             plan = serializer.validated_data["plan_id"]
             success_url = serializer.validated_data["success_url"]
             cancel_url = serializer.validated_data["cancel_url"]
+            organization = getattr(request, "org", None)
 
             try:
-                session = StripeService.create_checkout_session(
+                billing_service = BillingService()
+                session_data = billing_service.create_checkout_session(
                     plan=plan,
                     account=request.user,
                     success_url=success_url,
                     cancel_url=cancel_url,
-                    organization=request.user.current_organization,
+                    organization=organization,
                 )
 
-                return Response({"checkout_url": session.url, "session_id": session.id})
+                return Response(
+                    {
+                        "checkout_url": session_data.checkout_url,
+                        "session_id": session_data.session_id,
+                    }
+                )
             except Exception as e:
+                log.error(f"Checkout session creation failed: {str(e)}")
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=["post"])
     def manage_subscription(self, request, pk=None):
+        """Manage subscription (cancel, reactivate)."""
         subscription = self.get_object()
         serializer = SubscriptionActionSerializer(data=request.data)
 
@@ -109,15 +124,17 @@ class SubscriptionViewSet(viewsets.ReadOnlyModelViewSet):
             at_period_end = serializer.validated_data.get("at_period_end", True)
 
             try:
+                billing_service = BillingService()
                 message = ""
+
                 if action_type == "cancel":
-                    StripeService.cancel_subscription(subscription, at_period_end)
+                    billing_service.cancel_subscription(subscription, at_period_end)
                     if at_period_end:
                         message = str(_("Subscription will be canceled at period end"))
                     else:
                         message = str(_("Subscription has been canceled immediately"))
                 elif action_type == "reactivate":
-                    StripeService.reactivate_subscription(subscription)
+                    billing_service.reactivate_subscription(subscription)
                     message = str(_("Subscription has been reactivated"))
 
                 subscription.refresh_from_db()
@@ -128,6 +145,7 @@ class SubscriptionViewSet(viewsets.ReadOnlyModelViewSet):
                     }
                 )
             except Exception as e:
+                log.error(f"Subscription management failed: {str(e)}")
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -135,8 +153,9 @@ class SubscriptionViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=["get"])
     def current(self, request):
         """Get current active subscription."""
+        organization = getattr(request, "org", None)
         subscription = BillingService.get_active_subscription(
-            request.user, request.user.current_organization
+            request.user, organization
         )
 
         if subscription:
@@ -151,13 +170,17 @@ class SubscriptionViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=["get"])
     def overview(self, request):
         """Get billing overview including subscription, invoices, and usage."""
+        organization = getattr(request, "org", None)
+
         active_subscription = BillingService.get_active_subscription(
-            request.user, request.user.current_organization
+            request.user, organization
         )
 
-        recent_invoices = Invoice.objects.filter(
-            account=request.user, organization=request.user.current_organization
-        )[:5]
+        # Get recent invoices for this user and organization
+        invoice_queryset = Invoice.objects.filter(account=request.user)
+        if organization:
+            invoice_queryset = invoice_queryset.filter(organization=organization)
+        recent_invoices = invoice_queryset[:5]
 
         # Example usage stats - customize based on your features
         usage_stats = []
@@ -180,10 +203,10 @@ class SubscriptionViewSet(viewsets.ReadOnlyModelViewSet):
             "recent_invoices": recent_invoices,
             "usage_stats": usage_stats,
             "has_active_subscription": BillingService.has_active_subscription(
-                request.user, request.user.current_organization
+                request.user, organization
             ),
             "is_in_grace_period": BillingService.is_in_grace_period(
-                request.user, request.user.current_organization
+                request.user, organization
             ),
         }
 
@@ -197,13 +220,13 @@ class SubscriptionViewSet(viewsets.ReadOnlyModelViewSet):
         tags=["Billing"],
         parameters=[
             {
-                'name': 'id',
-                'in': 'path',
-                'required': True,
-                'description': 'Invoice UUID',
-                'schema': {'type': 'string', 'format': 'uuid'}
+                "name": "id",
+                "in": "path",
+                "required": True,
+                "description": "Invoice UUID",
+                "schema": {"type": "string", "format": "uuid"},
             }
-        ]
+        ],
     ),
 )
 class InvoiceViewSet(viewsets.ReadOnlyModelViewSet):
@@ -211,7 +234,9 @@ class InvoiceViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Invoice.objects.filter(
-            account=self.request.user,
-            organization=self.request.user.current_organization,
-        )
+        """Get invoices for the current user and organization."""
+        queryset = Invoice.objects.filter(account=self.request.user)
+        organization = getattr(self.request, "org", None)
+        if organization:
+            queryset = queryset.filter(organization=organization)
+        return queryset

@@ -1,7 +1,8 @@
+from django.conf import settings
 from django.db import models
+
 from apps.accounts.enums import TeamRoleTypes
 from apps.accounts.models.account import Account
-from django.conf import settings
 from apps.core.models import BaseFields
 
 

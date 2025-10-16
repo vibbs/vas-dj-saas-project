@@ -3,9 +3,10 @@ Caching utility functions for performance optimization.
 """
 
 import functools
-from django.core.cache import cache
+from collections.abc import Callable
+
 from django.conf import settings
-from typing import Optional, Any, Callable
+from django.core.cache import cache
 
 
 def cache_key(*parts) -> str:
@@ -15,7 +16,7 @@ def cache_key(*parts) -> str:
     Example:
         cache_key('user', user_id, 'permissions') -> 'vasdj:user:123:permissions'
     """
-    prefix = getattr(settings, 'CACHE_KEY_PREFIX', 'vasdj')
+    prefix = getattr(settings, "CACHE_KEY_PREFIX", "vasdj")
     return f"{prefix}:{':'.join(str(p) for p in parts)}"
 
 
@@ -28,6 +29,7 @@ def invalidate_cache(pattern: str):
     # consider using django-redis and its delete_pattern method
     try:
         from django_redis import get_redis_connection
+
         conn = get_redis_connection("default")
         # Use SCAN for efficient pattern-based deletion
         cursor = 0
@@ -54,17 +56,18 @@ def cached_property_method(timeout: int = 300):
         def get_expensive_data(self, param):
             return compute_expensive_operation(param)
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(self, *args, **kwargs):
             # Generate cache key from object, method name, and arguments
-            obj_id = getattr(self, 'id', id(self))
+            obj_id = getattr(self, "id", id(self))
             key = cache_key(
                 self.__class__.__name__,
                 obj_id,
                 func.__name__,
                 *args,
-                *sorted(kwargs.items())
+                *sorted(kwargs.items()),
             )
 
             # Try to get from cache
@@ -78,10 +81,13 @@ def cached_property_method(timeout: int = 300):
             return result
 
         return wrapper
+
     return decorator
 
 
-def cache_user_permissions(user_id, organization_id, permissions: dict, timeout: int = 300):
+def cache_user_permissions(
+    user_id, organization_id, permissions: dict, timeout: int = 300
+):
     """
     Cache user permissions for an organization.
 
@@ -91,11 +97,11 @@ def cache_user_permissions(user_id, organization_id, permissions: dict, timeout:
         permissions: Dictionary of permissions
         timeout: Cache timeout in seconds (default: 5 minutes)
     """
-    key = cache_key('user', user_id, 'org', organization_id, 'permissions')
+    key = cache_key("user", user_id, "org", organization_id, "permissions")
     cache.set(key, permissions, timeout)
 
 
-def get_cached_user_permissions(user_id, organization_id) -> Optional[dict]:
+def get_cached_user_permissions(user_id, organization_id) -> dict | None:
     """
     Get cached user permissions for an organization.
 
@@ -106,7 +112,7 @@ def get_cached_user_permissions(user_id, organization_id) -> Optional[dict]:
     Returns:
         Cached permissions dictionary or None if not cached
     """
-    key = cache_key('user', user_id, 'org', organization_id, 'permissions')
+    key = cache_key("user", user_id, "org", organization_id, "permissions")
     return cache.get(key)
 
 
@@ -120,11 +126,11 @@ def invalidate_user_permissions(user_id, organization_id=None):
     """
     if organization_id:
         # Invalidate specific org permissions
-        key = cache_key('user', user_id, 'org', organization_id, 'permissions')
+        key = cache_key("user", user_id, "org", organization_id, "permissions")
         cache.delete(key)
     else:
         # Invalidate all permissions for user
-        pattern = cache_key('user', user_id, 'org', '*', 'permissions')
+        pattern = cache_key("user", user_id, "org", "*", "permissions")
         invalidate_cache(pattern)
 
 
@@ -137,11 +143,11 @@ def cache_organization_stats(organization_id, stats: dict, timeout: int = 600):
         stats: Dictionary of statistics
         timeout: Cache timeout in seconds (default: 10 minutes)
     """
-    key = cache_key('org', organization_id, 'stats')
+    key = cache_key("org", organization_id, "stats")
     cache.set(key, stats, timeout)
 
 
-def get_cached_organization_stats(organization_id) -> Optional[dict]:
+def get_cached_organization_stats(organization_id) -> dict | None:
     """
     Get cached organization statistics.
 
@@ -151,7 +157,7 @@ def get_cached_organization_stats(organization_id) -> Optional[dict]:
     Returns:
         Cached stats dictionary or None if not cached
     """
-    key = cache_key('org', organization_id, 'stats')
+    key = cache_key("org", organization_id, "stats")
     return cache.get(key)
 
 
@@ -162,5 +168,5 @@ def invalidate_organization_cache(organization_id):
     Args:
         organization_id: Organization UUID
     """
-    pattern = cache_key('org', organization_id, '*')
+    pattern = cache_key("org", organization_id, "*")
     invalidate_cache(pattern)

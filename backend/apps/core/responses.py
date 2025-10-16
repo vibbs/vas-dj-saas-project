@@ -5,18 +5,20 @@ This module provides utility functions for creating standardized success respons
 that match the RFC 7807 specification for success envelopes.
 """
 
-from typing import Any, Dict, Optional, Union
+from typing import Any
+
 from rest_framework.response import Response
+
 from .codes import APIResponseCodes
 
 
 def success_response(
     *,
     data: Any = None,
-    code: Union[str, APIResponseCodes],
+    code: str | APIResponseCodes,
     i18n_key: str,
     status: int = 200,
-    extra: Optional[Dict[str, Any]] = None
+    extra: dict[str, Any] | None = None,
 ) -> Response:
     """
     Create a standardized success response.
@@ -52,8 +54,8 @@ def success_response(
 def ok(
     *,
     data: Any = None,
-    code: Union[str, APIResponseCodes] = APIResponseCodes.GEN_OK_200,
-    i18n_key: str = "common.ok"
+    code: str | APIResponseCodes = APIResponseCodes.GEN_OK_200,
+    i18n_key: str = "common.ok",
 ) -> Response:
     """
     Create a standard 200 OK response.
@@ -72,8 +74,8 @@ def ok(
 def created(
     *,
     data: Any = None,
-    code: Union[str, APIResponseCodes] = APIResponseCodes.GEN_CREATED_201,
-    i18n_key: str = "common.created"
+    code: str | APIResponseCodes = APIResponseCodes.GEN_CREATED_201,
+    i18n_key: str = "common.created",
 ) -> Response:
     """
     Create a standard 201 Created response.
@@ -92,8 +94,8 @@ def created(
 def accepted(
     *,
     data: Any = None,
-    code: Union[str, APIResponseCodes],
-    i18n_key: str = "common.accepted"
+    code: str | APIResponseCodes,
+    i18n_key: str = "common.accepted",
 ) -> Response:
     """
     Create a standard 202 Accepted response.
@@ -110,7 +112,7 @@ def accepted(
 
 
 def no_content(
-    *, code: Union[str, APIResponseCodes], i18n_key: str = "common.no_content"
+    *, code: str | APIResponseCodes, i18n_key: str = "common.no_content"
 ) -> Response:
     """
     Create a standard 204 No Content response.

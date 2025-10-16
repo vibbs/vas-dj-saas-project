@@ -6,9 +6,10 @@ the RFC 7807 success envelope format with numeric status codes.
 """
 
 import math
-from typing import Union
+
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+
 from .codes import APIResponseCodes
 
 

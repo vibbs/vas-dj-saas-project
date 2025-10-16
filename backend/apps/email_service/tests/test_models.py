@@ -4,9 +4,6 @@ Test cases for email service models.
 
 import pytest
 from django.core import mail
-from apps.email_service.services import send_email  # Adjust import based on your actual service
-from apps.accounts.tests.factories import AccountFactory
-from apps.organizations.tests.factories import OrganizationFactory
 
 
 @pytest.mark.django_db
@@ -44,7 +41,7 @@ class TestEmailService:
         """Test that test email backend is working."""
         # This should work with the locmem email backend in test settings
         assert len(mail.outbox) == 0
-        
+
         # When you implement email sending, you can test like this:
         # send_test_email()
         # assert len(mail.outbox) == 1

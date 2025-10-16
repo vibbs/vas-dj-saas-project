@@ -11,6 +11,7 @@ Code pattern: VDJ-<MODULE>-<USECASE>-<HTTP>
 import os
 import re
 from enum import StrEnum
+
 from django.conf import settings
 
 

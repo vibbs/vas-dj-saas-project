@@ -5,9 +5,8 @@ These serializers define the standardized response formats used across the API
 and ensure Swagger documentation matches actual response structures.
 """
 
+from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
-from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
-from typing import Any, Dict, List
 
 
 # RFC 7807 Problem Details Schema
@@ -29,15 +28,15 @@ from typing import Any, Dict, List
                     {
                         "path": ["email"],
                         "message": "This field is required.",
-                        "i18n_key": "validation.required"
+                        "i18n_key": "validation.required",
                     },
                     {
                         "path": ["password"],
                         "message": "Password must be at least 8 characters long.",
-                        "i18n_key": "validation.min_length"
-                    }
-                ]
-            }
+                        "i18n_key": "validation.min_length",
+                    },
+                ],
+            },
         ),
         OpenApiExample(
             "Authentication Required",
@@ -50,8 +49,8 @@ from typing import Any, Dict, List
                 "code": "VDJ-AUTH-LOGIN-401",
                 "i18n_key": "errors.authentication_required",
                 "detail": "Authentication credentials were not provided or are invalid.",
-                "instance": "/api/v1/organizations/"
-            }
+                "instance": "/api/v1/organizations/",
+            },
         ),
         OpenApiExample(
             "Not Found",
@@ -64,8 +63,8 @@ from typing import Any, Dict, List
                 "code": "VDJ-GEN-NOTFOUND-404",
                 "i18n_key": "errors.not_found",
                 "detail": "The requested resource was not found.",
-                "instance": "/api/v1/accounts/users/123/"
-            }
+                "instance": "/api/v1/accounts/users/123/",
+            },
         ),
         OpenApiExample(
             "Organization Access Denied",
@@ -79,47 +78,40 @@ from typing import Any, Dict, List
                 "i18n_key": "org.access_denied",
                 "detail": "You do not have access to this organization.",
                 "instance": "/api/v1/organizations/acme/",
-                "meta": {
-                    "organization_id": "123e4567-e89b-12d3-a456-426614174000"
-                }
-            }
-        )
+                "meta": {"organization_id": "123e4567-e89b-12d3-a456-426614174000"},
+            },
+        ),
     ]
 )
 class ProblemSerializer(serializers.Serializer):
     """RFC 7807 Problem Details schema for error responses."""
-    
+
     type = serializers.URLField(
         help_text="A URI reference that identifies the problem type"
     )
     title = serializers.CharField(
         help_text="A short, human-readable summary of the problem type"
     )
-    status = serializers.IntegerField(
-        help_text="The HTTP status code"
-    )
-    code = serializers.CharField(
-        help_text="Machine-readable error code (VDJ-*)"
-    )
+    status = serializers.IntegerField(help_text="The HTTP status code")
+    code = serializers.CharField(help_text="Machine-readable error code (VDJ-*)")
     i18n_key = serializers.CharField(
         help_text="Internationalization key for frontend localization"
     )
     detail = serializers.CharField(
         required=False,
-        help_text="A human-readable explanation specific to this problem occurrence"
+        help_text="A human-readable explanation specific to this problem occurrence",
     )
     instance = serializers.CharField(
         required=False,
-        help_text="A URI reference that identifies the specific occurrence of the problem"
+        help_text="A URI reference that identifies the specific occurrence of the problem",
     )
     issues = serializers.ListField(
         child=serializers.DictField(),
         required=False,
-        help_text="Array of validation issues (for validation errors)"
+        help_text="Array of validation issues (for validation errors)",
     )
     meta = serializers.DictField(
-        required=False,
-        help_text="Additional metadata about the problem"
+        required=False, help_text="Additional metadata about the problem"
     )
 
 
@@ -132,21 +124,19 @@ class ProblemSerializer(serializers.Serializer):
             value={
                 "path": ["user", "email"],
                 "message": "Enter a valid email address.",
-                "i18n_key": "validation.email"
-            }
+                "i18n_key": "validation.email",
+            },
         )
     ]
 )
 class IssueSerializer(serializers.Serializer):
     """Schema for individual validation issues within Problem responses."""
-    
+
     path = serializers.ListField(
         child=serializers.CharField(),
-        help_text="Path to the field that caused the issue (e.g., ['user', 'email'])"
+        help_text="Path to the field that caused the issue (e.g., ['user', 'email'])",
     )
-    message = serializers.CharField(
-        help_text="Human-readable error message"
-    )
+    message = serializers.CharField(help_text="Human-readable error message")
     i18n_key = serializers.CharField(
         help_text="Internationalization key for the error message"
     )
@@ -167,9 +157,9 @@ class IssueSerializer(serializers.Serializer):
                     "id": "123e4567-e89b-12d3-a456-426614174000",
                     "email": "user@example.com",
                     "firstName": "John",
-                    "lastName": "Doe"
-                }
-            }
+                    "lastName": "Doe",
+                },
+            },
         ),
         OpenApiExample(
             "User Created",
@@ -183,27 +173,21 @@ class IssueSerializer(serializers.Serializer):
                     "id": "123e4567-e89b-12d3-a456-426614174000",
                     "email": "newuser@example.com",
                     "firstName": "Jane",
-                    "lastName": "Smith"
-                }
-            }
-        )
+                    "lastName": "Smith",
+                },
+            },
+        ),
     ]
 )
 class SuccessEnvelopeSerializer(serializers.Serializer):
     """Standard success response envelope for non-paginated responses."""
-    
-    status = serializers.IntegerField(
-        help_text="HTTP status code (numeric)"
-    )
-    code = serializers.CharField(
-        help_text="Machine-readable success code (VDJ-*)"
-    )
+
+    status = serializers.IntegerField(help_text="HTTP status code (numeric)")
+    code = serializers.CharField(help_text="Machine-readable success code (VDJ-*)")
     i18n_key = serializers.CharField(
         help_text="Internationalization key for frontend localization"
     )
-    data = serializers.JSONField(
-        help_text="Response data payload"
-    )
+    data = serializers.JSONField(help_text="Response data payload")
 
 
 @extend_schema_serializer(
@@ -222,44 +206,37 @@ class SuccessEnvelopeSerializer(serializers.Serializer):
                     "currentPage": 1,
                     "next": 2,
                     "previous": None,
-                    "pageSize": 20
+                    "pageSize": 20,
                 },
                 "data": [
                     {
                         "id": "123e4567-e89b-12d3-a456-426614174000",
                         "email": "user1@example.com",
                         "firstName": "John",
-                        "lastName": "Doe"
+                        "lastName": "Doe",
                     },
                     {
                         "id": "456e7890-e89b-12d3-a456-426614174000",
                         "email": "user2@example.com",
                         "firstName": "Jane",
-                        "lastName": "Smith"
-                    }
-                ]
-            }
+                        "lastName": "Smith",
+                    },
+                ],
+            },
         )
     ]
 )
 class PaginatedEnvelopeSerializer(serializers.Serializer):
     """Standard paginated response envelope."""
-    
-    status = serializers.IntegerField(
-        help_text="HTTP status code (numeric)"
-    )
-    code = serializers.CharField(
-        help_text="Machine-readable success code (VDJ-*)"
-    )
+
+    status = serializers.IntegerField(help_text="HTTP status code (numeric)")
+    code = serializers.CharField(help_text="Machine-readable success code (VDJ-*)")
     i18n_key = serializers.CharField(
         help_text="Internationalization key for frontend localization"
     )
-    pagination = serializers.DictField(
-        help_text="Pagination metadata"
-    )
+    pagination = serializers.DictField(help_text="Pagination metadata")
     data = serializers.ListField(
-        child=serializers.JSONField(),
-        help_text="Array of response data items"
+        child=serializers.JSONField(), help_text="Array of response data items"
     )
 
 
@@ -275,33 +252,25 @@ class PaginatedEnvelopeSerializer(serializers.Serializer):
                 "currentPage": 1,
                 "next": 2,
                 "previous": None,
-                "pageSize": 20
-            }
+                "pageSize": 20,
+            },
         )
     ]
 )
 class PaginationSerializer(serializers.Serializer):
     """Pagination metadata schema."""
-    
-    count = serializers.IntegerField(
-        help_text="Total number of items across all pages"
-    )
-    totalPages = serializers.IntegerField(
-        help_text="Total number of pages"
-    )
-    currentPage = serializers.IntegerField(
-        help_text="Current page number (1-based)"
-    )
+
+    count = serializers.IntegerField(help_text="Total number of items across all pages")
+    totalPages = serializers.IntegerField(help_text="Total number of pages")
+    currentPage = serializers.IntegerField(help_text="Current page number (1-based)")
     next = serializers.IntegerField(
         required=False,
         allow_null=True,
-        help_text="Next page number (null if no next page)"
+        help_text="Next page number (null if no next page)",
     )
     previous = serializers.IntegerField(
         required=False,
         allow_null=True,
-        help_text="Previous page number (null if no previous page)"
+        help_text="Previous page number (null if no previous page)",
     )
-    pageSize = serializers.IntegerField(
-        help_text="Number of items per page"
-    )
+    pageSize = serializers.IntegerField(help_text="Number of items per page")

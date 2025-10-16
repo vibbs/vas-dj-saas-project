@@ -5,14 +5,17 @@ Pytest fixtures specific to accounts app.
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
+
 from apps.accounts.tests.factories import (
-    AccountFactory,
-    AdminAccountFactory,
-    UnverifiedAccountFactory,
     AccountAuthProviderFactory,
-    GoogleAuthProviderFactory
+    AccountFactory,
+    GoogleAuthProviderFactory,
+    UnverifiedAccountFactory,
 )
-from apps.organizations.tests.factories import OrganizationFactory, OrganizationMembershipFactory
+from apps.organizations.tests.factories import (
+    OrganizationFactory,
+    OrganizationMembershipFactory,
+)
 
 User = get_user_model()
 
@@ -47,8 +50,10 @@ def expired_verification_account():
     """Account with expired verification token."""
     account = UnverifiedAccountFactory()
     # Set token expiry to past
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
+
     account.email_verification_token_expires = timezone.now() - timedelta(hours=1)
     account.save()
     return account
@@ -62,7 +67,7 @@ def user():
     # Create user and associate with organization
     user = AccountFactory(organization=org)
     # Create membership
-    OrganizationMembershipFactory(organization=org, user=user, role='owner')
+    OrganizationMembershipFactory(organization=org, user=user, role="owner")
     return user
 
 
@@ -77,9 +82,9 @@ def authenticated_api_client(user):
     """Create an authenticated API client with organization context."""
     client = APIClient()
     client.force_authenticate(user=user)
-    
+
     # Add organization context header for tenant middleware
-    if hasattr(user, 'organization') and user.organization:
+    if hasattr(user, "organization") and user.organization:
         client.credentials(HTTP_X_ORG_SLUG=user.organization.slug)
-    
+
     return client

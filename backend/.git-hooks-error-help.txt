@@ -1,0 +1,42 @@
+===============================================
+  GIT COMMIT BLOCKED - QUICK FIX GUIDE
+===============================================
+
+Your commit was blocked by pre-commit hooks.
+Most likely: Required tools are not installed.
+
+QUICKEST FIX (Run in terminal):
+--------------------------------
+cd backend && make pre-commit-setup
+
+This installs black, isort, ruff, and pre-commit.
+
+ALTERNATIVE FIXES:
+------------------
+1. Install manually:
+   pip install black isort ruff pre-commit
+
+2. Skip hooks (not recommended):
+   git commit --no-verify -m "Your message"
+
+3. View detailed error:
+   cat backend/.git/pre-commit-errors.log
+
+COMMON ERRORS:
+--------------
+• "black...Failed" → Tools not installed
+• "Django check failed" → Run: make start
+• "Missing migrations" → Run: make migrations
+
+FULL DOCUMENTATION:
+-------------------
+• Troubleshooting: backend/TROUBLESHOOTING-GIT-HOOKS.md
+• Complete guide: backend/PRE-COMMIT-GUIDE.md
+
+NEED HELP?
+----------
+1. Check error log: backend/.git/pre-commit-errors.log
+2. Run diagnostic: make pre-commit-check
+3. Read troubleshooting guide (link above)
+
+===============================================

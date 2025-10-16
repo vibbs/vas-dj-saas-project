@@ -11,10 +11,12 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 import os
-import dj_database_url
 from pathlib import Path
-from decouple import config, Csv
-from apps.lib.locales import LOCALES, LANGUAGE_CODE_DEFAULT, LOCALE_PATHS_RELATIVE
+
+import dj_database_url
+from decouple import Csv, config
+
+from apps.lib.locales import LANGUAGE_CODE_DEFAULT, LOCALE_PATHS_RELATIVE, LOCALES
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -68,6 +70,16 @@ INSTALLED_APPS = [
     "apps.feature_flags",
 ]
 
+# Observability: Conditionally add django_prometheus
+# This app provides additional metrics and monitoring capabilities
+try:
+    from apps.core.observability.config import ObservabilityConfig
+
+    if ObservabilityConfig.is_metrics_enabled():
+        INSTALLED_APPS.append("django_prometheus")
+except ImportError:
+    pass
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "corsheaders.middleware.CorsMiddleware",  # CORS - must be before CommonMiddleware
@@ -84,6 +96,17 @@ MIDDLEWARE = [
     "apps.core.middleware.rate_limiting.RateLimitMiddleware",  # Rate limiting
     "apps.organizations.middleware.tenant.TenantMiddleware",
 ]
+
+# Observability: Conditionally add metrics middleware
+# This middleware collects Prometheus metrics for HTTP requests
+try:
+    from apps.core.observability.config import ObservabilityConfig
+
+    if ObservabilityConfig.is_metrics_enabled():
+        # Add metrics middleware near the end (after authentication)
+        MIDDLEWARE.append("apps.core.middleware.metrics.MetricsMiddleware")
+except ImportError:
+    pass
 
 ROOT_URLCONF = "config.urls"
 
@@ -321,33 +344,56 @@ FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 CORS_ALLOWED_ORIGINS = config(
     "CORS_ALLOWED_ORIGINS",
     default="http://localhost:3000,http://localhost:3001",
-    cast=lambda v: [s.strip() for s in v.split(",") if s.strip()]
+    cast=lambda v: [s.strip() for s in v.split(",") if s.strip()],
 )
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
-    'x-org-slug',  # Custom header for tenant resolution
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+    "x-org-slug",  # Custom header for tenant resolution
 ]
 
 # Cache Configuration (Development uses in-memory, Production uses Redis)
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'default-cache',
-        'TIMEOUT': 300,  # 5 minutes default
-        'OPTIONS': {
-            'MAX_ENTRIES': 1000
-        }
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "default-cache",
+        "TIMEOUT": 300,  # 5 minutes default
+        "OPTIONS": {"MAX_ENTRIES": 1000},
     }
 }
 
 # Cache key prefix
-CACHE_KEY_PREFIX = 'vasdj'
+CACHE_KEY_PREFIX = "vasdj"
+
+# Observability Configuration
+# All observability features are disabled by default to minimize infrastructure costs
+# Set OBSERVABILITY_ENABLED=true in environment to enable metrics and tracing
+OBSERVABILITY_ENABLED = config("OBSERVABILITY_ENABLED", default=False, cast=bool)
+METRICS_ENABLED = config("METRICS_ENABLED", default=False, cast=bool)
+TRACING_ENABLED = config("TRACING_ENABLED", default=False, cast=bool)
+DETAILED_METRICS_ENABLED = config("DETAILED_METRICS_ENABLED", default=False, cast=bool)
+METRICS_SAMPLE_RATE = config("METRICS_SAMPLE_RATE", default=1.0, cast=float)
+TRACING_SAMPLE_RATE = config("TRACING_SAMPLE_RATE", default=0.01, cast=float)
+
+# Initialize OpenTelemetry instrumentation if observability is enabled
+if OBSERVABILITY_ENABLED:
+    try:
+        import logging
+
+        from apps.core.observability.instrumentation import initialize_instrumentation
+
+        logger = logging.getLogger(__name__)
+        if initialize_instrumentation():
+            logger.info("OpenTelemetry instrumentation initialized")
+    except Exception as e:
+        import logging
+
+        logging.getLogger(__name__).warning(f"Failed to initialize observability: {e}")

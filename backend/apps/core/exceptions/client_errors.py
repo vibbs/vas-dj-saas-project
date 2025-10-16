@@ -2,15 +2,14 @@
 4xx Client Error exceptions for standardized error handling.
 """
 
-from typing import Optional
-from .base import BaseHttpException
 from ..codes import APIResponseCodes
+from .base import BaseHttpException
 
 
 class BadRequestException(BaseHttpException):
     """400 Bad Request - The request could not be understood by the server."""
 
-    def __init__(self, detail: Optional[str] = None, **kwargs):
+    def __init__(self, detail: str | None = None, **kwargs):
         super().__init__(
             type="https://docs.yourapp.com/problems/bad-request",
             title="Bad request",
@@ -25,7 +24,7 @@ class BadRequestException(BaseHttpException):
 class UnauthorizedException(BaseHttpException):
     """401 Unauthorized - Authentication is required and has failed or not been provided."""
 
-    def __init__(self, detail: Optional[str] = None, **kwargs):
+    def __init__(self, detail: str | None = None, **kwargs):
         super().__init__(
             type="https://docs.yourapp.com/problems/unauthorized",
             title="Authentication required",
@@ -41,7 +40,7 @@ class UnauthorizedException(BaseHttpException):
 class ForbiddenException(BaseHttpException):
     """403 Forbidden - The server understood the request but refuses to authorize it."""
 
-    def __init__(self, detail: Optional[str] = None, **kwargs):
+    def __init__(self, detail: str | None = None, **kwargs):
         super().__init__(
             type="https://docs.yourapp.com/problems/forbidden",
             title="Forbidden",
@@ -56,7 +55,7 @@ class ForbiddenException(BaseHttpException):
 class NotFoundException(BaseHttpException):
     """404 Not Found - The requested resource could not be found."""
 
-    def __init__(self, detail: Optional[str] = None, **kwargs):
+    def __init__(self, detail: str | None = None, **kwargs):
         super().__init__(
             type="https://docs.yourapp.com/problems/not-found",
             title="Not found",
@@ -71,7 +70,7 @@ class NotFoundException(BaseHttpException):
 class MethodNotAllowedException(BaseHttpException):
     """405 Method Not Allowed - The request method is not supported for the requested resource."""
 
-    def __init__(self, detail: Optional[str] = None, **kwargs):
+    def __init__(self, detail: str | None = None, **kwargs):
         super().__init__(
             type="https://docs.yourapp.com/problems/method-not-allowed",
             title="Method not allowed",
@@ -86,7 +85,7 @@ class MethodNotAllowedException(BaseHttpException):
 class ConflictException(BaseHttpException):
     """409 Conflict - The request could not be completed due to a conflict with the current state."""
 
-    def __init__(self, detail: Optional[str] = None, **kwargs):
+    def __init__(self, detail: str | None = None, **kwargs):
         super().__init__(
             type="https://docs.yourapp.com/problems/conflict",
             title="Conflict",
@@ -102,13 +101,15 @@ class ConflictException(BaseHttpException):
 class ValidationException(BaseHttpException):
     """400 Bad Request - The request contains invalid data (used for field validation errors)."""
 
-    def __init__(self, detail: Optional[str] = None, **kwargs):
+    def __init__(self, detail: str | None = None, **kwargs):
         # Extract issues from kwargs and ensure they're at root level
         issues = kwargs.pop("issues", [])
-        
+
         # Extract meta separately, excluding handled keys
-        meta = {k: v for k, v in kwargs.items() if k not in ["code", "i18n_key", "instance"]}
-        
+        meta = {
+            k: v for k, v in kwargs.items() if k not in ["code", "i18n_key", "instance"]
+        }
+
         super().__init__(
             type="https://docs.yourapp.com/problems/validation-error",
             title="Validation error",
@@ -125,7 +126,7 @@ class ValidationException(BaseHttpException):
 class UnprocessableEntityException(BaseHttpException):
     """422 Unprocessable Entity - The request was well-formed but was unable to be followed."""
 
-    def __init__(self, detail: Optional[str] = None, **kwargs):
+    def __init__(self, detail: str | None = None, **kwargs):
         super().__init__(
             type="https://docs.yourapp.com/problems/unprocessable-entity",
             title="Unprocessable entity",
@@ -141,7 +142,7 @@ class UnprocessableEntityException(BaseHttpException):
 class RateLimitException(BaseHttpException):
     """429 Too Many Requests - The user has sent too many requests in a given amount of time."""
 
-    def __init__(self, detail: Optional[str] = None, **kwargs):
+    def __init__(self, detail: str | None = None, **kwargs):
         self.reset_time = kwargs.get("reset_time")
         self.limit = kwargs.get("limit")
         super().__init__(
@@ -151,5 +152,9 @@ class RateLimitException(BaseHttpException):
             detail=detail or "Rate limit exceeded. Please try again later.",
             code=kwargs.get("code", APIResponseCodes.GEN_RATE_429),
             i18n_key=kwargs.get("i18n_key", "errors.rate_limit_exceeded"),
-            meta={k: v for k, v in kwargs.items() if k not in ["code", "i18n_key", "reset_time", "limit"]},
+            meta={
+                k: v
+                for k, v in kwargs.items()
+                if k not in ["code", "i18n_key", "reset_time", "limit"]
+            },
         )

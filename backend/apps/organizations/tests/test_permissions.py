@@ -2,27 +2,28 @@
 Test cases for organization permissions.
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 
+import pytest
+
+from apps.accounts.tests.factories import AccountFactory
 from apps.organizations.permissions import (
-    IsOrgMember,
-    IsOrgAdmin,
-    IsOrgOwner,
-    CanManageMembers,
     CanManageBilling,
-    IsOwnerOrReadOnly,
+    CanManageMembers,
     IsAdminOrReadOnly,
-    OrganizationAccessPermission
+    IsOrgAdmin,
+    IsOrgMember,
+    IsOrgOwner,
+    IsOwnerOrReadOnly,
+    OrganizationAccessPermission,
 )
 from apps.organizations.tests.factories import (
     OrganizationFactory,
-    OrganizationMembershipFactory
+    OrganizationMembershipFactory,
 )
-from apps.accounts.tests.factories import AccountFactory
 
 
-def create_mock_request(user=None, method='GET', org=None, membership=None):
+def create_mock_request(user=None, method="GET", org=None, membership=None):
     """Helper to create mock request objects."""
     request = Mock()
     request.user = user
@@ -47,7 +48,7 @@ class TestIsOrgMember:
         permission = IsOrgMember()
         request = create_mock_request(user=None)
         view = create_mock_view()
-        
+
         assert not permission.has_permission(request, view)
 
     def test_anonymous_user_denied(self):
@@ -57,7 +58,7 @@ class TestIsOrgMember:
         user.is_authenticated = False
         request = create_mock_request(user=user)
         view = create_mock_view()
-        
+
         assert not permission.has_permission(request, view)
 
     def test_superuser_bypasses_check(self):
@@ -68,7 +69,7 @@ class TestIsOrgMember:
         user.is_superuser = True
         request = create_mock_request(user=user)
         view = create_mock_view()
-        
+
         assert permission.has_permission(request, view)
 
     def test_no_org_context_denied(self):
@@ -79,7 +80,7 @@ class TestIsOrgMember:
         user.is_superuser = False
         request = create_mock_request(user=user, org=None)
         view = create_mock_view()
-        
+
         assert not permission.has_permission(request, view)
 
     def test_no_membership_denied(self):
@@ -91,7 +92,7 @@ class TestIsOrgMember:
         org = Mock()
         request = create_mock_request(user=user, org=org, membership=None)
         view = create_mock_view()
-        
+
         assert not permission.has_permission(request, view)
 
     def test_inactive_membership_denied(self):
@@ -105,7 +106,7 @@ class TestIsOrgMember:
         membership.is_active.return_value = False
         request = create_mock_request(user=user, org=org, membership=membership)
         view = create_mock_view()
-        
+
         assert not permission.has_permission(request, view)
 
     def test_active_membership_allowed(self):
@@ -119,7 +120,7 @@ class TestIsOrgMember:
         membership.is_active.return_value = True
         request = create_mock_request(user=user, org=org, membership=membership)
         view = create_mock_view()
-        
+
         assert permission.has_permission(request, view)
 
 
@@ -133,7 +134,7 @@ class TestIsOrgAdmin:
         permission = IsOrgAdmin()
         request = create_mock_request(user=None)
         view = create_mock_view()
-        
+
         assert not permission.has_permission(request, view)
 
     def test_superuser_bypasses_check(self):
@@ -144,7 +145,7 @@ class TestIsOrgAdmin:
         user.is_superuser = True
         request = create_mock_request(user=user)
         view = create_mock_view()
-        
+
         assert permission.has_permission(request, view)
 
     def test_member_denied(self):
@@ -158,7 +159,7 @@ class TestIsOrgAdmin:
         membership.is_admin.return_value = False
         request = create_mock_request(user=user, org=org, membership=membership)
         view = create_mock_view()
-        
+
         assert not permission.has_permission(request, view)
 
     def test_admin_allowed(self):
@@ -172,7 +173,7 @@ class TestIsOrgAdmin:
         membership.is_admin.return_value = True
         request = create_mock_request(user=user, org=org, membership=membership)
         view = create_mock_view()
-        
+
         assert permission.has_permission(request, view)
 
     def test_owner_allowed(self):
@@ -183,10 +184,12 @@ class TestIsOrgAdmin:
         user.is_superuser = False
         org = Mock()
         membership = Mock()
-        membership.is_admin.return_value = True  # Owners should return True for is_admin
+        membership.is_admin.return_value = (
+            True  # Owners should return True for is_admin
+        )
         request = create_mock_request(user=user, org=org, membership=membership)
         view = create_mock_view()
-        
+
         assert permission.has_permission(request, view)
 
 
@@ -200,7 +203,7 @@ class TestIsOrgOwner:
         permission = IsOrgOwner()
         request = create_mock_request(user=None)
         view = create_mock_view()
-        
+
         assert not permission.has_permission(request, view)
 
     def test_superuser_bypasses_check(self):
@@ -211,7 +214,7 @@ class TestIsOrgOwner:
         user.is_superuser = True
         request = create_mock_request(user=user)
         view = create_mock_view()
-        
+
         assert permission.has_permission(request, view)
 
     def test_member_denied(self):
@@ -225,7 +228,7 @@ class TestIsOrgOwner:
         membership.is_owner.return_value = False
         request = create_mock_request(user=user, org=org, membership=membership)
         view = create_mock_view()
-        
+
         assert not permission.has_permission(request, view)
 
     def test_admin_denied(self):
@@ -239,7 +242,7 @@ class TestIsOrgOwner:
         membership.is_owner.return_value = False  # Admin is not owner
         request = create_mock_request(user=user, org=org, membership=membership)
         view = create_mock_view()
-        
+
         assert not permission.has_permission(request, view)
 
     def test_owner_allowed(self):
@@ -253,7 +256,7 @@ class TestIsOrgOwner:
         membership.is_owner.return_value = True
         request = create_mock_request(user=user, org=org, membership=membership)
         view = create_mock_view()
-        
+
         assert permission.has_permission(request, view)
 
 
@@ -273,7 +276,7 @@ class TestCanManageMembers:
         membership.can_manage_members.return_value = False
         request = create_mock_request(user=user, org=org, membership=membership)
         view = create_mock_view()
-        
+
         assert not permission.has_permission(request, view)
 
     def test_admin_allowed(self):
@@ -287,7 +290,7 @@ class TestCanManageMembers:
         membership.can_manage_members.return_value = True
         request = create_mock_request(user=user, org=org, membership=membership)
         view = create_mock_view()
-        
+
         assert permission.has_permission(request, view)
 
     def test_owner_allowed(self):
@@ -301,7 +304,7 @@ class TestCanManageMembers:
         membership.can_manage_members.return_value = True
         request = create_mock_request(user=user, org=org, membership=membership)
         view = create_mock_view()
-        
+
         assert permission.has_permission(request, view)
 
 
@@ -321,7 +324,7 @@ class TestCanManageBilling:
         membership.can_manage_billing.return_value = False
         request = create_mock_request(user=user, org=org, membership=membership)
         view = create_mock_view()
-        
+
         assert not permission.has_permission(request, view)
 
     def test_admin_denied(self):
@@ -332,10 +335,12 @@ class TestCanManageBilling:
         user.is_superuser = False
         org = Mock()
         membership = Mock()
-        membership.can_manage_billing.return_value = False  # Only owners can manage billing
+        membership.can_manage_billing.return_value = (
+            False  # Only owners can manage billing
+        )
         request = create_mock_request(user=user, org=org, membership=membership)
         view = create_mock_view()
-        
+
         assert not permission.has_permission(request, view)
 
     def test_owner_allowed(self):
@@ -349,7 +354,7 @@ class TestCanManageBilling:
         membership.can_manage_billing.return_value = True
         request = create_mock_request(user=user, org=org, membership=membership)
         view = create_mock_view()
-        
+
         assert permission.has_permission(request, view)
 
 
@@ -368,16 +373,22 @@ class TestIsOwnerOrReadOnly:
         membership = Mock()
         membership.is_active.return_value = True
         membership.is_owner.return_value = False
-        
+
         # Test read access
-        request = create_mock_request(user=user, org=org, membership=membership, method='GET')
+        request = create_mock_request(
+            user=user, org=org, membership=membership, method="GET"
+        )
         view = create_mock_view()
         assert permission.has_permission(request, view)
-        
-        request = create_mock_request(user=user, org=org, membership=membership, method='HEAD')
+
+        request = create_mock_request(
+            user=user, org=org, membership=membership, method="HEAD"
+        )
         assert permission.has_permission(request, view)
-        
-        request = create_mock_request(user=user, org=org, membership=membership, method='OPTIONS')
+
+        request = create_mock_request(
+            user=user, org=org, membership=membership, method="OPTIONS"
+        )
         assert permission.has_permission(request, view)
 
     def test_write_access_denied_for_members(self):
@@ -390,19 +401,27 @@ class TestIsOwnerOrReadOnly:
         membership = Mock()
         membership.is_active.return_value = True
         membership.is_owner.return_value = False
-        
+
         # Test write access denied
-        request = create_mock_request(user=user, org=org, membership=membership, method='POST')
+        request = create_mock_request(
+            user=user, org=org, membership=membership, method="POST"
+        )
         view = create_mock_view()
         assert not permission.has_permission(request, view)
-        
-        request = create_mock_request(user=user, org=org, membership=membership, method='PUT')
+
+        request = create_mock_request(
+            user=user, org=org, membership=membership, method="PUT"
+        )
         assert not permission.has_permission(request, view)
-        
-        request = create_mock_request(user=user, org=org, membership=membership, method='PATCH')
+
+        request = create_mock_request(
+            user=user, org=org, membership=membership, method="PATCH"
+        )
         assert not permission.has_permission(request, view)
-        
-        request = create_mock_request(user=user, org=org, membership=membership, method='DELETE')
+
+        request = create_mock_request(
+            user=user, org=org, membership=membership, method="DELETE"
+        )
         assert not permission.has_permission(request, view)
 
     def test_full_access_for_owners(self):
@@ -415,14 +434,18 @@ class TestIsOwnerOrReadOnly:
         membership = Mock()
         membership.is_active.return_value = True
         membership.is_owner.return_value = True
-        
+
         # Test all methods allowed
-        methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']
+        methods = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]
         view = create_mock_view()
-        
+
         for method in methods:
-            request = create_mock_request(user=user, org=org, membership=membership, method=method)
-            assert permission.has_permission(request, view), f"Owner should have {method} access"
+            request = create_mock_request(
+                user=user, org=org, membership=membership, method=method
+            )
+            assert permission.has_permission(
+                request, view
+            ), f"Owner should have {method} access"
 
     def test_inactive_membership_denied(self):
         """Test that inactive memberships are denied all access."""
@@ -433,8 +456,10 @@ class TestIsOwnerOrReadOnly:
         org = Mock()
         membership = Mock()
         membership.is_active.return_value = False
-        
-        request = create_mock_request(user=user, org=org, membership=membership, method='GET')
+
+        request = create_mock_request(
+            user=user, org=org, membership=membership, method="GET"
+        )
         view = create_mock_view()
         assert not permission.has_permission(request, view)
 
@@ -454,9 +479,11 @@ class TestIsAdminOrReadOnly:
         membership = Mock()
         membership.is_active.return_value = True
         membership.is_admin.return_value = False
-        
+
         # Test read access
-        request = create_mock_request(user=user, org=org, membership=membership, method='GET')
+        request = create_mock_request(
+            user=user, org=org, membership=membership, method="GET"
+        )
         view = create_mock_view()
         assert permission.has_permission(request, view)
 
@@ -470,9 +497,11 @@ class TestIsAdminOrReadOnly:
         membership = Mock()
         membership.is_active.return_value = True
         membership.is_admin.return_value = False
-        
+
         # Test write access denied
-        request = create_mock_request(user=user, org=org, membership=membership, method='POST')
+        request = create_mock_request(
+            user=user, org=org, membership=membership, method="POST"
+        )
         view = create_mock_view()
         assert not permission.has_permission(request, view)
 
@@ -486,14 +515,18 @@ class TestIsAdminOrReadOnly:
         membership = Mock()
         membership.is_active.return_value = True
         membership.is_admin.return_value = True
-        
+
         # Test all methods allowed
-        methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']
+        methods = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]
         view = create_mock_view()
-        
+
         for method in methods:
-            request = create_mock_request(user=user, org=org, membership=membership, method=method)
-            assert permission.has_permission(request, view), f"Admin should have {method} access"
+            request = create_mock_request(
+                user=user, org=org, membership=membership, method=method
+            )
+            assert permission.has_permission(
+                request, view
+            ), f"Admin should have {method} access"
 
     def test_full_access_for_owners(self):
         """Test that owners have full access (owners are admins)."""
@@ -504,9 +537,13 @@ class TestIsAdminOrReadOnly:
         org = Mock()
         membership = Mock()
         membership.is_active.return_value = True
-        membership.is_admin.return_value = True  # Owners should return True for is_admin
-        
-        request = create_mock_request(user=user, org=org, membership=membership, method='POST')
+        membership.is_admin.return_value = (
+            True  # Owners should return True for is_admin
+        )
+
+        request = create_mock_request(
+            user=user, org=org, membership=membership, method="POST"
+        )
         view = create_mock_view()
         assert permission.has_permission(request, view)
 
@@ -522,12 +559,12 @@ class TestOrganizationAccessPermission:
         user = Mock()
         user.is_authenticated = True
         org = Mock()
-        
+
         # Test legacy direct organization relationship
         user.organization = org
         request = create_mock_request(user=user, org=org)
         view = create_mock_view()
-        
+
         assert permission.has_permission(request, view)
 
     def test_deprecated_permission_new_membership_relationship(self):
@@ -538,10 +575,10 @@ class TestOrganizationAccessPermission:
         user.organization = None  # No direct relationship
         user.has_active_membership_in.return_value = True
         org = Mock()
-        
+
         request = create_mock_request(user=user, org=org)
         view = create_mock_view()
-        
+
         assert permission.has_permission(request, view)
 
     def test_deprecated_permission_no_access(self):
@@ -552,10 +589,10 @@ class TestOrganizationAccessPermission:
         user.organization = None
         user.has_active_membership_in.return_value = False
         org = Mock()
-        
+
         request = create_mock_request(user=user, org=org)
         view = create_mock_view()
-        
+
         assert not permission.has_permission(request, view)
 
 
@@ -570,41 +607,38 @@ class TestPermissionIntegration:
         owner_user = AccountFactory()
         admin_user = AccountFactory()
         member_user = AccountFactory()
-        
+
         # Create real memberships
         owner_membership = OrganizationMembershipFactory(
-            organization=org,
-            user=owner_user,
-            role='owner',
-            status='active'
+            organization=org, user=owner_user, role="owner", status="active"
         )
         admin_membership = OrganizationMembershipFactory(
-            organization=org,
-            user=admin_user,
-            role='admin',
-            status='active'
+            organization=org, user=admin_user, role="admin", status="active"
         )
         member_membership = OrganizationMembershipFactory(
-            organization=org,
-            user=member_user,
-            role='member',
-            status='active'
+            organization=org, user=member_user, role="member", status="active"
         )
-        
+
         # Test IsOrgMember permission
         permission = IsOrgMember()
         view = create_mock_view()
-        
+
         # Owner should have access
-        request = create_mock_request(user=owner_user, org=org, membership=owner_membership)
+        request = create_mock_request(
+            user=owner_user, org=org, membership=owner_membership
+        )
         assert permission.has_permission(request, view)
-        
+
         # Admin should have access
-        request = create_mock_request(user=admin_user, org=org, membership=admin_membership)
+        request = create_mock_request(
+            user=admin_user, org=org, membership=admin_membership
+        )
         assert permission.has_permission(request, view)
-        
+
         # Member should have access
-        request = create_mock_request(user=member_user, org=org, membership=member_membership)
+        request = create_mock_request(
+            user=member_user, org=org, membership=member_membership
+        )
         assert permission.has_permission(request, view)
 
     def test_real_admin_permissions(self):
@@ -613,39 +647,36 @@ class TestPermissionIntegration:
         owner_user = AccountFactory()
         admin_user = AccountFactory()
         member_user = AccountFactory()
-        
+
         owner_membership = OrganizationMembershipFactory(
-            organization=org,
-            user=owner_user,
-            role='owner',
-            status='active'
+            organization=org, user=owner_user, role="owner", status="active"
         )
         admin_membership = OrganizationMembershipFactory(
-            organization=org,
-            user=admin_user,
-            role='admin',
-            status='active'
+            organization=org, user=admin_user, role="admin", status="active"
         )
         member_membership = OrganizationMembershipFactory(
-            organization=org,
-            user=member_user,
-            role='member',
-            status='active'
+            organization=org, user=member_user, role="member", status="active"
         )
-        
+
         permission = IsOrgAdmin()
         view = create_mock_view()
-        
+
         # Owner should have admin access
-        request = create_mock_request(user=owner_user, org=org, membership=owner_membership)
+        request = create_mock_request(
+            user=owner_user, org=org, membership=owner_membership
+        )
         assert permission.has_permission(request, view)
-        
+
         # Admin should have admin access
-        request = create_mock_request(user=admin_user, org=org, membership=admin_membership)
+        request = create_mock_request(
+            user=admin_user, org=org, membership=admin_membership
+        )
         assert permission.has_permission(request, view)
-        
+
         # Member should not have admin access
-        request = create_mock_request(user=member_user, org=org, membership=member_membership)
+        request = create_mock_request(
+            user=member_user, org=org, membership=member_membership
+        )
         assert not permission.has_permission(request, view)
 
     def test_real_owner_permissions(self):
@@ -654,56 +685,52 @@ class TestPermissionIntegration:
         owner_user = AccountFactory()
         admin_user = AccountFactory()
         member_user = AccountFactory()
-        
+
         owner_membership = OrganizationMembershipFactory(
-            organization=org,
-            user=owner_user,
-            role='owner',
-            status='active'
+            organization=org, user=owner_user, role="owner", status="active"
         )
         admin_membership = OrganizationMembershipFactory(
-            organization=org,
-            user=admin_user,
-            role='admin',
-            status='active'
+            organization=org, user=admin_user, role="admin", status="active"
         )
         member_membership = OrganizationMembershipFactory(
-            organization=org,
-            user=member_user,
-            role='member',
-            status='active'
+            organization=org, user=member_user, role="member", status="active"
         )
-        
+
         permission = IsOrgOwner()
         view = create_mock_view()
-        
+
         # Owner should have owner access
-        request = create_mock_request(user=owner_user, org=org, membership=owner_membership)
+        request = create_mock_request(
+            user=owner_user, org=org, membership=owner_membership
+        )
         assert permission.has_permission(request, view)
-        
+
         # Admin should not have owner access
-        request = create_mock_request(user=admin_user, org=org, membership=admin_membership)
+        request = create_mock_request(
+            user=admin_user, org=org, membership=admin_membership
+        )
         assert not permission.has_permission(request, view)
-        
+
         # Member should not have owner access
-        request = create_mock_request(user=member_user, org=org, membership=member_membership)
+        request = create_mock_request(
+            user=member_user, org=org, membership=member_membership
+        )
         assert not permission.has_permission(request, view)
 
     def test_suspended_membership_permissions(self):
         """Test permissions with suspended membership."""
         org = OrganizationFactory()
         user = AccountFactory()
-        
+
         suspended_membership = OrganizationMembershipFactory(
-            organization=org,
-            user=user,
-            role='admin',
-            status='suspended'
+            organization=org, user=user, role="admin", status="suspended"
         )
-        
+
         permission = IsOrgMember()
         view = create_mock_view()
-        
+
         # Suspended member should not have access
-        request = create_mock_request(user=user, org=org, membership=suspended_membership)
+        request = create_mock_request(
+            user=user, org=org, membership=suspended_membership
+        )
         assert not permission.has_permission(request, view)

@@ -16,17 +16,18 @@ from apps.core.managers import OrganizationManager
 class TenantAwareModel(models.Model):
     """
     Abstract base model for organization-scoped multi-tenancy.
-    
+
     All models inheriting from this will automatically be scoped to
     an organization, supporting the multi-tenant architecture.
     """
+
     organization = models.ForeignKey(
         "organizations.Organization",
         on_delete=models.CASCADE,
         related_name="%(class)s_set",
         null=True,
         blank=True,
-        help_text="Organization this record belongs to. Can be null for global records."
+        help_text="Organization this record belongs to. Can be null for global records.",
     )
 
     class Meta:
@@ -36,10 +37,11 @@ class TenantAwareModel(models.Model):
 class BaseFields(TenantAwareModel):
     """
     Abstract base model with common audit fields and UUID primary key.
-    
+
     Provides automatic creation/update timestamps, user tracking,
     UUID primary keys, and extensible JSON properties for all models.
     """
+
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True
     )

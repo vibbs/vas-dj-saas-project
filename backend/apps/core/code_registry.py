@@ -12,7 +12,7 @@ Validates uniqueness and format compliance for RFC 7807 usage.
 import logging
 import pathlib
 from importlib import import_module
-from typing import Dict, Set, Any, Optional, Type
+from typing import Any
 
 from django.conf import settings
 
@@ -36,13 +36,14 @@ class CodeRegistryError(Exception):
 class CodeRegistry:
     """
     Central registry for error codes and problem type definitions.
-    
+
     Scans Django apps for code enums and YAML error catalogs,
     validates format compliance, and provides lookup methods.
     """
+
     def __init__(self):
-        self.codes: Set[str] = set()
-        self.problem_types: Dict[str, Dict[str, Any]] = {}
+        self.codes: set[str] = set()
+        self.problem_types: dict[str, dict[str, Any]] = {}
         self._loaded = False
 
     def load(self) -> None:
@@ -88,13 +89,15 @@ class CodeRegistry:
             ):
                 try:
                     # Check if it's actually an enum-like class that can be iterated
-                    if hasattr(attr_value, '__members__'):
+                    if hasattr(attr_value, "__members__"):
                         # It's a proper enum with members
                         for member in attr_value:
                             self._register_code(
                                 member.value, app_name, f"{attr_name}.{member.name}"
                             )
-                    elif hasattr(attr_value, '__iter__') and not isinstance(attr_value, (str, bytes)):
+                    elif hasattr(attr_value, "__iter__") and not isinstance(
+                        attr_value, (str, bytes)
+                    ):
                         # It's iterable but not a string
                         for member in attr_value:
                             self._register_code(
@@ -102,9 +105,13 @@ class CodeRegistry:
                             )
                     else:
                         # It's a class but not iterable, skip it
-                        logger.debug(f"Skipping non-iterable enum class: {attr_name} in {app_name}")
+                        logger.debug(
+                            f"Skipping non-iterable enum class: {attr_name} in {app_name}"
+                        )
                 except TypeError as e:
-                    logger.warning(f"Cannot iterate over {attr_name} in {app_name}: {e}")
+                    logger.warning(
+                        f"Cannot iterate over {attr_name} in {app_name}: {e}"
+                    )
                     continue
 
             # Case 2: Plain string constant that looks like a code
@@ -118,7 +125,7 @@ class CodeRegistry:
         if yaml is None:
             logger.debug(f"YAML not available, skipping error catalog for {app_name}")
             return
-            
+
         try:
             app_module = import_module(app_name)
             app_path = pathlib.Path(app_module.__file__).parent
@@ -155,7 +162,7 @@ class CodeRegistry:
         logger.debug(f"Registered code: {code} from {app_name}.{source_name}")
 
     def _register_problem_type(
-        self, problem_def: Dict[str, Any], app_name: str
+        self, problem_def: dict[str, Any], app_name: str
     ) -> None:
         """Register a problem type and validate its structure."""
         required_fields = ["slug", "type", "title", "default_status"]
@@ -200,13 +207,13 @@ class CodeRegistry:
         self.problem_types[slug] = problem_def
         logger.debug(f"Registered problem type: {slug} from {app_name}")
 
-    def get_problem_type(self, slug: str) -> Optional[Dict[str, Any]]:
+    def get_problem_type(self, slug: str) -> dict[str, Any] | None:
         return self.problem_types.get(slug)
 
     def validate_code_exists(self, code: str) -> bool:
         return code in self.codes
 
-    def get_stats(self) -> Dict[str, int]:
+    def get_stats(self) -> dict[str, int]:
         return {
             "codes": len(self.codes),
             "problem_types": len(self.problem_types),

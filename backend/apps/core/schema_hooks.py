@@ -9,12 +9,12 @@ formats used by the API, ensuring Swagger documentation is accurate.
 def wrap_responses_in_success_envelope(result, generator, request, public):
     """
     Post-process the OpenAPI schema to wrap success responses in SuccessEnvelope format.
-    
+
     This hook converts standard DRF responses to the RFC 7807 compliant success format:
     {
         "status": 200,
         "code": "VDJ-GEN-OK-200",
-        "i18n_key": "common.ok", 
+        "i18n_key": "common.ok",
         "data": {...}
     }
     """
@@ -58,13 +58,12 @@ def wrap_responses_in_success_envelope(result, generator, request, public):
                     # Wrap in SuccessEnvelope if needed
                     if should_wrap_in_success_envelope(schema):
                         # Determine if this is a list response
-                        is_list_response = (
-                            schema.get("type") == "array" or
-                            (schema.get("type") == "object" and 
-                             "properties" in schema and
-                             "results" in schema["properties"])
+                        is_list_response = schema.get("type") == "array" or (
+                            schema.get("type") == "object"
+                            and "properties" in schema
+                            and "results" in schema["properties"]
                         )
-                        
+
                         if is_list_response:
                             # Use PaginatedEnvelope for list responses
                             content["schema"] = {
@@ -75,12 +74,7 @@ def wrap_responses_in_success_envelope(result, generator, request, public):
                             content["schema"] = {
                                 "allOf": [
                                     {"$ref": "#/components/schemas/SuccessEnvelope"},
-                                    {
-                                        "type": "object",
-                                        "properties": {
-                                            "data": schema
-                                        }
-                                    }
+                                    {"type": "object", "properties": {"data": schema}},
                                 ]
                             }
 
@@ -90,7 +84,7 @@ def wrap_responses_in_success_envelope(result, generator, request, public):
 def add_rfc7807_error_responses(result, generator, request, public):
     """
     Post-process the OpenAPI schema to add RFC 7807 compliant error responses.
-    
+
     This replaces the old error format with proper Problem Details schema.
     """
     if not isinstance(result, dict) or "paths" not in result:
@@ -118,10 +112,10 @@ def add_rfc7807_error_responses(result, generator, request, public):
                                     {
                                         "path": ["email"],
                                         "message": "This field is required.",
-                                        "i18n_key": "validation.required"
+                                        "i18n_key": "validation.required",
                                     }
-                                ]
-                            }
+                                ],
+                            },
                         },
                         "bad_request": {
                             "summary": "Bad Request",
@@ -132,12 +126,12 @@ def add_rfc7807_error_responses(result, generator, request, public):
                                 "code": "VDJ-GEN-BAD-400",
                                 "i18n_key": "errors.parse_error",
                                 "detail": "Malformed request data.",
-                                "instance": "/api/v1/endpoint/"
-                            }
-                        }
-                    }
+                                "instance": "/api/v1/endpoint/",
+                            },
+                        },
+                    },
                 }
-            }
+            },
         },
         "401": {
             "description": "Unauthorized",
@@ -154,8 +148,8 @@ def add_rfc7807_error_responses(result, generator, request, public):
                                 "code": "VDJ-AUTH-LOGIN-401",
                                 "i18n_key": "errors.authentication_required",
                                 "detail": "Authentication credentials were not provided or are invalid.",
-                                "instance": "/api/v1/organizations/"
-                            }
+                                "instance": "/api/v1/organizations/",
+                            },
                         },
                         "invalid_credentials": {
                             "summary": "Invalid Credentials",
@@ -166,12 +160,12 @@ def add_rfc7807_error_responses(result, generator, request, public):
                                 "code": "VDJ-ACC-CREDS-401",
                                 "i18n_key": "account.invalid_credentials",
                                 "detail": "The email or password provided is incorrect.",
-                                "instance": "/api/v1/auth/login/"
-                            }
-                        }
-                    }
+                                "instance": "/api/v1/auth/login/",
+                            },
+                        },
+                    },
                 }
-            }
+            },
         },
         "403": {
             "description": "Forbidden",
@@ -188,8 +182,8 @@ def add_rfc7807_error_responses(result, generator, request, public):
                                 "code": "VDJ-PERM-DENIED-403",
                                 "i18n_key": "errors.permission_denied",
                                 "detail": "You do not have permission to perform this action.",
-                                "instance": "/api/v1/organizations/"
-                            }
+                                "instance": "/api/v1/organizations/",
+                            },
                         },
                         "organization_access_denied": {
                             "summary": "Organization Access Denied",
@@ -200,12 +194,12 @@ def add_rfc7807_error_responses(result, generator, request, public):
                                 "code": "VDJ-ORG-ACCESS-403",
                                 "i18n_key": "org.access_denied",
                                 "detail": "You do not have access to this organization.",
-                                "instance": "/api/v1/organizations/acme/"
-                            }
-                        }
-                    }
+                                "instance": "/api/v1/organizations/acme/",
+                            },
+                        },
+                    },
                 }
-            }
+            },
         },
         "404": {
             "description": "Not Found",
@@ -222,12 +216,12 @@ def add_rfc7807_error_responses(result, generator, request, public):
                                 "code": "VDJ-GEN-NOTFOUND-404",
                                 "i18n_key": "errors.not_found",
                                 "detail": "The requested resource was not found.",
-                                "instance": "/api/v1/accounts/users/123/"
-                            }
+                                "instance": "/api/v1/accounts/users/123/",
+                            },
                         }
-                    }
+                    },
                 }
-            }
+            },
         },
         "409": {
             "description": "Conflict",
@@ -244,12 +238,12 @@ def add_rfc7807_error_responses(result, generator, request, public):
                                 "code": "VDJ-ACC-EXISTS-409",
                                 "i18n_key": "account.already_exists",
                                 "detail": "An account with this email address already exists.",
-                                "instance": "/api/v1/accounts/register/"
-                            }
+                                "instance": "/api/v1/accounts/register/",
+                            },
                         }
-                    }
+                    },
                 }
-            }
+            },
         },
         "422": {
             "description": "Unprocessable Entity",
@@ -271,19 +265,19 @@ def add_rfc7807_error_responses(result, generator, request, public):
                                     {
                                         "path": ["email"],
                                         "message": "Enter a valid email address.",
-                                        "i18n_key": "validation.email"
+                                        "i18n_key": "validation.email",
                                     },
                                     {
                                         "path": ["password"],
                                         "message": "Password must be at least 8 characters long.",
-                                        "i18n_key": "validation.min_length"
-                                    }
-                                ]
-                            }
+                                        "i18n_key": "validation.min_length",
+                                    },
+                                ],
+                            },
                         }
-                    }
+                    },
                 }
-            }
+            },
         },
         "500": {
             "description": "Internal Server Error",
@@ -300,13 +294,13 @@ def add_rfc7807_error_responses(result, generator, request, public):
                                 "code": "VDJ-GEN-ERR-500",
                                 "i18n_key": "errors.internal",
                                 "detail": "An unexpected server error occurred.",
-                                "instance": "/api/v1/endpoint/"
-                            }
+                                "instance": "/api/v1/endpoint/",
+                            },
                         }
-                    }
+                    },
                 }
-            }
-        }
+            },
+        },
     }
 
     # Endpoints that should be excluded from automatic error responses
@@ -321,7 +315,7 @@ def add_rfc7807_error_responses(result, generator, request, public):
         # Skip excluded paths
         if any(path.startswith(excluded_path) for excluded_path in excluded_paths):
             continue
-        
+
         if not isinstance(path_item, dict):
             continue
 
@@ -331,20 +325,20 @@ def add_rfc7807_error_responses(result, generator, request, public):
 
             # Skip public endpoints (no auth required) for 401/403 errors
             is_public_endpoint = (
-                path.startswith("/api/v1/auth/") and 
-                method.lower() in ["post"] and
-                any(keyword in path for keyword in ["login", "register", "refresh"])
+                path.startswith("/api/v1/auth/")
+                and method.lower() in ["post"]
+                and any(keyword in path for keyword in ["login", "register", "refresh"])
             )
 
             # Add RFC 7807 error responses
             responses = operation["responses"]
-            
+
             # Always add common error responses
             for status, error_response in rfc7807_error_responses.items():
                 # Skip 401/403 for public endpoints
                 if is_public_endpoint and status in ["401", "403"]:
                     continue
-                    
+
                 if status not in responses:
                     responses[status] = error_response
 
@@ -354,7 +348,7 @@ def add_rfc7807_error_responses(result, generator, request, public):
 def add_schema_components(result, generator, request, public):
     """
     Add RFC 7807 schema components to the OpenAPI specification.
-    
+
     This ensures the Problem, SuccessEnvelope, and other schemas are available
     for reference throughout the API documentation.
     """
@@ -368,182 +362,184 @@ def add_schema_components(result, generator, request, public):
         result["components"]["schemas"] = {}
 
     # Add RFC 7807 schema components
-    result["components"]["schemas"].update({
-        "Problem": {
-            "type": "object",
-            "title": "RFC 7807 Problem Details",
-            "description": "Standard error response format following RFC 7807",
-            "required": ["type", "title", "status", "code", "i18n_key"],
-            "properties": {
-                "type": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "A URI reference that identifies the problem type",
-                    "example": "https://docs.yourapp.com/problems/validation"
+    result["components"]["schemas"].update(
+        {
+            "Problem": {
+                "type": "object",
+                "title": "RFC 7807 Problem Details",
+                "description": "Standard error response format following RFC 7807",
+                "required": ["type", "title", "status", "code", "i18n_key"],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "A URI reference that identifies the problem type",
+                        "example": "https://docs.yourapp.com/problems/validation",
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "A short, human-readable summary of the problem type",
+                        "example": "Validation failed",
+                    },
+                    "status": {
+                        "type": "integer",
+                        "description": "The HTTP status code",
+                        "example": 400,
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Machine-readable error code",
+                        "example": "VDJ-GEN-VAL-422",
+                    },
+                    "i18n_key": {
+                        "type": "string",
+                        "description": "Internationalization key for frontend localization",
+                        "example": "validation.failed",
+                    },
+                    "detail": {
+                        "type": "string",
+                        "description": "A human-readable explanation specific to this problem occurrence",
+                        "example": "The request contains invalid data.",
+                    },
+                    "instance": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "A URI reference that identifies the specific occurrence of the problem",
+                        "example": "/api/v1/accounts/register/",
+                    },
+                    "issues": {
+                        "type": "array",
+                        "description": "Array of validation issues (for validation errors)",
+                        "items": {"$ref": "#/components/schemas/Issue"},
+                    },
+                    "meta": {
+                        "type": "object",
+                        "description": "Additional metadata about the problem",
+                        "additionalProperties": True,
+                    },
                 },
-                "title": {
-                    "type": "string",
-                    "description": "A short, human-readable summary of the problem type",
-                    "example": "Validation failed"
+            },
+            "Issue": {
+                "type": "object",
+                "title": "Validation Issue",
+                "description": "Details about a specific field validation error",
+                "required": ["path", "message", "i18n_key"],
+                "properties": {
+                    "path": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Path to the field that caused the issue",
+                        "example": ["user", "email"],
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "Human-readable error message",
+                        "example": "This field is required.",
+                    },
+                    "i18n_key": {
+                        "type": "string",
+                        "description": "Internationalization key for the error message",
+                        "example": "validation.required",
+                    },
                 },
-                "status": {
-                    "type": "integer",
-                    "description": "The HTTP status code",
-                    "example": 400
+            },
+            "SuccessEnvelope": {
+                "type": "object",
+                "title": "Success Response Envelope",
+                "description": "Standard success response format for non-paginated responses",
+                "required": ["status", "code", "i18n_key", "data"],
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "description": "HTTP status code (numeric)",
+                        "example": 200,
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Machine-readable success code",
+                        "example": "VDJ-GEN-OK-200",
+                    },
+                    "i18n_key": {
+                        "type": "string",
+                        "description": "Internationalization key for frontend localization",
+                        "example": "common.ok",
+                    },
+                    "data": {
+                        "description": "Response data payload",
+                        "example": {"id": "123", "name": "Example"},
+                    },
                 },
-                "code": {
-                    "type": "string",
-                    "description": "Machine-readable error code",
-                    "example": "VDJ-GEN-VAL-422"
+            },
+            "PaginatedEnvelope": {
+                "type": "object",
+                "title": "Paginated Response Envelope",
+                "description": "Standard paginated response format",
+                "required": ["status", "code", "i18n_key", "pagination", "data"],
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "description": "HTTP status code (numeric)",
+                        "example": 200,
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Machine-readable success code",
+                        "example": "VDJ-GEN-LIST-200",
+                    },
+                    "i18n_key": {
+                        "type": "string",
+                        "description": "Internationalization key for frontend localization",
+                        "example": "list.ok",
+                    },
+                    "pagination": {"$ref": "#/components/schemas/Pagination"},
+                    "data": {
+                        "type": "array",
+                        "description": "Array of response data items",
+                        "items": {},
+                    },
                 },
-                "i18n_key": {
-                    "type": "string", 
-                    "description": "Internationalization key for frontend localization",
-                    "example": "validation.failed"
+            },
+            "Pagination": {
+                "type": "object",
+                "title": "Pagination Metadata",
+                "description": "Standard pagination information",
+                "required": ["count", "totalPages", "currentPage", "pageSize"],
+                "properties": {
+                    "count": {
+                        "type": "integer",
+                        "description": "Total number of items across all pages",
+                        "example": 150,
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "description": "Total number of pages",
+                        "example": 8,
+                    },
+                    "currentPage": {
+                        "type": "integer",
+                        "description": "Current page number (1-based)",
+                        "example": 1,
+                    },
+                    "next": {
+                        "type": "integer",
+                        "nullable": True,
+                        "description": "Next page number (null if no next page)",
+                        "example": 2,
+                    },
+                    "previous": {
+                        "type": "integer",
+                        "nullable": True,
+                        "description": "Previous page number (null if no previous page)",
+                        "example": None,
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "example": 20,
+                    },
                 },
-                "detail": {
-                    "type": "string",
-                    "description": "A human-readable explanation specific to this problem occurrence",
-                    "example": "The request contains invalid data."
-                },
-                "instance": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "A URI reference that identifies the specific occurrence of the problem",
-                    "example": "/api/v1/accounts/register/"
-                },
-                "issues": {
-                    "type": "array",
-                    "description": "Array of validation issues (for validation errors)",
-                    "items": {"$ref": "#/components/schemas/Issue"}
-                },
-                "meta": {
-                    "type": "object",
-                    "description": "Additional metadata about the problem",
-                    "additionalProperties": True
-                }
-            }
-        },
-        "Issue": {
-            "type": "object",
-            "title": "Validation Issue",
-            "description": "Details about a specific field validation error",
-            "required": ["path", "message", "i18n_key"],
-            "properties": {
-                "path": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Path to the field that caused the issue",
-                    "example": ["user", "email"]
-                },
-                "message": {
-                    "type": "string",
-                    "description": "Human-readable error message",
-                    "example": "This field is required."
-                },
-                "i18n_key": {
-                    "type": "string",
-                    "description": "Internationalization key for the error message",
-                    "example": "validation.required"
-                }
-            }
-        },
-        "SuccessEnvelope": {
-            "type": "object",
-            "title": "Success Response Envelope",
-            "description": "Standard success response format for non-paginated responses",
-            "required": ["status", "code", "i18n_key", "data"],
-            "properties": {
-                "status": {
-                    "type": "integer",
-                    "description": "HTTP status code (numeric)",
-                    "example": 200
-                },
-                "code": {
-                    "type": "string",
-                    "description": "Machine-readable success code",
-                    "example": "VDJ-GEN-OK-200"
-                },
-                "i18n_key": {
-                    "type": "string",
-                    "description": "Internationalization key for frontend localization",
-                    "example": "common.ok"
-                },
-                "data": {
-                    "description": "Response data payload",
-                    "example": {"id": "123", "name": "Example"}
-                }
-            }
-        },
-        "PaginatedEnvelope": {
-            "type": "object",
-            "title": "Paginated Response Envelope", 
-            "description": "Standard paginated response format",
-            "required": ["status", "code", "i18n_key", "pagination", "data"],
-            "properties": {
-                "status": {
-                    "type": "integer",
-                    "description": "HTTP status code (numeric)",
-                    "example": 200
-                },
-                "code": {
-                    "type": "string", 
-                    "description": "Machine-readable success code",
-                    "example": "VDJ-GEN-LIST-200"
-                },
-                "i18n_key": {
-                    "type": "string",
-                    "description": "Internationalization key for frontend localization", 
-                    "example": "list.ok"
-                },
-                "pagination": {"$ref": "#/components/schemas/Pagination"},
-                "data": {
-                    "type": "array",
-                    "description": "Array of response data items",
-                    "items": {}
-                }
-            }
-        },
-        "Pagination": {
-            "type": "object",
-            "title": "Pagination Metadata",
-            "description": "Standard pagination information",
-            "required": ["count", "totalPages", "currentPage", "pageSize"],
-            "properties": {
-                "count": {
-                    "type": "integer",
-                    "description": "Total number of items across all pages",
-                    "example": 150
-                },
-                "totalPages": {
-                    "type": "integer", 
-                    "description": "Total number of pages",
-                    "example": 8
-                },
-                "currentPage": {
-                    "type": "integer",
-                    "description": "Current page number (1-based)",
-                    "example": 1
-                },
-                "next": {
-                    "type": "integer",
-                    "nullable": True,
-                    "description": "Next page number (null if no next page)",
-                    "example": 2
-                },
-                "previous": {
-                    "type": "integer",
-                    "nullable": True,
-                    "description": "Previous page number (null if no previous page)",
-                    "example": None
-                },
-                "pageSize": {
-                    "type": "integer",
-                    "description": "Number of items per page",
-                    "example": 20
-                }
-            }
+            },
         }
-    })
+    )
 
     return result

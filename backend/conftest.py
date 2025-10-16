@@ -3,19 +3,22 @@ Global pytest fixtures for the entire project.
 """
 
 import pytest
-from django.core.management import call_command
 from django.test import Client
 from rest_framework.test import APIClient
+
 from apps.accounts.tests.factories import (
     AccountFactory,
     AdminAccountFactory,
     SuperuserAccountFactory,
-    UnverifiedAccountFactory
+    UnverifiedAccountFactory,
 )
-from apps.organizations.tests.factories import OrganizationFactory, OrganizationMembershipFactory
+from apps.organizations.tests.factories import (
+    OrganizationFactory,
+    OrganizationMembershipFactory,
+)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def django_db_setup(django_db_setup, django_db_blocker):
     """
     Custom database setup that runs migrations at the start of test session.
@@ -75,10 +78,7 @@ def organization_with_owner(user):
     org = OrganizationFactory(created_by=user)
     # Create owner membership
     OrganizationMembershipFactory(
-        organization=org,
-        user=user,
-        role='owner',
-        status='active'
+        organization=org, user=user, role="owner", status="active"
     )
     return org
 
@@ -102,9 +102,6 @@ def tenant_aware_user(organization):
     """User with organization context."""
     user = AccountFactory(organization=organization)
     OrganizationMembershipFactory(
-        organization=organization,
-        user=user,
-        role='member',
-        status='active'
+        organization=organization, user=user, role="member", status="active"
     )
     return user

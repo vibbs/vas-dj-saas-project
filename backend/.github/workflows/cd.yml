@@ -1,0 +1,379 @@
+name: 🚀 Backend CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["🔄 Backend CI Pipeline"]
+    types:
+      - completed
+    branches: [main, develop]
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment environment"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - staging
+          - production
+      cloud_provider:
+        description: "Cloud provider for deployment"
+        required: true
+        default: "aws"
+        type: choice
+        options:
+          - aws
+          - cloudflare
+          - gcp
+          - azure
+          - docker-registry
+      force_deploy:
+        description: "Force deployment even if CI failed"
+        required: false
+        default: false
+        type: boolean
+
+env:
+  WORKING_DIRECTORY: "./backend"
+  REGISTRY_BASE: "vas-dj-backend"
+
+jobs:
+  # Pre-deployment checks
+  pre-deploy:
+    name: 🔍 Pre-deployment Checks
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || inputs.force_deploy }}
+    outputs:
+      should-deploy: ${{ steps.check.outputs.should-deploy }}
+      environment: ${{ steps.check.outputs.environment }}
+      cloud-provider: ${{ steps.check.outputs.cloud-provider }}
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Check deployment conditions
+        id: check
+        run: |
+          # Determine environment
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            ENVIRONMENT="${{ inputs.environment }}"
+            CLOUD_PROVIDER="${{ inputs.cloud_provider }}"
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            ENVIRONMENT="production"
+            CLOUD_PROVIDER="aws"  # Default for production
+          else
+            ENVIRONMENT="staging"
+            CLOUD_PROVIDER="aws"  # Default for staging
+          fi
+
+          echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
+          echo "cloud-provider=${CLOUD_PROVIDER}" >> $GITHUB_OUTPUT
+          echo "should-deploy=true" >> $GITHUB_OUTPUT
+
+          echo "🎯 Target Environment: ${ENVIRONMENT}"
+          echo "☁️ Cloud Provider: ${CLOUD_PROVIDER}"
+
+  # Download artifacts from CI
+  prepare-artifacts:
+    name: 📦 Prepare Deployment Artifacts
+    runs-on: ubuntu-latest
+    needs: pre-deploy
+    if: needs.pre-deploy.outputs.should-deploy == 'true'
+
+    steps:
+      - name: 📥 Download Docker image
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: 🐳 Load Docker image
+        run: docker load -i vas-dj-backend.tar
+
+      - name: 📋 Verify image
+        run: |
+          docker images
+          docker inspect vas-dj-backend:latest
+
+  # AWS Deployment
+  deploy-aws:
+    name: 🚀 Deploy to AWS
+    runs-on: ubuntu-latest
+    needs: [pre-deploy, prepare-artifacts]
+    if: needs.pre-deploy.outputs.cloud-provider == 'aws'
+    environment: ${{ needs.pre-deploy.outputs.environment }}
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download Docker image
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: 🐳 Load Docker image
+        run: docker load -i vas-dj-backend.tar
+
+      - name: 🔑 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: 🐳 Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: 🏷️ Tag and push to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY || 'vas-dj-backend' }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker tag vas-dj-backend:latest $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker tag vas-dj-backend:latest $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: 🚀 Deploy to ECS/EKS (placeholder)
+        run: |
+          echo "🚀 Deploying to AWS ECS/EKS"
+          echo "📝 Update your task definition with: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          echo "🔄 Trigger service update here"
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY || 'vas-dj-backend' }}
+          IMAGE_TAG: ${{ github.sha }}
+
+  # Cloudflare Workers Deployment
+  deploy-cloudflare:
+    name: 🚀 Deploy to Cloudflare
+    runs-on: ubuntu-latest
+    needs: [pre-deploy, prepare-artifacts]
+    if: needs.pre-deploy.outputs.cloud-provider == 'cloudflare'
+    environment: ${{ needs.pre-deploy.outputs.environment }}
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download Docker image
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: 🔑 Setup Cloudflare credentials
+        run: |
+          echo "🔑 Setting up Cloudflare credentials"
+          # Configure wrangler or direct API calls
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: 🚀 Deploy to Cloudflare Workers/Pages
+        run: |
+          echo "🚀 Deploying to Cloudflare"
+          echo "📝 Configure your wrangler.toml for container deployment"
+          echo "🔄 Use Cloudflare Container Registry or Workers"
+
+  # GCP Deployment
+  deploy-gcp:
+    name: 🚀 Deploy to GCP
+    runs-on: ubuntu-latest
+    needs: [pre-deploy, prepare-artifacts]
+    if: needs.pre-deploy.outputs.cloud-provider == 'gcp'
+    environment: ${{ needs.pre-deploy.outputs.environment }}
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download Docker image
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: 🐳 Load Docker image
+        run: docker load -i vas-dj-backend.tar
+
+      - name: 🔑 Setup GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: 🔧 Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: 🐳 Configure Docker for GCR
+        run: gcloud auth configure-docker
+
+      - name: 🏷️ Tag and push to GCR
+        env:
+          PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker tag vas-dj-backend:latest gcr.io/$PROJECT_ID/vas-dj-backend:$IMAGE_TAG
+          docker tag vas-dj-backend:latest gcr.io/$PROJECT_ID/vas-dj-backend:latest
+          docker push gcr.io/$PROJECT_ID/vas-dj-backend:$IMAGE_TAG
+          docker push gcr.io/$PROJECT_ID/vas-dj-backend:latest
+
+      - name: 🚀 Deploy to Cloud Run
+        run: |
+          gcloud run deploy vas-dj-backend \
+            --image gcr.io/$PROJECT_ID/vas-dj-backend:$IMAGE_TAG \
+            --platform managed \
+            --region ${{ vars.GCP_REGION || 'us-central1' }} \
+            --allow-unauthenticated
+        env:
+          PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          IMAGE_TAG: ${{ github.sha }}
+
+  # Azure Deployment
+  deploy-azure:
+    name: 🚀 Deploy to Azure
+    runs-on: ubuntu-latest
+    needs: [pre-deploy, prepare-artifacts]
+    if: needs.pre-deploy.outputs.cloud-provider == 'azure'
+    environment: ${{ needs.pre-deploy.outputs.environment }}
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download Docker image
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: 🐳 Load Docker image
+        run: docker load -i vas-dj-backend.tar
+
+      - name: 🔑 Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: 🐳 Login to Azure Container Registry
+        run: |
+          az acr login --name ${{ vars.AZURE_REGISTRY_NAME }}
+
+      - name: 🏷️ Tag and push to ACR
+        env:
+          REGISTRY_NAME: ${{ vars.AZURE_REGISTRY_NAME }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker tag vas-dj-backend:latest $REGISTRY_NAME.azurecr.io/vas-dj-backend:$IMAGE_TAG
+          docker tag vas-dj-backend:latest $REGISTRY_NAME.azurecr.io/vas-dj-backend:latest
+          docker push $REGISTRY_NAME.azurecr.io/vas-dj-backend:$IMAGE_TAG
+          docker push $REGISTRY_NAME.azurecr.io/vas-dj-backend:latest
+
+      - name: 🚀 Deploy to Azure Container Instances
+        run: |
+          echo "🚀 Deploying to Azure Container Instances or App Service"
+          echo "📝 Configure your Azure deployment here"
+
+  # Generic Docker Registry Deployment
+  deploy-docker-registry:
+    name: 🚀 Deploy to Docker Registry
+    runs-on: ubuntu-latest
+    needs: [pre-deploy, prepare-artifacts]
+    if: needs.pre-deploy.outputs.cloud-provider == 'docker-registry'
+    environment: ${{ needs.pre-deploy.outputs.environment }}
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download Docker image
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: 🐳 Load Docker image
+        run: docker load -i vas-dj-backend.tar
+
+      - name: 🔑 Login to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.DOCKER_REGISTRY_URL || 'docker.io' }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: 🏷️ Tag and push to Registry
+        env:
+          REGISTRY_URL: ${{ vars.DOCKER_REGISTRY_URL || 'docker.io' }}
+          REPOSITORY: ${{ vars.DOCKER_REPOSITORY || 'vas-dj-backend' }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker tag vas-dj-backend:latest $REGISTRY_URL/$REPOSITORY:$IMAGE_TAG
+          docker tag vas-dj-backend:latest $REGISTRY_URL/$REPOSITORY:latest
+          docker push $REGISTRY_URL/$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY_URL/$REPOSITORY:latest
+
+  # Post-deployment validation
+  post-deploy:
+    name: 🔍 Post-deployment Validation
+    runs-on: ubuntu-latest
+    needs:
+      [
+        pre-deploy,
+        deploy-aws,
+        deploy-cloudflare,
+        deploy-gcp,
+        deploy-azure,
+        deploy-docker-registry,
+      ]
+    if: always() && needs.pre-deploy.outputs.should-deploy == 'true'
+
+    steps:
+      - name: 📊 Deployment Summary
+        run: |
+          echo "## 🚀 Deployment Summary"
+          echo "**Environment**: ${{ needs.pre-deploy.outputs.environment }}"
+          echo "**Cloud Provider**: ${{ needs.pre-deploy.outputs.cloud-provider }}"
+          echo "**Commit**: ${{ github.sha }}"
+          echo "**Triggered by**: ${{ github.event_name }}"
+
+          # Check which deployment ran
+          if [[ "${{ needs.deploy-aws.result }}" != "skipped" ]]; then
+            echo "**AWS Deployment**: ${{ needs.deploy-aws.result }}"
+          fi
+          if [[ "${{ needs.deploy-cloudflare.result }}" != "skipped" ]]; then
+            echo "**Cloudflare Deployment**: ${{ needs.deploy-cloudflare.result }}"
+          fi
+          if [[ "${{ needs.deploy-gcp.result }}" != "skipped" ]]; then
+            echo "**GCP Deployment**: ${{ needs.deploy-gcp.result }}"
+          fi
+          if [[ "${{ needs.deploy-azure.result }}" != "skipped" ]]; then
+            echo "**Azure Deployment**: ${{ needs.deploy-azure.result }}"
+          fi
+          if [[ "${{ needs.deploy-docker-registry.result }}" != "skipped" ]]; then
+            echo "**Docker Registry Deployment**: ${{ needs.deploy-docker-registry.result }}"
+          fi
+
+      - name: 🎉 Deployment Success
+        if: |
+          needs.deploy-aws.result == 'success' ||
+          needs.deploy-cloudflare.result == 'success' ||
+          needs.deploy-gcp.result == 'success' ||
+          needs.deploy-azure.result == 'success' ||
+          needs.deploy-docker-registry.result == 'success'
+        run: |
+          echo "🎉 Deployment completed successfully!"
+          echo "Environment: ${{ needs.pre-deploy.outputs.environment }}"
+          echo "Cloud Provider: ${{ needs.pre-deploy.outputs.cloud-provider }}"

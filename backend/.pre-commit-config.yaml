@@ -1,0 +1,87 @@
+# Pre-commit hooks for auto-fixing code issues
+# These hooks will auto-fix issues gracefully
+# Run manually with: pre-commit run --all-files
+#
+# Note: If hooks fail due to missing dependencies, install them:
+#   pip install black isort ruff pre-commit
+#   make pre-commit-install
+
+repos:
+  # Code formatting - Auto-fixes (non-blocking if tools missing)
+  - repo: https://github.com/psf/black
+    rev: 24.8.0
+    hooks:
+      - id: black
+        language_version: python3.11
+        exclude: migrations/
+        args: [--line-length=88]
+        # Make it fail gracefully if black is not installed
+        verbose: true
+
+  # Import sorting - Auto-fixes
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        exclude: migrations/
+        args: [--profile=black, --line-length=88]
+        verbose: true
+
+  # Basic file checks - Auto-fixes (lightweight, always safe)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+        exclude: docker/docker-compose.*\.yml
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=1000]
+      - id: fix-byte-order-marker
+
+  # Ruff linting and auto-fixes
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.8
+    hooks:
+      - id: ruff
+        args: [--fix]
+        exclude: migrations/
+        verbose: true
+      - id: ruff-format
+        exclude: migrations/
+        verbose: true
+
+  # Django specific checks with smart auto-fix
+  - repo: local
+    hooks:
+      # Unified Django checks with auto-mitigation
+      - id: django-smart-check
+        name: Django Smart Check (with auto-fix)
+        entry: bash -c 'AUTO_FIX=true ./scripts/pre-commit-helper.sh'
+        language: system
+        pass_filenames: false
+        require_serial: true
+        files: \.py$
+        exclude: migrations/
+        verbose: true
+        always_run: false  # Only run when Python files change
+
+# Configuration
+default_install_hook_types: [pre-commit, pre-push]
+default_stages: [pre-commit]
+fail_fast: false
+minimum_pre_commit_version: "3.0.0"
+
+# CI configuration
+ci:
+  autofix_commit_msg: 🎨 [pre-commit.ci] auto fixes from pre-commit hooks
+  autofix_prs: true
+  autoupdate_branch: ""
+  autoupdate_commit_msg: ⬆️ [pre-commit.ci] pre-commit autoupdate
+  autoupdate_schedule: weekly
+  skip: [django-check, django-migrations]
+  submodules: false

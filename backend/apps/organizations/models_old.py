@@ -1,7 +1,6 @@
-import uuid
-from django.db import models
 from django.core.validators import MinLengthValidator
-from apps.core.models import BaseFields
+from django.db import models
+
 from .managers import OrganizationManager
 
 

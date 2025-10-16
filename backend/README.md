@@ -47,7 +47,7 @@ open http://localhost:8000/api/docs/
 - **Background Tasks**: Celery
 - **API Documentation**: drf-spectacular (OpenAPI/Swagger)
 - **Containerization**: Docker & Docker Compose
-- **Dependency Management**: Poetry
+- **Dependency Management**: UV (10-100x faster than pip/poetry)
 
 ## 📁 Project Structure
 
@@ -81,7 +81,8 @@ vas-dj-saas-project/
 │   ├── Dockerfile         # Application container
 │   └── docker-compose.yml # Service orchestration
 ├── Makefile              # Development commands
-└── pyproject.toml        # Poetry configuration
+├── pyproject.toml        # UV/Python project configuration
+└── uv.lock               # Dependency lockfile
 ```
 
 ## 🚦 Quick Start
@@ -90,8 +91,12 @@ vas-dj-saas-project/
 
 - Docker
 - Docker Compose
+- Python 3.11+ (for local development)
+- UV (for local development): `pip install uv`
 
 ### Installation
+
+#### Docker Setup (Recommended for Quick Start)
 
 1. **Clone the repository:**
    ```bash
@@ -121,9 +126,47 @@ vas-dj-saas-project/
    docker compose -f ./docker/docker-compose.yml run --rm web python manage.py createsuperuser
    ```
 
+#### Local Development Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd vas-dj-saas-project
+   ```
+
+2. **Set up development environment with UV:**
+   ```bash
+   make dev-setup
+   source .venv/bin/activate
+   ```
+
+3. **Set up environment variables:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+4. **Start external services (PostgreSQL, Redis):**
+   ```bash
+   # Using Docker for services only
+   docker compose -f ./docker/docker-compose.yml up postgres redis -d
+   ```
+
+5. **Run database migrations:**
+   ```bash
+   python manage.py migrate
+   ```
+
+6. **Start the development server:**
+   ```bash
+   python manage.py runserver
+   ```
+
 ## 🖥 Development Commands
 
 The project includes a Makefile with convenient commands:
+
+### Docker Commands
 
 ```bash
 # Build containers
@@ -146,6 +189,34 @@ make clean
 
 # Check System Status
 make check-status
+```
+
+### Local Development with UV
+
+```bash
+# Setup development environment
+make dev-setup
+
+# Create virtual environment
+make uv-venv
+
+# Install dependencies (system Python)
+make uv-install
+
+# Install dependencies (in virtual environment)
+make uv-install-dev
+
+# Add a new package
+make uv-add-package PACKAGE=requests
+
+# Remove a package
+make uv-remove-package PACKAGE=requests
+
+# Update lockfile
+make uv-lock
+
+# Clean UV cache
+make uv-clean
 ```
 
 ## 🌐 API Documentation
@@ -226,4 +297,3 @@ The project includes production-ready configurations:
 3. Maintain API documentation with schema annotations
 4. Write comprehensive tests for new features
 5. Ensure multi-tenant data isolation in all models
-

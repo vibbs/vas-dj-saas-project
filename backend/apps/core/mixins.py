@@ -5,12 +5,10 @@ These mixins provide common functionality like organization-based filtering,
 audit logging, and permission checking for multi-tenant SaaS applications.
 """
 
-from typing import Optional
-from django.db.models import QuerySet, Q
-from rest_framework import status
+from django.db.models import QuerySet
 from rest_framework.exceptions import PermissionDenied
 
-from apps.core.audit import log_audit_event, AuditAction
+from apps.core.audit import AuditAction, log_audit_event
 
 
 class OrganizationFilterMixin:
@@ -52,7 +50,7 @@ class OrganizationFilterMixin:
             Default: True
     """
 
-    organization_filter_field = 'organization'
+    organization_filter_field = "organization"
     organization_filter_method = None  # Auto-detect
     organization_select_related = None
     organization_prefetch_related = None
@@ -64,7 +62,11 @@ class OrganizationFilterMixin:
 
         Override this method only if you need additional custom filtering.
         """
-        queryset = super().get_queryset() if hasattr(super(), 'get_queryset') else self.queryset
+        queryset = (
+            super().get_queryset()
+            if hasattr(super(), "get_queryset")
+            else self.queryset
+        )
 
         # Apply organization filtering
         queryset = self._apply_organization_filter(queryset)
@@ -93,9 +95,9 @@ class OrganizationFilterMixin:
         # Detect filter method if not specified
         filter_method = self._get_filter_method()
 
-        if filter_method == 'foreign_key':
+        if filter_method == "foreign_key":
             return self._filter_by_foreign_key(queryset, user)
-        elif filter_method == 'membership':
+        elif filter_method == "membership":
             return self._filter_by_membership(queryset, user)
         else:
             # Fallback: try foreign key first, then membership
@@ -118,14 +120,14 @@ class OrganizationFilterMixin:
         # Check if model has direct organization field
         model = self.queryset.model
         if hasattr(model, self.organization_filter_field):
-            return 'foreign_key'
+            return "foreign_key"
 
         # Check if model has organization_memberships (many-to-many)
-        if hasattr(model, 'organization_memberships'):
-            return 'membership'
+        if hasattr(model, "organization_memberships"):
+            return "membership"
 
         # Default to foreign key
-        return 'foreign_key'
+        return "foreign_key"
 
     def _filter_by_foreign_key(self, queryset: QuerySet, user) -> QuerySet:
         """
@@ -136,11 +138,11 @@ class OrganizationFilterMixin:
         """
         # Get user's active organizations
         user_org_ids = user.get_active_memberships().values_list(
-            'organization_id', flat=True
+            "organization_id", flat=True
         )
 
         # Filter by organization field
-        filter_kwargs = {f'{self.organization_filter_field}_id__in': user_org_ids}
+        filter_kwargs = {f"{self.organization_filter_field}_id__in": user_org_ids}
         return queryset.filter(**filter_kwargs).distinct()
 
     def _filter_by_membership(self, queryset: QuerySet, user) -> QuerySet:
@@ -152,7 +154,7 @@ class OrganizationFilterMixin:
         """
         # Get user's active organizations
         user_org_ids = user.get_active_memberships().values_list(
-            'organization_id', flat=True
+            "organization_id", flat=True
         )
 
         # Filter by membership
@@ -202,10 +204,12 @@ class OrganizationFilterMixin:
             obj_org = getattr(obj, self.organization_filter_field)
         else:
             # Try to get via memberships
-            obj_orgs = obj.organization_memberships.values_list('organization_id', flat=True)
-            user_org_ids = set(user.get_active_memberships().values_list(
-                'organization_id', flat=True
-            ))
+            obj_orgs = obj.organization_memberships.values_list(
+                "organization_id", flat=True
+            )
+            user_org_ids = set(
+                user.get_active_memberships().values_list("organization_id", flat=True)
+            )
             has_access = bool(set(obj_orgs) & user_org_ids)
 
             if not has_access:
@@ -216,14 +220,14 @@ class OrganizationFilterMixin:
             return True
 
         # Check if user is member of object's organization
-        has_access = user.get_active_memberships().filter(
-            organization=obj_org
-        ).exists()
+        has_access = user.get_active_memberships().filter(organization=obj_org).exists()
 
         if not has_access:
             if raise_exception:
                 self._log_access_denied(obj, user)
-                raise PermissionDenied("You don't have access to this organization's data.")
+                raise PermissionDenied(
+                    "You don't have access to this organization's data."
+                )
             return False
 
         return True
@@ -238,10 +242,7 @@ class OrganizationFilterMixin:
             resource_type=model_name,
             resource_id=str(obj.pk),
             success=False,
-            details={
-                'reason': 'user_not_in_organization',
-                'model': model_name
-            }
+            details={"reason": "user_not_in_organization", "model": model_name},
         )
 
 
@@ -264,18 +265,18 @@ class AuditLoggingMixin:
     def perform_create(self, serializer):
         """Log resource creation."""
         instance = serializer.save()
-        self._log_crud_action('create', instance)
+        self._log_crud_action("create", instance)
         return instance
 
     def perform_update(self, serializer):
         """Log resource update."""
         instance = serializer.save()
-        self._log_crud_action('update', instance)
+        self._log_crud_action("update", instance)
         return instance
 
     def perform_destroy(self, instance):
         """Log resource deletion."""
-        self._log_crud_action('destroy', instance)
+        self._log_crud_action("destroy", instance)
         instance.delete()
 
     def _log_crud_action(self, action_type: str, instance):
@@ -292,10 +293,7 @@ class AuditLoggingMixin:
             resource_type=model_name,
             resource_id=str(instance.pk),
             success=True,
-            details={
-                'action': action_type,
-                'model': model_name
-            }
+            details={"action": action_type, "model": model_name},
         )
 
 
@@ -321,6 +319,7 @@ class TenantAwareViewSetMixin(OrganizationFilterMixin, AuditLoggingMixin):
 
     That's it! Organization filtering and audit logging are automatic.
     """
+
     pass
 
 

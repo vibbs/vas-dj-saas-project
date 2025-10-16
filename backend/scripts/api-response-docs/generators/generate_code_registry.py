@@ -6,14 +6,15 @@ This script generates various registry formats (JSON, YAML, Python constants)
 that can be used for documentation, client SDKs, or integration purposes.
 """
 
+import json
 import os
 import sys
-import json
-import yaml
-import django
+from collections import defaultdict
 from pathlib import Path
-from collections import defaultdict, OrderedDict
-from typing import Dict, List, Set, Any, Optional
+
+import django
+import yaml
+
 # Add the backend directory to Python path
 # Script is in: backend/scripts/api-response-docs/generators/
 # Backend is: backend/ (4 levels up)
@@ -24,20 +25,18 @@ if str(backend_dir) not in sys.path:
 # Configure Django settings
 # Use environment variable or fallback to development settings
 django_settings = os.environ.get(
-    "DJANGO_SETTINGS_MODULE", 
-    "config.settings.development"
+    "DJANGO_SETTINGS_MODULE", "config.settings.development"
 )
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", django_settings)
 
 django.setup()
 
 from apps.core.code_registry import REGISTRY, CodeRegistryError
-from apps.core.codes import BaseAPICodeMixin
 
 
 def organize_codes_by_hierarchy(
-    codes: Set[str],
-) -> Dict[str, Dict[str, Dict[str, List[str]]]]:
+    codes: set[str],
+) -> dict[str, dict[str, dict[str, list[str]]]]:
     """Organize codes into a hierarchical structure: module -> type -> status -> codes."""
     hierarchy = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 
@@ -118,7 +117,7 @@ def generate_code_description(code: str) -> str:
 
 
 def generate_json_registry(
-    output_dir: Path, codes: Set[str], problem_types: Dict
+    output_dir: Path, codes: set[str], problem_types: dict
 ) -> None:
     """Generate JSON format registry."""
     registry_data = {
@@ -155,7 +154,7 @@ def generate_json_registry(
 
 
 def generate_yaml_registry(
-    output_dir: Path, codes: Set[str], problem_types: Dict
+    output_dir: Path, codes: set[str], problem_types: dict
 ) -> None:
     """Generate YAML format registry."""
     registry_data = {
@@ -195,7 +194,7 @@ def generate_yaml_registry(
     print(f"Generated: {yaml_path}")
 
 
-def generate_python_constants(output_dir: Path, codes: Set[str]) -> None:
+def generate_python_constants(output_dir: Path, codes: set[str]) -> None:
     """Generate Python constants file for client SDKs."""
 
     hierarchy = organize_codes_by_hierarchy(codes)
@@ -273,7 +272,7 @@ def get_code_info(code: str) -> Dict[str, Any]:
         return {
             "code": code,
             "module": parts[1],
-            "usecase": parts[2], 
+            "usecase": parts[2],
             "http_status": int(parts[-1]),
             "type": ResponseCodeType.SUCCESS if parts[-1].startswith('2') else ResponseCodeType.ERROR
         }
@@ -298,7 +297,7 @@ def get_codes_by_module(module: str) -> List[str]:
     # Add all codes to the helper function
     for module, types in sorted(hierarchy.items()):
         content += f'    if module.upper() == "{module}":\n'
-        content += f"        return [\n"
+        content += "        return [\n"
         for type_name, statuses in types.items():
             for status, status_codes in statuses.items():
                 for code_info in status_codes:
@@ -314,14 +313,14 @@ def get_codes_by_module(module: str) -> List[str]:
     print(f"Generated: {py_path}")
 
 
-def generate_typescript_definitions(output_dir: Path, codes: Set[str]) -> None:
+def generate_typescript_definitions(output_dir: Path, codes: set[str]) -> None:
     """Generate TypeScript definitions for client SDKs."""
 
     hierarchy = organize_codes_by_hierarchy(codes)
 
     content = """/**
  * Auto-generated API response codes for VAS-DJ SaaS.
- * 
+ *
  * This file contains all response codes organized by module and type.
  * Generated from the Django backend code registry.
  */
@@ -388,7 +387,7 @@ export function getCodeInfo(code: string): CodeInfo {
   return {
     code,
     module: 'unknown',
-    usecase: 'unknown', 
+    usecase: 'unknown',
     httpStatus: 500,
     type: ResponseCodeType.ERROR,
     description: 'Unknown response code'
@@ -421,7 +420,7 @@ function generateCodeDescription(code: string): string {
 
 
 def generate_openapi_schema_fragment(
-    output_dir: Path, codes: Set[str], problem_types: Dict
+    output_dir: Path, codes: set[str], problem_types: dict
 ) -> None:
     """Generate OpenAPI schema fragment for response codes."""
 
@@ -532,10 +531,10 @@ def main():
         generate_typescript_definitions(output_dir, codes)
         generate_openapi_schema_fragment(output_dir, codes, problem_types)
 
-        print(f"\n✓ Registry generation successful!")
+        print("\n✓ Registry generation successful!")
         print(f"  - Response codes: {len(codes)}")
         print(f"  - Problem types: {len(problem_types)}")
-        print(f"  - Export formats: JSON, YAML, Python, TypeScript, OpenAPI")
+        print("  - Export formats: JSON, YAML, Python, TypeScript, OpenAPI")
         print(f"  - Output directory: {output_dir}")
 
         return 0

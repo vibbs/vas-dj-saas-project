@@ -1,10 +1,10 @@
 import uuid
-import re
-from django.db import models
-from django.core.validators import MinLengthValidator, RegexValidator
+
 from django.core.exceptions import ValidationError
+from django.core.validators import MinLengthValidator, RegexValidator
+from django.db import models
 from django.utils.translation import gettext_lazy as _
-from apps.core.models import BaseFields
+
 from ..managers import OrganizationManager
 
 
@@ -15,14 +15,16 @@ class Organization(models.Model):
     name = models.CharField(
         max_length=100,
         validators=[
-            MinLengthValidator(3, message=_("Organization name must be at least 3 characters long."))
+            MinLengthValidator(
+                3, message=_("Organization name must be at least 3 characters long.")
+            )
         ],
         help_text="Name of the organization (3-100 characters)",
     )
     slug = models.SlugField(
         unique=True,
         max_length=50,
-        help_text="URL-friendly version of the organization name"
+        help_text="URL-friendly version of the organization name",
     )
     description = models.TextField(blank=True, null=True)
     logo = models.URLField(blank=True, null=True)
@@ -37,23 +39,45 @@ class Organization(models.Model):
         on_delete=models.SET_NULL,
         related_name="created_organizations",
     )
-    
+
     # Legacy creator fields (can be removed later)
     creator_email = models.EmailField()
     creator_name = models.CharField(max_length=255, blank=True)
 
     # Business metadata
     is_active = models.BooleanField(default=True)
+
+    # Soft delete fields (GDPR compliance)
+    deleted_at = models.DateTimeField(
+        null=True, blank=True, help_text="Timestamp when organization was soft-deleted"
+    )
+    deleted_by = models.ForeignKey(
+        "accounts.Account",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="deleted_organizations",
+        help_text="User who initiated deletion",
+    )
+    deletion_reason = models.TextField(
+        blank=True, null=True, help_text="Reason for organization deletion"
+    )
+    scheduled_permanent_deletion = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Scheduled date for permanent data deletion (typically 30 days after soft delete)",
+    )
+
     plan = models.CharField(
         max_length=20,
         choices=[
-            ('free_trial', 'Free Trial'),
-            ('starter', 'Starter'),
-            ('pro', 'Pro'),
-            ('enterprise', 'Enterprise'),
+            ("free_trial", "Free Trial"),
+            ("starter", "Starter"),
+            ("pro", "Pro"),
+            ("enterprise", "Enterprise"),
         ],
-        default='free_trial',
-        help_text="Current plan tier"
+        default="free_trial",
+        help_text="Current plan tier",
     )
     paid_until = models.DateField(blank=True, null=True)
     on_trial = models.BooleanField(default=False)
@@ -63,11 +87,15 @@ class Organization(models.Model):
         unique=True,
         help_text="Unique subdomain for the organization (3-50 characters, alphanumeric and hyphens only)",
         validators=[
-            MinLengthValidator(3, message=_("Subdomain must be at least 3 characters long.")),
+            MinLengthValidator(
+                3, message=_("Subdomain must be at least 3 characters long.")
+            ),
             RegexValidator(
-                regex=r'^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$',
-                message=_("Subdomain can only contain alphanumeric characters and hyphens. Cannot start or end with hyphen.")
-            )
+                regex=r"^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$",
+                message=_(
+                    "Subdomain can only contain alphanumeric characters and hyphens. Cannot start or end with hyphen."
+                ),
+            ),
         ],
     )
 
@@ -77,30 +105,47 @@ class Organization(models.Model):
     def clean(self):
         """Validate organization data."""
         super().clean()
-        
+
         # Validate subdomain format
         if self.sub_domain:
             # Check for reserved subdomains
             reserved_subdomains = {
-                'www', 'api', 'admin', 'mail', 'ftp', 'app', 'apps', 'support',
-                'help', 'blog', 'docs', 'status', 'dev', 'test', 'staging'
+                "www",
+                "api",
+                "admin",
+                "mail",
+                "ftp",
+                "app",
+                "apps",
+                "support",
+                "help",
+                "blog",
+                "docs",
+                "status",
+                "dev",
+                "test",
+                "staging",
             }
             if self.sub_domain.lower() in reserved_subdomains:
-                raise ValidationError({
-                    'sub_domain': _("This subdomain is reserved and cannot be used.")
-                })
-        
+                raise ValidationError(
+                    {"sub_domain": _("This subdomain is reserved and cannot be used.")}
+                )
+
         # Validate plan consistency
-        if self.on_trial and self.plan not in ['free_trial']:
-            raise ValidationError({
-                'plan': _("Organizations on trial must have 'free_trial' plan.")
-            })
-        
+        if self.on_trial and self.plan not in ["free_trial"]:
+            raise ValidationError(
+                {"plan": _("Organizations on trial must have 'free_trial' plan.")}
+            )
+
         if self.paid_until and self.on_trial:
-            raise ValidationError({
-                'paid_until': _("Organizations on trial cannot have a paid_until date.")
-            })
-    
+            raise ValidationError(
+                {
+                    "paid_until": _(
+                        "Organizations on trial cannot have a paid_until date."
+                    )
+                }
+            )
+
     def save(self, *args, **kwargs):
         self.clean()
         super().save(*args, **kwargs)
@@ -110,7 +155,7 @@ class Organization(models.Model):
 
     def get_owner_membership(self):
         """Get the owner membership for this organization."""
-        return self.memberships.filter(role='owner', status='active').first()
+        return self.memberships.filter(role="owner", status="active").first()
 
     def get_owner(self):
         """Get the owner account for this organization."""
@@ -119,32 +164,177 @@ class Organization(models.Model):
 
     def has_active_subscription(self):
         """Check if organization has an active subscription."""
-        return hasattr(self, 'subscription') and self.subscription.status in ['active', 'trialing']
-    
+        return hasattr(self, "subscription") and self.subscription.status in [
+            "active",
+            "trialing",
+        ]
+
     def is_trial_expired(self):
         """Check if trial period has expired."""
         from django.utils import timezone
-        return self.on_trial and self.trial_ends_on and self.trial_ends_on < timezone.now().date()
-    
+
+        return (
+            self.on_trial
+            and self.trial_ends_on
+            and self.trial_ends_on < timezone.now().date()
+        )
+
     def get_active_members_count(self):
         """Get count of active members in organization."""
-        return self.memberships.filter(status='active').count()
-    
+        return self.memberships.filter(status="active").count()
+
     def get_pending_invites_count(self):
         """Get count of pending invites."""
-        return self.invites.filter(status='pending').count()
-    
+        return self.invites.filter(status="pending").count()
+
     def can_add_member(self):
         """Check if organization can add more members based on plan limits."""
         # This could be enhanced with actual plan limits
-        if self.plan == 'free_trial':
+        if self.plan == "free_trial":
             return self.get_active_members_count() < 5
-        elif self.plan == 'starter':
+        elif self.plan == "starter":
             return self.get_active_members_count() < 10
-        elif self.plan == 'pro':
+        elif self.plan == "pro":
             return self.get_active_members_count() < 50
         # Enterprise has no limit
         return True
+
+    def soft_delete(self, deleted_by=None, reason=None):
+        """
+        Soft delete the organization (GDPR compliance).
+        Sets deleted_at timestamp and schedules permanent deletion after 30 days.
+        """
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        self.deleted_at = timezone.now()
+        self.deleted_by = deleted_by
+        self.deletion_reason = reason
+        self.scheduled_permanent_deletion = timezone.now() + timedelta(days=30)
+        self.is_active = False
+        self.save(
+            update_fields=[
+                "deleted_at",
+                "deleted_by",
+                "deletion_reason",
+                "scheduled_permanent_deletion",
+                "is_active",
+            ]
+        )
+
+        # Log the deletion for audit purposes
+        from apps.core.models import AuditLog
+
+        AuditLog.log_event(
+            event_type="data_deletion",
+            resource_type="organization",
+            resource_id=str(self.id),
+            user=deleted_by,
+            organization=self,
+            outcome="success",
+            details={
+                "action": "soft_delete",
+                "reason": reason,
+                "scheduled_permanent_deletion": self.scheduled_permanent_deletion.isoformat(),
+            },
+        )
+
+        # Schedule Celery task for permanent deletion
+        from apps.organizations.tasks import schedule_permanent_deletion
+
+        schedule_permanent_deletion.apply_async(
+            args=[str(self.id)], eta=self.scheduled_permanent_deletion
+        )
+
+    def restore(self, restored_by=None):
+        """
+        Restore a soft-deleted organization.
+        Only works if permanent deletion hasn't been executed yet.
+        """
+        if not self.deleted_at:
+            return False
+
+        self.deleted_at = None
+        self.deleted_by = None
+        self.deletion_reason = None
+        self.scheduled_permanent_deletion = None
+        self.is_active = True
+        self.save(
+            update_fields=[
+                "deleted_at",
+                "deleted_by",
+                "deletion_reason",
+                "scheduled_permanent_deletion",
+                "is_active",
+            ]
+        )
+
+        # Log the restoration for audit purposes
+        from apps.core.models import AuditLog
+
+        AuditLog.log_event(
+            event_type="data_restoration",
+            resource_type="organization",
+            resource_id=str(self.id),
+            user=restored_by,
+            organization=self,
+            outcome="success",
+            details={"action": "restore"},
+        )
+
+        return True
+
+    def is_deleted(self):
+        """Check if organization is soft-deleted."""
+        return self.deleted_at is not None
+
+    def can_be_restored(self):
+        """Check if organization can still be restored (within 30-day window)."""
+        from django.utils import timezone
+
+        return (
+            self.deleted_at is not None
+            and self.scheduled_permanent_deletion is not None
+            and timezone.now() < self.scheduled_permanent_deletion
+        )
+
+    def permanently_delete(self):
+        """
+        Permanently delete the organization and all associated data.
+        This is irreversible and should only be called after soft delete grace period.
+        """
+        from apps.core.models import AuditLog
+
+        # Log the permanent deletion before deleting
+        AuditLog.log_event(
+            event_type="data_deletion",
+            resource_type="organization",
+            resource_id=str(self.id),
+            user=self.deleted_by,
+            organization=self,
+            outcome="success",
+            details={
+                "action": "permanent_delete",
+                "soft_deleted_at": (
+                    self.deleted_at.isoformat() if self.deleted_at else None
+                ),
+                "reason": self.deletion_reason,
+            },
+        )
+
+        # Delete all related data
+        # Django will cascade delete based on ForeignKey relationships
+        # But we'll be explicit for important data:
+
+        # Delete memberships
+        self.memberships.all().delete()
+
+        # Delete invites
+        self.invites.all().delete()
+
+        # Delete the organization itself (this will cascade to other related objects)
+        self.delete()
 
     class Meta:
         verbose_name = "Organization"

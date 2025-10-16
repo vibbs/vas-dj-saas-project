@@ -17,6 +17,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `docker compose -f ./docker/docker-compose.yml run --rm web python manage.py <command>`
 - `docker compose -f ./docker/docker-compose.yml exec web python manage.py <command>` (if container is running)
 
+### Pre-Commit Hooks (Smart Auto-Fix)
+- `make pre-commit-setup` - **One-time setup**: Install all dependencies (black, isort, ruff)
+- `make pre-commit-install` - Install git hooks with auto-fix capabilities
+- `make pre-commit-check` - Run smart checks with auto-fix (formats code, creates migrations)
+- `make pre-commit-check-manual` - Run checks without auto-fix
+- `make pre-commit-run` - Run all hooks on all files
+- **If commit blocked**: See [TROUBLESHOOTING-GIT-HOOKS.md](TROUBLESHOOTING-GIT-HOOKS.md) for quick fixes
+- **Detailed guide**: [PRE-COMMIT-GUIDE.md](PRE-COMMIT-GUIDE.md)
+
 ### Testing Framework
 This project uses pytest with comprehensive test coverage:
 
@@ -136,6 +145,7 @@ This is a Django SaaS project with multi-tenancy support:
 - PostgreSQL with psycopg2-binary
 - drf-spectacular for OpenAPI/Swagger documentation
 - UV for ultra-fast package installation (10-100x faster than pip/poetry)
+- Poetry (migrated to UV for better performance)
 
 ## Security & Production Readiness
 

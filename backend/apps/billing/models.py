@@ -1,7 +1,8 @@
 import uuid
-from django.db import models
-from django.conf import settings
 from decimal import Decimal
+
+from django.db import models
+
 from apps.core.models import BaseFields
 
 
@@ -36,15 +37,35 @@ class Plan(BaseFields):
         related_name="%(class)s_set",
         null=True,
         blank=True,
-        help_text="If null, this is a global plan available to all organizations"
+        help_text="If null, this is a global plan available to all organizations",
     )
-    
+
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField(blank=True)
 
-    stripe_price_id = models.CharField(max_length=255, unique=True)
-    stripe_product_id = models.CharField(max_length=255)
+    # Payment provider fields
+    provider = models.CharField(
+        max_length=50,
+        default="stripe",
+        help_text="Payment provider (stripe, paypal, etc.)",
+    )
+    external_price_id = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        help_text="External price/plan ID from payment provider",
+    )
+    external_product_id = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        help_text="External product ID from payment provider",
+    )
+
+    # Legacy Stripe fields (for backward compatibility)
+    stripe_price_id = models.CharField(max_length=255, blank=True)
+    stripe_product_id = models.CharField(max_length=255, blank=True)
 
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=3, default="usd")
@@ -63,12 +84,23 @@ class Plan(BaseFields):
 
     class Meta:
         ordering = ["amount"]
+        unique_together = [["provider", "external_price_id"]]
 
     def __str__(self):
         return f"{self.name} ({self.get_interval_display()})"
 
     def get_interval_display(self):
         return f"{self.interval_count} {self.get_interval_display().lower()}"
+
+    def save(self, *args, **kwargs):
+        # Auto-populate legacy stripe fields for backward compatibility
+        if self.provider == "stripe":
+            if self.external_price_id and not self.stripe_price_id:
+                self.stripe_price_id = self.external_price_id
+            if self.external_product_id and not self.stripe_product_id:
+                self.stripe_product_id = self.external_product_id
+
+        super().save(*args, **kwargs)
 
 
 class Subscription(models.Model):
@@ -78,19 +110,41 @@ class Subscription(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     # Organization-based subscription (1:1 relationship)
     organization = models.OneToOneField(
-        'organizations.Organization',
+        "organizations.Organization",
         on_delete=models.CASCADE,
-        related_name='subscription'
+        related_name="subscription",
     )
     plan = models.ForeignKey(
         Plan, on_delete=models.PROTECT, related_name="subscriptions"
     )
-    
-    # Stripe external IDs
-    stripe_subscription_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
+
+    # Payment provider fields
+    provider = models.CharField(
+        max_length=50,
+        default="stripe",
+        help_text="Payment provider (stripe, paypal, etc.)",
+    )
+    external_subscription_id = models.CharField(
+        max_length=255,
+        unique=True,
+        null=True,
+        blank=True,
+        help_text="External subscription ID from payment provider",
+    )
+    external_customer_id = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text="External customer ID from payment provider",
+    )
+
+    # Legacy Stripe fields (for backward compatibility)
+    stripe_subscription_id = models.CharField(
+        max_length=255, unique=True, null=True, blank=True
+    )
     stripe_customer_id = models.CharField(max_length=255, null=True, blank=True)
 
     status = models.CharField(
@@ -130,6 +184,16 @@ class Subscription(models.Model):
     def is_canceled(self):
         return self.status == SubscriptionStatus.CANCELED
 
+    def save(self, *args, **kwargs):
+        # Auto-populate legacy stripe fields for backward compatibility
+        if self.provider == "stripe":
+            if self.external_subscription_id and not self.stripe_subscription_id:
+                self.stripe_subscription_id = self.external_subscription_id
+            if self.external_customer_id and not self.stripe_customer_id:
+                self.stripe_customer_id = self.external_customer_id
+
+        super().save(*args, **kwargs)
+
 
 class Invoice(models.Model):
     # Remove BaseFields inheritance to avoid organization FK circular dependency
@@ -138,12 +202,10 @@ class Invoice(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     # Organization-based invoice
     organization = models.ForeignKey(
-        'organizations.Organization',
-        on_delete=models.CASCADE,
-        related_name='invoices'
+        "organizations.Organization", on_delete=models.CASCADE, related_name="invoices"
     )
     subscription = models.ForeignKey(
         Subscription,
@@ -153,7 +215,28 @@ class Invoice(models.Model):
         blank=True,
     )
 
-    stripe_invoice_id = models.CharField(max_length=255, unique=True)
+    # Payment provider fields
+    provider = models.CharField(
+        max_length=50,
+        default="stripe",
+        help_text="Payment provider (stripe, paypal, etc.)",
+    )
+    external_invoice_id = models.CharField(
+        max_length=255,
+        unique=True,
+        null=True,
+        blank=True,
+        help_text="External invoice ID from payment provider",
+    )
+    external_payment_intent_id = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        help_text="External payment intent ID",
+    )
+
+    # Legacy Stripe fields (for backward compatibility)
+    stripe_invoice_id = models.CharField(max_length=255, blank=True)
     stripe_payment_intent_id = models.CharField(max_length=255, blank=True)
 
     number = models.CharField(max_length=100)
@@ -188,3 +271,13 @@ class Invoice(models.Model):
     @property
     def is_paid(self):
         return self.status == InvoiceStatus.PAID
+
+    def save(self, *args, **kwargs):
+        # Auto-populate legacy stripe fields for backward compatibility
+        if self.provider == "stripe":
+            if self.external_invoice_id and not self.stripe_invoice_id:
+                self.stripe_invoice_id = self.external_invoice_id
+            if self.external_payment_intent_id and not self.stripe_payment_intent_id:
+                self.stripe_payment_intent_id = self.external_payment_intent_id
+
+        super().save(*args, **kwargs)

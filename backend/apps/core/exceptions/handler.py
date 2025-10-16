@@ -6,28 +6,25 @@ into RFC 7807 "Problem Details for HTTP APIs" format.
 """
 
 import logging
-from typing import Optional
+
+from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from django.core.exceptions import (
-    PermissionDenied,
-    ValidationError as DjangoValidationError,
-)
-from rest_framework.response import Response
-from rest_framework.views import exception_handler as drf_exception_handler
 from rest_framework.exceptions import (
-    ValidationError,
-    PermissionDenied as DRFPermissionDenied,
     AuthenticationFailed,
+    MethodNotAllowed,
     NotAuthenticated,
     NotFound,
-    MethodNotAllowed,
     ParseError,
-    UnsupportedMediaType,
     Throttled,
+    UnsupportedMediaType,
+    ValidationError,
 )
+from rest_framework.exceptions import PermissionDenied as DRFPermissionDenied
+from rest_framework.response import Response
+from rest_framework.views import exception_handler as drf_exception_handler
 
-from .base import BaseHttpException, flatten_validation_errors
 from ..codes import APIResponseCodes
+from .base import BaseHttpException, flatten_validation_errors
 
 logger = logging.getLogger(__name__)
 
@@ -178,7 +175,7 @@ def _convert_drf_exception_to_rfc7807(exc, response) -> BaseHttpException:
         return BaseHttpException(
             type="https://docs.yourapp.com/problems/method-not-allowed",
             title="Method Not Allowed",
-            detail=f"{exc.method} method is not allowed for this endpoint.",
+            detail=str(exc.default_detail),
             status=405,
             code=f"{APIResponseCodes.GEN_BAD_400.value.replace('400', '405')}",
             i18n_key="errors.method_not_allowed",

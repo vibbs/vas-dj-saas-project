@@ -1,0 +1,104 @@
+# Prometheus Configuration
+#
+# This configuration defines how Prometheus scrapes metrics from the Django application
+# and other services in the stack.
+#
+# Metrics Endpoints:
+#   - Django app: http://web:8000/metrics
+#   - Prometheus itself: http://localhost:9090/metrics
+#   - Node Exporter (optional): http://node-exporter:9100/metrics
+
+global:
+  # How frequently to scrape targets by default
+  scrape_interval: 15s
+
+  # How long until a scrape request times out
+  scrape_timeout: 10s
+
+  # How frequently to evaluate rules
+  evaluation_interval: 15s
+
+  # Labels to add to all metrics
+  external_labels:
+    environment: 'development'
+    cluster: 'vas-dj-saas'
+
+# Alertmanager configuration (optional - uncomment when needed)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#           - alertmanager:9093
+
+# Rule files for alerting (optional - uncomment when needed)
+# rule_files:
+#   - '/etc/prometheus/alerts/*.yml'
+
+# Scrape configurations
+scrape_configs:
+  # Django Application Metrics
+  - job_name: 'django'
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['web:8000']
+        labels:
+          service: 'django-web'
+          app: 'vas-dj-saas'
+
+    # Relabeling to extract meaningful labels
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'django-web'
+
+  # Prometheus Self-Monitoring
+  - job_name: 'prometheus'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+
+  # PostgreSQL Exporter (optional - uncomment if using postgres_exporter)
+  # - job_name: 'postgresql'
+  #   scrape_interval: 30s
+  #   static_configs:
+  #     - targets: ['postgres-exporter:9187']
+  #       labels:
+  #         service: 'postgresql'
+  #         database: 'saas_db'
+
+  # Redis Exporter (optional - uncomment if using redis_exporter)
+  # - job_name: 'redis'
+  #   scrape_interval: 30s
+  #   static_configs:
+  #     - targets: ['redis-exporter:9121']
+  #       labels:
+  #         service: 'redis'
+
+  # Node Exporter for system metrics (optional - uncomment if enabled)
+  # - job_name: 'node'
+  #   scrape_interval: 30s
+  #   static_configs:
+  #     - targets: ['node-exporter:9100']
+  #       labels:
+  #         service: 'node-exporter'
+  #         instance: 'docker-host'
+
+  # Celery Exporter (optional - uncomment if using celery-exporter)
+  # - job_name: 'celery'
+  #   scrape_interval: 30s
+  #   static_configs:
+  #     - targets: ['celery-exporter:9808']
+  #       labels:
+  #         service: 'celery'
+
+# Storage configuration
+storage:
+  tsdb:
+    # How long to keep data (override with --storage.tsdb.retention.time flag)
+    retention.time: 7d
+
+    # Maximum disk space to use (optional)
+    # retention.size: 10GB

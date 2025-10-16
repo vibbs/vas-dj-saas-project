@@ -5,9 +5,8 @@ These serializers define the standardized Problem Details format used across
 the API for all error responses, following RFC 7807 specification.
 """
 
+from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
-from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
-
 
 # Import the standardized schemas from core
 # Note: These are now references to the schema components defined in schema_hooks.py
@@ -32,31 +31,34 @@ from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
                     {
                         "path": ["email"],
                         "message": "This field is required.",
-                        "i18n_key": "validation.required"
+                        "i18n_key": "validation.required",
                     },
                     {
                         "path": ["password"],
                         "message": "Password must be at least 8 characters long.",
-                        "i18n_key": "validation.min_length"
-                    }
-                ]
-            }
+                        "i18n_key": "validation.min_length",
+                    },
+                ],
+            },
         ),
     ]
 )
 class ValidationErrorSerializer(serializers.Serializer):
     """RFC 7807 Problem Details for validation errors."""
+
     type = serializers.URLField(help_text="Problem type URI")
     title = serializers.CharField(help_text="Problem title")
     status = serializers.IntegerField(help_text="HTTP status code")
     code = serializers.CharField(help_text="Machine-readable error code")
     i18n_key = serializers.CharField(help_text="Internationalization key")
-    detail = serializers.CharField(required=False, help_text="Detailed error description")
+    detail = serializers.CharField(
+        required=False, help_text="Detailed error description"
+    )
     instance = serializers.CharField(required=False, help_text="Problem instance URI")
     issues = serializers.ListField(
         child=serializers.DictField(),
         required=False,
-        help_text="Array of validation issues"
+        help_text="Array of validation issues",
     )
     meta = serializers.DictField(required=False, help_text="Additional metadata")
 
@@ -74,7 +76,7 @@ class ValidationErrorSerializer(serializers.Serializer):
                 "code": "VDJ-AUTH-LOGIN-401",
                 "i18n_key": "errors.authentication_required",
                 "detail": "Authentication credentials were not provided or are invalid.",
-                "instance": "/api/v1/organizations/"
+                "instance": "/api/v1/organizations/",
             },
         ),
         OpenApiExample(
@@ -88,7 +90,7 @@ class ValidationErrorSerializer(serializers.Serializer):
                 "code": "VDJ-ACC-CREDS-401",
                 "i18n_key": "account.invalid_credentials",
                 "detail": "The email or password provided is incorrect.",
-                "instance": "/api/v1/auth/login/"
+                "instance": "/api/v1/auth/login/",
             },
         ),
         OpenApiExample(
@@ -102,19 +104,22 @@ class ValidationErrorSerializer(serializers.Serializer):
                 "code": "VDJ-AUTH-EXPIRED-401",
                 "i18n_key": "errors.token_expired",
                 "detail": "The provided JWT token has expired.",
-                "instance": "/api/v1/organizations/"
+                "instance": "/api/v1/organizations/",
             },
         ),
     ]
 )
 class UnauthorizedErrorSerializer(serializers.Serializer):
     """RFC 7807 Problem Details for unauthorized access errors."""
+
     type = serializers.URLField(help_text="Problem type URI")
     title = serializers.CharField(help_text="Problem title")
     status = serializers.IntegerField(help_text="HTTP status code", default=401)
     code = serializers.CharField(help_text="Machine-readable error code")
     i18n_key = serializers.CharField(help_text="Internationalization key")
-    detail = serializers.CharField(required=False, help_text="Detailed error description")
+    detail = serializers.CharField(
+        required=False, help_text="Detailed error description"
+    )
     instance = serializers.CharField(required=False, help_text="Problem instance URI")
     meta = serializers.DictField(required=False, help_text="Additional metadata")
 
@@ -132,7 +137,7 @@ class UnauthorizedErrorSerializer(serializers.Serializer):
                 "code": "VDJ-PERM-DENIED-403",
                 "i18n_key": "errors.permission_denied",
                 "detail": "You do not have permission to perform this action.",
-                "instance": "/api/v1/organizations/"
+                "instance": "/api/v1/organizations/",
             },
         ),
         OpenApiExample(
@@ -147,21 +152,22 @@ class UnauthorizedErrorSerializer(serializers.Serializer):
                 "i18n_key": "org.access_denied",
                 "detail": "You do not have access to this organization.",
                 "instance": "/api/v1/organizations/acme/",
-                "meta": {
-                    "organization_id": "123e4567-e89b-12d3-a456-426614174000"
-                }
+                "meta": {"organization_id": "123e4567-e89b-12d3-a456-426614174000"},
             },
         ),
     ]
 )
 class ForbiddenErrorSerializer(serializers.Serializer):
     """RFC 7807 Problem Details for forbidden access errors."""
+
     type = serializers.URLField(help_text="Problem type URI")
     title = serializers.CharField(help_text="Problem title")
     status = serializers.IntegerField(help_text="HTTP status code", default=403)
     code = serializers.CharField(help_text="Machine-readable error code")
     i18n_key = serializers.CharField(help_text="Internationalization key")
-    detail = serializers.CharField(required=False, help_text="Detailed error description")
+    detail = serializers.CharField(
+        required=False, help_text="Detailed error description"
+    )
     instance = serializers.CharField(required=False, help_text="Problem instance URI")
     meta = serializers.DictField(required=False, help_text="Additional metadata")
 
@@ -179,7 +185,7 @@ class ForbiddenErrorSerializer(serializers.Serializer):
                 "code": "VDJ-GEN-NOTFOUND-404",
                 "i18n_key": "errors.not_found",
                 "detail": "The requested resource was not found.",
-                "instance": "/api/v1/accounts/users/123/"
+                "instance": "/api/v1/accounts/users/123/",
             },
         ),
         OpenApiExample(
@@ -193,19 +199,22 @@ class ForbiddenErrorSerializer(serializers.Serializer):
                 "code": "VDJ-ACC-NOTFOUND-404",
                 "i18n_key": "account.not_found",
                 "detail": "The specified user account could not be found.",
-                "instance": "/api/v1/accounts/users/nonexistent/"
+                "instance": "/api/v1/accounts/users/nonexistent/",
             },
         ),
     ]
 )
 class NotFoundErrorSerializer(serializers.Serializer):
     """RFC 7807 Problem Details for not found errors."""
+
     type = serializers.URLField(help_text="Problem type URI")
     title = serializers.CharField(help_text="Problem title")
     status = serializers.IntegerField(help_text="HTTP status code", default=404)
     code = serializers.CharField(help_text="Machine-readable error code")
     i18n_key = serializers.CharField(help_text="Internationalization key")
-    detail = serializers.CharField(required=False, help_text="Detailed error description")
+    detail = serializers.CharField(
+        required=False, help_text="Detailed error description"
+    )
     instance = serializers.CharField(required=False, help_text="Problem instance URI")
     meta = serializers.DictField(required=False, help_text="Additional metadata")
 
@@ -223,7 +232,7 @@ class NotFoundErrorSerializer(serializers.Serializer):
                 "code": "VDJ-ACC-EXISTS-409",
                 "i18n_key": "account.already_exists",
                 "detail": "An account with this email address already exists.",
-                "instance": "/api/v1/accounts/register/"
+                "instance": "/api/v1/accounts/register/",
             },
         ),
         OpenApiExample(
@@ -237,19 +246,22 @@ class NotFoundErrorSerializer(serializers.Serializer):
                 "code": "VDJ-ORG-MEMBER-409",
                 "i18n_key": "org.member.already_exists",
                 "detail": "This user is already a member of the organization.",
-                "instance": "/api/v1/organizations/acme/members/"
+                "instance": "/api/v1/organizations/acme/members/",
             },
         ),
     ]
 )
 class ConflictErrorSerializer(serializers.Serializer):
     """RFC 7807 Problem Details for conflict errors."""
+
     type = serializers.URLField(help_text="Problem type URI")
     title = serializers.CharField(help_text="Problem title")
     status = serializers.IntegerField(help_text="HTTP status code", default=409)
     code = serializers.CharField(help_text="Machine-readable error code")
     i18n_key = serializers.CharField(help_text="Internationalization key")
-    detail = serializers.CharField(required=False, help_text="Detailed error description")
+    detail = serializers.CharField(
+        required=False, help_text="Detailed error description"
+    )
     instance = serializers.CharField(required=False, help_text="Problem instance URI")
     meta = serializers.DictField(required=False, help_text="Additional metadata")
 
@@ -268,21 +280,22 @@ class ConflictErrorSerializer(serializers.Serializer):
                 "i18n_key": "errors.rate_limit_exceeded",
                 "detail": "Too many requests. Please try again later.",
                 "instance": "/api/v1/endpoint/",
-                "meta": {
-                    "retry_after": 300
-                }
+                "meta": {"retry_after": 300},
             },
         ),
     ]
 )
 class RateLimitErrorSerializer(serializers.Serializer):
     """RFC 7807 Problem Details for rate limit errors."""
+
     type = serializers.URLField(help_text="Problem type URI")
     title = serializers.CharField(help_text="Problem title")
     status = serializers.IntegerField(help_text="HTTP status code", default=429)
     code = serializers.CharField(help_text="Machine-readable error code")
     i18n_key = serializers.CharField(help_text="Internationalization key")
-    detail = serializers.CharField(required=False, help_text="Detailed error description")
+    detail = serializers.CharField(
+        required=False, help_text="Detailed error description"
+    )
     instance = serializers.CharField(required=False, help_text="Problem instance URI")
     meta = serializers.DictField(required=False, help_text="Additional metadata")
 
@@ -300,19 +313,22 @@ class RateLimitErrorSerializer(serializers.Serializer):
                 "code": "VDJ-GEN-ERR-500",
                 "i18n_key": "errors.internal",
                 "detail": "An unexpected server error occurred.",
-                "instance": "/api/v1/endpoint/"
+                "instance": "/api/v1/endpoint/",
             },
         ),
     ]
 )
 class InternalServerErrorSerializer(serializers.Serializer):
     """RFC 7807 Problem Details for internal server errors."""
+
     type = serializers.URLField(help_text="Problem type URI")
     title = serializers.CharField(help_text="Problem title")
     status = serializers.IntegerField(help_text="HTTP status code", default=500)
     code = serializers.CharField(help_text="Machine-readable error code")
     i18n_key = serializers.CharField(help_text="Internationalization key")
-    detail = serializers.CharField(required=False, help_text="Detailed error description")
+    detail = serializers.CharField(
+        required=False, help_text="Detailed error description"
+    )
     instance = serializers.CharField(required=False, help_text="Problem instance URI")
     meta = serializers.DictField(required=False, help_text="Additional metadata")
 
@@ -331,25 +347,28 @@ class InternalServerErrorSerializer(serializers.Serializer):
                 "i18n_key": "errors.service_unavailable",
                 "detail": "Service is temporarily unavailable.",
                 "instance": "/api/v1/endpoint/",
-                "meta": {
-                    "retry_after": 600
-                }
+                "meta": {"retry_after": 600},
             },
         ),
     ]
 )
 class ServiceUnavailableErrorSerializer(serializers.Serializer):
     """RFC 7807 Problem Details for service unavailable errors."""
+
     type = serializers.URLField(help_text="Problem type URI")
     title = serializers.CharField(help_text="Problem title")
     status = serializers.IntegerField(help_text="HTTP status code", default=503)
     code = serializers.CharField(help_text="Machine-readable error code")
     i18n_key = serializers.CharField(help_text="Internationalization key")
-    detail = serializers.CharField(required=False, help_text="Detailed error description")
+    detail = serializers.CharField(
+        required=False, help_text="Detailed error description"
+    )
     instance = serializers.CharField(required=False, help_text="Problem instance URI")
     meta = serializers.DictField(required=False, help_text="Additional metadata")
 
 
 # Legacy serializers for backward compatibility
 # These are deprecated and will be removed in future versions
-BadRequestErrorSerializer = ValidationErrorSerializer  # Deprecated: Use ValidationErrorSerializer
+BadRequestErrorSerializer = (
+    ValidationErrorSerializer  # Deprecated: Use ValidationErrorSerializer
+)

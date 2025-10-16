@@ -8,11 +8,12 @@ and problem types defined in the application's code registry.
 
 import os
 import sys
-import yaml
-import django
-from pathlib import Path
 from collections import defaultdict
-from typing import Dict, List, Set, Any
+from pathlib import Path
+
+import django
+import yaml
+
 # Add the backend directory to Python path
 # Script is in: backend/scripts/api-response-docs/generators/
 # Backend is: backend/ (4 levels up)
@@ -23,8 +24,7 @@ if str(backend_dir) not in sys.path:
 # Configure Django settings
 # Use environment variable or fallback to development settings
 django_settings = os.environ.get(
-    "DJANGO_SETTINGS_MODULE", 
-    "config.settings.development"
+    "DJANGO_SETTINGS_MODULE", "config.settings.development"
 )
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", django_settings)
 
@@ -34,8 +34,8 @@ from apps.core.code_registry import REGISTRY, CodeRegistryError
 
 
 def categorize_codes_by_app_and_type(
-    codes: Set[str],
-) -> Dict[str, Dict[str, List[str]]]:
+    codes: set[str],
+) -> dict[str, dict[str, list[str]]]:
     """Categorize codes by app and response type (success/error)."""
     categorized = defaultdict(lambda: {"success": [], "error": []})
 
@@ -107,7 +107,7 @@ def get_code_description(code: str) -> str:
     return "Unknown response code"
 
 
-def generate_index_file(output_dir: Path, categorized_codes: Dict, stats: Dict):
+def generate_index_file(output_dir: Path, categorized_codes: dict, stats: dict):
     """Generate the main index file for API response documentation."""
     index_content = f"""# API Response Documentation
 
@@ -181,7 +181,7 @@ All response codes follow the pattern: `VDJ-<MODULE>-<USECASE>-<HTTP>`
     print(f"Generated: {index_path}")
 
 
-def generate_module_pages(output_dir: Path, categorized_codes: Dict):
+def generate_module_pages(output_dir: Path, categorized_codes: dict):
     """Generate individual pages for each module's response codes."""
     for app, codes in categorized_codes.items():
         if not codes["success"] and not codes["error"]:
@@ -239,7 +239,7 @@ return Response({{
 }}, status=200)
 ```
 
-### Error Response Example  
+### Error Response Example
 ```python
 # In your exception handler
 return Response({{
@@ -267,8 +267,8 @@ def generate_problem_pages(output_dir: Path):
     for slug, problem in REGISTRY.problem_types.items():
         content = f"""# {problem['title']}
 
-**Type URI:** `{problem['type']}`  
-**Default Status:** {problem['default_status']}  
+**Type URI:** `{problem['type']}`
+**Default Status:** {problem['default_status']}
 **I18n Key:** `{problem['i18n_key']}`
 
 ## Description
@@ -323,7 +323,7 @@ return ProblemDetailResponse(
         print(f"Generated: {page_path}")
 
 
-def generate_consolidated_registry(output_dir: Path, categorized_codes: Dict):
+def generate_consolidated_registry(output_dir: Path, categorized_codes: dict):
     """Generate a consolidated registry of all codes and problem types."""
     registry_data = {"response_codes": {}, "problem_types": {}, "statistics": {}}
 
@@ -407,7 +407,7 @@ def main():
         generate_problem_pages(output_dir)
         generate_consolidated_registry(output_dir, categorized_codes)
 
-        print(f"\n✓ Documentation generation successful!")
+        print("\n✓ Documentation generation successful!")
         print(f"  - Response codes documented: {stats['total_codes']}")
         print(f"    - Success codes (2xx): {stats['total_success']}")
         print(f"    - Error codes (4xx/5xx): {stats['total_error']}")

@@ -5,24 +5,24 @@ Provides comprehensive pytest fixtures for testing feature flags,
 access rules, onboarding progress, and related services.
 """
 
+from datetime import timedelta
+from unittest.mock import patch
+
 import pytest
-from datetime import datetime, timedelta
-from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
+from django.utils import timezone
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
-from unittest.mock import Mock, patch
 
-from ..models import FeatureFlag, FeatureAccess, UserOnboardingProgress
-from ..services import FeatureFlagService, OnboardingService, FeatureFlagCacheService
 from ..enums import OnboardingStageTypes
+from ..services import FeatureFlagCacheService, FeatureFlagService, OnboardingService
 from .factories import (
-    FeatureFlagFactory,
     FeatureAccessFactory,
-    UserOnboardingProgressFactory,
+    FeatureFlagFactory,
+    OrganizationFactory,
     UserFactory,
-    OrganizationFactory
+    UserOnboardingProgressFactory,
 )
 
 User = get_user_model()
@@ -63,15 +63,13 @@ def organization(db):
 
 @pytest.fixture
 def user_with_org(db, organization):
-    """Create a user with an organization."""
-    user = UserFactory()
+    """Create a regular (non-staff) user with an organization."""
+    user = UserFactory(is_staff=False, is_superuser=False)  # Explicit non-staff
     # Create organization membership
     from apps.organizations.models import OrganizationMembership
+
     OrganizationMembership.objects.create(
-        user=user,
-        organization=organization,
-        role='member',
-        status='active'
+        user=user, organization=organization, role="member", status="active"
     )
     return user
 
@@ -79,13 +77,13 @@ def user_with_org(db, organization):
 @pytest.fixture
 def admin_with_org(db, organization):
     """Create an admin user with an organization."""
-    user = UserFactory(is_staff=True)  # Django staff user for DRF IsAdminUser permission
+    user = UserFactory(
+        is_staff=True
+    )  # Django staff user for DRF IsAdminUser permission
     from apps.organizations.models import OrganizationMembership
+
     OrganizationMembership.objects.create(
-        user=user,
-        organization=organization,
-        role='admin',
-        status='active'
+        user=user, organization=organization, role="admin", status="active"
     )
     return user
 
@@ -102,8 +100,8 @@ def authenticated_api_client(api_client, user_with_org, organization):
     """Create an authenticated API client with organization context."""
     refresh = RefreshToken.for_user(user_with_org)
     api_client.credentials(
-        HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}',
-        HTTP_X_ORG_SLUG=organization.slug
+        HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}",
+        HTTP_X_ORG_SLUG=organization.slug,
     )
     return api_client
 
@@ -113,8 +111,8 @@ def admin_api_client(api_client, admin_with_org, organization):
     """Create an admin API client with organization context."""
     refresh = RefreshToken.for_user(admin_with_org)
     api_client.credentials(
-        HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}',
-        HTTP_X_ORG_SLUG=organization.slug
+        HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}",
+        HTTP_X_ORG_SLUG=organization.slug,
     )
     return api_client
 
@@ -124,54 +122,60 @@ def org_admin_api_client(api_client, admin_with_org, organization):
     """Create an organization admin API client with organization context."""
     refresh = RefreshToken.for_user(admin_with_org)
     api_client.credentials(
-        HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}',
-        HTTP_X_ORG_SLUG=organization.slug
+        HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}",
+        HTTP_X_ORG_SLUG=organization.slug,
     )
     return api_client
 
 
 # Feature Flag fixtures
 @pytest.fixture
-def feature_flag(db):
-    """Create a basic feature flag."""
-    return FeatureFlagFactory()
+def feature_flag(db, organization):
+    """Create a basic organization-scoped feature flag."""
+    return FeatureFlagFactory(organization=organization)
 
 
 @pytest.fixture
-def enabled_feature_flag(db):
-    """Create a globally enabled feature flag."""
-    return FeatureFlagFactory(is_enabled_globally=True)
+def global_feature_flag(db):
+    """Create a global feature flag (no organization) - admin users only."""
+    return FeatureFlagFactory(organization=None)
 
 
 @pytest.fixture
-def disabled_feature_flag(db):
-    """Create a globally disabled feature flag."""
-    return FeatureFlagFactory(is_enabled_globally=False)
+def enabled_feature_flag(db, organization):
+    """Create a globally enabled organization-scoped feature flag."""
+    return FeatureFlagFactory(organization=organization, is_enabled_globally=True)
 
 
 @pytest.fixture
-def rollout_feature_flag(db):
-    """Create a feature flag with 50% rollout."""
-    return FeatureFlagFactory(is_enabled_globally=False, rollout_percentage=50)
+def disabled_feature_flag(db, organization):
+    """Create a globally disabled organization-scoped feature flag."""
+    return FeatureFlagFactory(organization=organization, is_enabled_globally=False)
 
 
 @pytest.fixture
-def scheduled_feature_flag(db):
-    """Create a feature flag scheduled for the future."""
-    future_time = timezone.now() + timedelta(days=1)
+def rollout_feature_flag(db, organization):
+    """Create an organization-scoped feature flag with 50% rollout."""
     return FeatureFlagFactory(
-        is_enabled_globally=True,
-        active_from=future_time
+        organization=organization, is_enabled_globally=False, rollout_percentage=50
     )
 
 
 @pytest.fixture
-def expired_feature_flag(db):
-    """Create an expired feature flag."""
+def scheduled_feature_flag(db, organization):
+    """Create an organization-scoped feature flag scheduled for the future."""
+    future_time = timezone.now() + timedelta(days=1)
+    return FeatureFlagFactory(
+        organization=organization, is_enabled_globally=True, active_from=future_time
+    )
+
+
+@pytest.fixture
+def expired_feature_flag(db, organization):
+    """Create an expired organization-scoped feature flag."""
     past_time = timezone.now() - timedelta(days=1)
     return FeatureFlagFactory(
-        is_enabled_globally=True,
-        active_until=past_time
+        organization=organization, is_enabled_globally=True, active_until=past_time
     )
 
 
@@ -191,16 +195,14 @@ def user_access_rule(db, feature_flag, user):
 @pytest.fixture
 def role_access_rule(db, feature_flag):
     """Create a role-based access rule."""
-    return FeatureAccessFactory(feature=feature_flag, role='ADMIN', enabled=True)
+    return FeatureAccessFactory(feature=feature_flag, role="ADMIN", enabled=True)
 
 
 @pytest.fixture
 def org_access_rule(db, feature_flag, organization):
     """Create an organization-specific access rule."""
     return FeatureAccessFactory(
-        feature=feature_flag, 
-        organization=organization, 
-        enabled=True
+        feature=feature_flag, organization=organization, enabled=True
     )
 
 
@@ -213,15 +215,9 @@ def disabled_access_rule(db, feature_flag, user):
 @pytest.fixture
 def conditional_access_rule(db, feature_flag, user):
     """Create an access rule with conditions."""
-    conditions = {
-        'min_account_age_days': 7,
-        'requires_email_verified': True
-    }
+    conditions = {"min_account_age_days": 7, "requires_email_verified": True}
     return FeatureAccessFactory(
-        feature=feature_flag,
-        user=user,
-        enabled=True,
-        conditions=conditions
+        feature=feature_flag, user=user, enabled=True, conditions=conditions
     )
 
 
@@ -239,7 +235,7 @@ def email_verified_progress(db, user):
         user=user,
         current_stage=OnboardingStageTypes.EMAIL_VERIFIED.value,
         completed_stages=[OnboardingStageTypes.SIGNUP_COMPLETE.value],
-        progress_percentage=25
+        progress_percentage=25,
     )
 
 
@@ -256,7 +252,7 @@ def advanced_onboarding_progress(db, user):
         user=user,
         current_stage=OnboardingStageTypes.FIRST_TEAM_MEMBER.value,
         completed_stages=completed,
-        progress_percentage=75
+        progress_percentage=75,
     )
 
 
@@ -269,7 +265,7 @@ def completed_onboarding_progress(db, user):
         current_stage=OnboardingStageTypes.ONBOARDING_COMPLETE.value,
         completed_stages=all_stages[:-1],  # All except the current one
         progress_percentage=100,
-        onboarding_completed_at=timezone.now()
+        onboarding_completed_at=timezone.now(),
     )
 
 
@@ -308,7 +304,7 @@ def cache_service():
 @pytest.fixture
 def mock_cache():
     """Mock the cache for testing cache behavior."""
-    with patch('apps.feature_flags.services.cache_service.cache') as mock:
+    with patch("apps.feature_flags.services.cache_service.cache") as mock:
         mock.get.return_value = None
         mock.set.return_value = True
         mock.delete.return_value = True
@@ -319,18 +315,18 @@ def mock_cache():
 def mock_redis_cache():
     """Mock Redis cache with more realistic behavior."""
     mock_cache_data = {}
-    
+
     def mock_get(key):
         return mock_cache_data.get(key)
-    
+
     def mock_set(key, value, timeout=None):
         mock_cache_data[key] = value
         return True
-    
+
     def mock_delete(key):
         return mock_cache_data.pop(key, None) is not None
-    
-    with patch('apps.feature_flags.services.cache_service.cache') as mock:
+
+    with patch("apps.feature_flags.services.cache_service.cache") as mock:
         mock.get.side_effect = mock_get
         mock.set.side_effect = mock_set
         mock.delete.side_effect = mock_delete
@@ -340,35 +336,64 @@ def mock_redis_cache():
 @pytest.fixture
 def mock_logger():
     """Mock logger for testing log output."""
-    with patch('apps.feature_flags.views.feature_flag_views.logger') as mock:
+    with patch("apps.feature_flags.views.feature_flag_views.logger") as mock:
         yield mock
 
 
 # Data fixtures
 @pytest.fixture
-def multiple_feature_flags(db):
-    """Create multiple feature flags for testing."""
+def multiple_feature_flags(db, organization):
+    """Create multiple organization-scoped feature flags for testing."""
     flags = []
-    flags.append(FeatureFlagFactory(key='analytics', name='Analytics', is_enabled_globally=True))
-    flags.append(FeatureFlagFactory(key='reporting', name='Reporting', is_enabled_globally=False))
-    flags.append(FeatureFlagFactory(key='premium', name='Premium Features', rollout_percentage=25))
-    flags.append(FeatureFlagFactory(key='beta', name='Beta Features', is_enabled_globally=False))
+    flags.append(
+        FeatureFlagFactory(
+            organization=organization,
+            key="analytics",
+            name="Analytics",
+            is_enabled_globally=True,
+        )
+    )
+    flags.append(
+        FeatureFlagFactory(
+            organization=organization,
+            key="reporting",
+            name="Reporting",
+            is_enabled_globally=False,
+        )
+    )
+    flags.append(
+        FeatureFlagFactory(
+            organization=organization,
+            key="premium",
+            name="Premium Features",
+            rollout_percentage=25,
+        )
+    )
+    flags.append(
+        FeatureFlagFactory(
+            organization=organization,
+            key="beta",
+            name="Beta Features",
+            is_enabled_globally=False,
+        )
+    )
     return flags
 
 
 @pytest.fixture
 def multiple_users(db, organization):
     """Create multiple users for testing."""
+    import uuid
+
     users = []
+    unique_suffix = str(uuid.uuid4())[:8]
     for i in range(5):
-        user = UserFactory(email=f'user{i}@example.com')
+        user = UserFactory(email=f"user{i}_{unique_suffix}@example.com")
         # Create organization membership
         from apps.organizations.models import OrganizationMembership
+
         OrganizationMembership.objects.create(
-            user=user,
-            organization=organization,
-            role='member',
-            status='active'
+            user=user, organization=organization, role="member", status="active"
         )
         users.append(user)
     return users
@@ -378,35 +403,43 @@ def multiple_users(db, organization):
 def complex_access_rules(db, multiple_feature_flags, multiple_users, organization):
     """Create a complex set of access rules for testing."""
     rules = []
-    
+
     # User-specific rules
-    rules.append(FeatureAccessFactory(
-        feature=multiple_feature_flags[0],  # analytics
-        user=multiple_users[0],
-        enabled=True
-    ))
-    
+    rules.append(
+        FeatureAccessFactory(
+            feature=multiple_feature_flags[0],  # analytics
+            user=multiple_users[0],
+            enabled=True,
+        )
+    )
+
     # Role-based rules
-    rules.append(FeatureAccessFactory(
-        feature=multiple_feature_flags[1],  # reporting
-        role='ADMIN',
-        enabled=True
-    ))
-    
+    rules.append(
+        FeatureAccessFactory(
+            feature=multiple_feature_flags[1],
+            role="ADMIN",
+            enabled=True,  # reporting
+        )
+    )
+
     # Organization rules
-    rules.append(FeatureAccessFactory(
-        feature=multiple_feature_flags[2],  # premium
-        organization=organization,
-        enabled=True
-    ))
-    
+    rules.append(
+        FeatureAccessFactory(
+            feature=multiple_feature_flags[2],  # premium
+            organization=organization,
+            enabled=True,
+        )
+    )
+
     # Disabled rule
-    rules.append(FeatureAccessFactory(
-        feature=multiple_feature_flags[3],  # beta
-        user=multiple_users[1],
-        enabled=False
-    ))
-    
+    rules.append(
+        FeatureAccessFactory(
+            feature=multiple_feature_flags[3],  # beta
+            user=multiple_users[1],
+            enabled=False,
+        )
+    )
+
     return rules
 
 
@@ -415,8 +448,8 @@ def complex_access_rules(db, multiple_feature_flags, multiple_users, organizatio
 def freeze_time():
     """Freeze time for testing time-dependent features."""
     fixed_time = timezone.now().replace(microsecond=0)
-    
-    with patch('django.utils.timezone.now') as mock_now:
+
+    with patch("django.utils.timezone.now") as mock_now:
         mock_now.return_value = fixed_time
         yield fixed_time
 
@@ -438,14 +471,14 @@ def future_time():
 def valid_flag_data():
     """Provide valid feature flag data for testing."""
     return {
-        'key': 'test_feature',
-        'name': 'Test Feature',
-        'description': 'A test feature for testing',
-        'is_enabled_globally': False,
-        'rollout_percentage': 0,
-        'is_permanent': False,
-        'requires_restart': False,
-        'environments': ['development', 'staging']
+        "key": "test_feature",
+        "name": "Test Feature",
+        "description": "A test feature for testing",
+        "is_enabled_globally": False,
+        "rollout_percentage": 0,
+        "is_permanent": False,
+        "requires_restart": False,
+        "environments": ["development", "staging"],
     }
 
 
@@ -453,10 +486,10 @@ def valid_flag_data():
 def valid_access_rule_data(feature_flag, user):
     """Provide valid access rule data for testing."""
     return {
-        'feature': feature_flag.id,
-        'user': user.id,
-        'enabled': True,
-        'reason': 'Test access rule'
+        "feature": feature_flag.id,
+        "user": user.id,
+        "enabled": True,
+        "reason": "Test access rule",
     }
 
 
@@ -464,41 +497,36 @@ def valid_access_rule_data(feature_flag, user):
 def valid_onboarding_data():
     """Provide valid onboarding action data for testing."""
     return {
-        'action': 'email_verified',
-        'metadata': {
-            'verification_method': 'email_link',
-            'timestamp': timezone.now().isoformat()
-        }
+        "action": "email_verified",
+        "metadata": {
+            "verification_method": "email_link",
+            "timestamp": timezone.now().isoformat(),
+        },
     }
 
 
 # Performance test fixtures
 @pytest.fixture
-def performance_test_data(db):
+def performance_test_data(db, organization):
     """Create data for performance testing."""
     # Create many flags and rules for performance testing
     flags = [
-        FeatureFlagFactory(key=f'perf_flag_{i}')
+        FeatureFlagFactory(organization=organization, key=f"perf_flag_{i}")
         for i in range(50)
     ]
-    
-    users = [
-        UserFactory(email=f'perf_user_{i}@example.com')
-        for i in range(20)
-    ]
-    
+
+    users = [UserFactory(email=f"perf_user_{i}@example.com") for i in range(20)]
+
     # Create many access rules
     rules = []
     for i, flag in enumerate(flags[:25]):  # Half the flags get rules
         for j, user in enumerate(users[:10]):  # Half the users get rules
-            rules.append(FeatureAccessFactory(
-                feature=flag,
-                user=user,
-                enabled=(i + j) % 2 == 0  # Mix of enabled/disabled
-            ))
-    
-    return {
-        'flags': flags,
-        'users': users,
-        'rules': rules
-    }
+            rules.append(
+                FeatureAccessFactory(
+                    feature=flag,
+                    user=user,
+                    enabled=(i + j) % 2 == 0,  # Mix of enabled/disabled
+                )
+            )
+
+    return {"flags": flags, "users": users, "rules": rules}

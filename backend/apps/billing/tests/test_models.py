@@ -3,7 +3,6 @@ Test cases for billing models.
 """
 
 import pytest
-from apps.billing.models import SubscriptionPlan, Subscription  # Adjust imports based on your actual models
 
 
 @pytest.mark.django_db

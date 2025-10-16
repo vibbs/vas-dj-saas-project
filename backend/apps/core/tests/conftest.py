@@ -5,15 +5,14 @@ This module provides comprehensive fixtures for testing core infrastructure
 components like rate limiting, exception handling, and code registry.
 """
 
+from unittest.mock import MagicMock, Mock
+
 import pytest
-import json
-from unittest.mock import Mock, patch, MagicMock
-from django.http import HttpRequest
 from django.contrib.auth.models import AnonymousUser
-from rest_framework.test import APIRequestFactory
+from django.http import HttpRequest
+from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
-from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError, NotFound, PermissionDenied
+from rest_framework.test import APIRequestFactory
 
 from apps.accounts.tests.factories import AccountFactory
 from apps.organizations.tests.factories import OrganizationFactory
@@ -29,12 +28,9 @@ def api_request_factory():
 def mock_request():
     """Mock HTTP request for testing."""
     request = HttpRequest()
-    request.method = 'GET'
-    request.path = '/api/test/'
-    request.META = {
-        'REMOTE_ADDR': '192.168.1.100',
-        'HTTP_USER_AGENT': 'TestAgent/1.0'
-    }
+    request.method = "GET"
+    request.path = "/api/test/"
+    request.META = {"REMOTE_ADDR": "192.168.1.100", "HTTP_USER_AGENT": "TestAgent/1.0"}
     request.user = AnonymousUser()
     return request
 
@@ -59,7 +55,7 @@ def organization_request(authenticated_request):
 @pytest.fixture
 def drf_request(api_request_factory):
     """DRF request instance."""
-    request = api_request_factory.get('/api/test/')
+    request = api_request_factory.get("/api/test/")
     return Request(request)
 
 
@@ -67,7 +63,7 @@ def drf_request(api_request_factory):
 def authenticated_drf_request(api_request_factory):
     """Authenticated DRF request."""
     user = AccountFactory()
-    request = api_request_factory.get('/api/test/')
+    request = api_request_factory.get("/api/test/")
     request.user = user
     return Request(request)
 
@@ -97,41 +93,40 @@ def mock_failed_redis():
 @pytest.fixture
 def sample_validation_error():
     """Sample DRF ValidationError for testing exception handling."""
-    return ValidationError({
-        'email': ['This field is required.'],
-        'password': ['Password too short.', 'Password too common.'],
-        'nested_field': {
-            'sub_field': ['Invalid value.']
+    return ValidationError(
+        {
+            "email": ["This field is required."],
+            "password": ["Password too short.", "Password too common."],
+            "nested_field": {"sub_field": ["Invalid value."]},
         }
-    })
+    )
 
 
 @pytest.fixture
 def sample_nested_validation_error():
     """Complex nested ValidationError for testing flattening."""
-    return ValidationError({
-        'user': {
-            'email': ['Invalid email format.'],
-            'profile': {
-                'age': ['Must be at least 18.'],
-                'preferences': [
-                    'Invalid preference.',
-                    'Duplicate preference.'
-                ]
-            }
-        },
-        'organization': ['Organization is required.']
-    })
+    return ValidationError(
+        {
+            "user": {
+                "email": ["Invalid email format."],
+                "profile": {
+                    "age": ["Must be at least 18."],
+                    "preferences": ["Invalid preference.", "Duplicate preference."],
+                },
+            },
+            "organization": ["Organization is required."],
+        }
+    )
 
 
 @pytest.fixture
 def mock_view_context():
     """Mock view context for exception handler testing."""
     return {
-        'view': Mock(),
-        'request': Mock(path='/api/test/', method='POST'),
-        'args': (),
-        'kwargs': {}
+        "view": Mock(),
+        "request": Mock(path="/api/test/", method="POST"),
+        "args": (),
+        "kwargs": {},
     }
 
 
@@ -139,11 +134,11 @@ def mock_view_context():
 def sample_paginated_data():
     """Sample data for pagination testing."""
     return [
-        {'id': 1, 'name': 'Item 1'},
-        {'id': 2, 'name': 'Item 2'},
-        {'id': 3, 'name': 'Item 3'},
-        {'id': 4, 'name': 'Item 4'},
-        {'id': 5, 'name': 'Item 5'},
+        {"id": 1, "name": "Item 1"},
+        {"id": 2, "name": "Item 2"},
+        {"id": 3, "name": "Item 3"},
+        {"id": 4, "name": "Item 4"},
+        {"id": 5, "name": "Item 5"},
     ]
 
 
@@ -169,49 +164,50 @@ def mock_page():
 
 class MockAppModule:
     """Mock app module for code registry testing."""
+
     def __init__(self, path):
-        self.__file__ = str(path / '__init__.py')
+        self.__file__ = str(path / "__init__.py")
 
 
 @pytest.fixture
 def mock_codes_module():
     """Mock codes module with various code types."""
     from apps.core.codes import BaseAPICodeMixin
-    
+
     module = Mock()
-    
+
     # Create mock enum members first
     member1 = Mock()
-    member1.value = 'VDJ-TEST-SUCCESS-200'
-    member1.name = 'SUCCESS_200'
-    
+    member1.value = "VDJ-TEST-SUCCESS-200"
+    member1.name = "SUCCESS_200"
+
     member2 = Mock()
-    member2.value = 'VDJ-TEST-ERROR-400' 
-    member2.name = 'ERROR_400'
-    
+    member2.value = "VDJ-TEST-ERROR-400"
+    member2.name = "ERROR_400"
+
     # Create a metaclass that makes the class iterable
     class EnumMeta(type):
         def __iter__(cls):
             return iter([cls.SUCCESS_200, cls.ERROR_400])
-    
+
     # Create a real class that properly inherits from BaseAPICodeMixin
     class TestCodes(BaseAPICodeMixin, metaclass=EnumMeta):
-        __name__ = 'TestCodes'
+        __name__ = "TestCodes"
         SUCCESS_200 = member1
         ERROR_400 = member2
-        
+
         @classmethod
         def __members__(cls):
-            return {'SUCCESS_200': cls.SUCCESS_200, 'ERROR_400': cls.ERROR_400}
-    
+            return {"SUCCESS_200": cls.SUCCESS_200, "ERROR_400": cls.ERROR_400}
+
     # Set up the class-level __members__ attribute for the hasattr check
-    TestCodes.__members__ = {'SUCCESS_200': member1, 'ERROR_400': member2}
-    
+    TestCodes.__members__ = {"SUCCESS_200": member1, "ERROR_400": member2}
+
     # Add to module
     module.TestCodes = TestCodes
-    module.SIMPLE_CODE = 'VDJ-TEST-SIMPLE-200'
-    module.__name__ = 'test_app.codes'
-    
+    module.SIMPLE_CODE = "VDJ-TEST-SIMPLE-200"
+    module.__name__ = "test_app.codes"
+
     return module
 
 
@@ -220,23 +216,23 @@ def sample_error_catalog():
     """Sample error catalog YAML content."""
     return [
         {
-            'slug': 'test-error',
-            'type': 'https://docs.yourapp.com/problems/test-error',
-            'title': 'Test Error',
-            'default_status': 400,
-            'i18n_key': 'errors.test_error',
-            'description': 'Test error for unit testing',
-            'codes': ['VDJ-TEST-ERROR-400']
+            "slug": "test-error",
+            "type": "https://docs.yourapp.com/problems/test-error",
+            "title": "Test Error",
+            "default_status": 400,
+            "i18n_key": "errors.test_error",
+            "description": "Test error for unit testing",
+            "codes": ["VDJ-TEST-ERROR-400"],
         },
         {
-            'slug': 'test-success',
-            'type': 'https://docs.yourapp.com/problems/test-success',
-            'title': 'Test Success',
-            'default_status': 200,
-            'i18n_key': 'success.test_success',
-            'description': 'Test success for unit testing',
-            'codes': ['VDJ-TEST-SUCCESS-200']
-        }
+            "slug": "test-success",
+            "type": "https://docs.yourapp.com/problems/test-success",
+            "title": "Test Success",
+            "default_status": 200,
+            "i18n_key": "success.test_success",
+            "description": "Test success for unit testing",
+            "codes": ["VDJ-TEST-SUCCESS-200"],
+        },
     ]
 
 
@@ -246,16 +242,16 @@ def invalid_error_catalog():
     return [
         {
             # Missing required fields
-            'slug': 'incomplete-error',
-            'title': 'Incomplete Error'
+            "slug": "incomplete-error",
+            "title": "Incomplete Error",
             # Missing: type, default_status
         },
         {
-            'slug': 'invalid-type',
-            'type': 'invalid-url',  # Not HTTPS
-            'title': 'Invalid Type',
-            'default_status': 400
-        }
+            "slug": "invalid-type",
+            "type": "invalid-url",  # Not HTTPS
+            "title": "Invalid Type",
+            "default_status": 400,
+        },
     ]
 
 
@@ -263,19 +259,13 @@ def invalid_error_catalog():
 def rate_limit_settings():
     """Rate limiting settings for testing."""
     return {
-        'ENABLED': True,
-        'REDIS_URL': 'redis://localhost:6379/1',
-        'DEFAULT_LIMITS': {
-            'PER_IP': '100/hour',
-            'PER_USER': '200/hour'
+        "ENABLED": True,
+        "REDIS_URL": "redis://localhost:6379/1",
+        "DEFAULT_LIMITS": {"PER_IP": "100/hour", "PER_USER": "200/hour"},
+        "ENDPOINT_LIMITS": {
+            "test_endpoint": {"PER_IP": "10/hour", "PER_EMAIL": "3/hour"}
         },
-        'ENDPOINT_LIMITS': {
-            'test_endpoint': {
-                'PER_IP': '10/hour',
-                'PER_EMAIL': '3/hour'
-            }
-        },
-        'EXCLUDED_PATHS': ['/admin/', '/health/']
+        "EXCLUDED_PATHS": ["/admin/", "/health/"],
     }
 
 
@@ -283,11 +273,11 @@ def rate_limit_settings():
 def mock_render_context():
     """Mock renderer context for testing."""
     return {
-        'view': Mock(),
-        'request': Mock(path='/api/test/'),
-        'response': Mock(status_code=200),
-        'args': (),
-        'kwargs': {}
+        "view": Mock(),
+        "request": Mock(path="/api/test/"),
+        "response": Mock(status_code=200),
+        "args": (),
+        "kwargs": {},
     }
 
 
@@ -305,18 +295,11 @@ def create_test_response_data(data_type="simple"):
         return [{"id": 1, "name": "Item 1"}, {"id": 2, "name": "Item 2"}]
     elif data_type == "paginated":
         return {
-            "pagination": {
-                "count": 100,
-                "totalPages": 5,
-                "currentPage": 1
-            },
-            "data": [{"id": 1, "name": "Item 1"}]
+            "pagination": {"count": 100, "totalPages": 5, "currentPage": 1},
+            "data": [{"id": 1, "name": "Item 1"}],
         }
     elif data_type == "error":
-        return {
-            "detail": "Error message",
-            "status_code": 400
-        }
+        return {"detail": "Error message", "status_code": 400}
     else:
         return None
 

@@ -1,8 +1,9 @@
-import uuid
 import logging
+import uuid
+
 from django.utils.deprecation import MiddlewareMixin
 
-from apps.lib.log_utils import set_transaction_id, TRANSACTION_ID_KEY
+from apps.lib.log_utils import TRANSACTION_ID_KEY, set_transaction_id
 
 
 # Middleware to handle transaction IDs for logging and request tracking

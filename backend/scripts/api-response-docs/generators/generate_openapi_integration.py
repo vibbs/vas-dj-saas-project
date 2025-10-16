@@ -8,11 +8,13 @@ integrated into the main API schema to provide rich response code documentation.
 
 import os
 import sys
-import yaml
-import django
+from collections import defaultdict
 from pathlib import Path
-from collections import defaultdict, OrderedDict
-from typing import Dict, List, Set, Any, Optional
+from typing import Any
+
+import django
+import yaml
+
 # Add the backend directory to Python path
 # Script is in: backend/scripts/api-response-docs/generators/
 # Backend is: backend/ (4 levels up)
@@ -23,8 +25,7 @@ if str(backend_dir) not in sys.path:
 # Configure Django settings
 # Use environment variable or fallback to development settings
 django_settings = os.environ.get(
-    "DJANGO_SETTINGS_MODULE", 
-    "config.settings.development"
+    "DJANGO_SETTINGS_MODULE", "config.settings.development"
 )
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", django_settings)
 
@@ -33,7 +34,7 @@ django.setup()
 from apps.core.code_registry import REGISTRY, CodeRegistryError
 
 
-def categorize_codes_for_openapi(codes: Set[str]) -> Dict[str, Dict[str, List[str]]]:
+def categorize_codes_for_openapi(codes: set[str]) -> dict[str, dict[str, list[str]]]:
     """Categorize codes for OpenAPI schema generation."""
     categorized = defaultdict(lambda: {"success": [], "error": []})
 
@@ -51,7 +52,7 @@ def categorize_codes_for_openapi(codes: Set[str]) -> Dict[str, Dict[str, List[st
     return categorized
 
 
-def generate_response_code_schemas(codes: Set[str]) -> Dict[str, Any]:
+def generate_response_code_schemas(codes: set[str]) -> dict[str, Any]:
     """Generate OpenAPI schemas for response codes."""
     schemas = {}
 
@@ -220,8 +221,8 @@ def generate_response_code_schemas(codes: Set[str]) -> Dict[str, Any]:
 
 
 def generate_status_specific_responses(
-    codes: Set[str], problem_types: Dict
-) -> Dict[str, Any]:
+    codes: set[str], problem_types: dict
+) -> dict[str, Any]:
     """Generate OpenAPI response objects for specific status codes."""
     responses = {}
 
@@ -321,7 +322,7 @@ def generate_status_specific_responses(
     return responses
 
 
-def generate_parameter_schemas() -> Dict[str, Any]:
+def generate_parameter_schemas() -> dict[str, Any]:
     """Generate parameter schemas for response code filtering."""
     parameters = {}
 
@@ -361,7 +362,7 @@ def generate_parameter_schemas() -> Dict[str, Any]:
     return parameters
 
 
-def generate_security_schemes() -> Dict[str, Any]:
+def generate_security_schemes() -> dict[str, Any]:
     """Generate security schemes related to response codes."""
     security_schemes = {}
 
@@ -385,8 +386,8 @@ def generate_security_schemes() -> Dict[str, Any]:
 
 
 def generate_complete_openapi_components(
-    codes: Set[str], problem_types: Dict
-) -> Dict[str, Any]:
+    codes: set[str], problem_types: dict
+) -> dict[str, Any]:
     """Generate complete OpenAPI components section."""
     components = {
         "schemas": generate_response_code_schemas(codes),
@@ -435,7 +436,7 @@ def generate_complete_openapi_components(
     return components
 
 
-def generate_example_integration() -> Dict[str, Any]:
+def generate_example_integration() -> dict[str, Any]:
     """Generate example of how to integrate these components."""
     integration_example = {
         "paths": {
@@ -547,7 +548,7 @@ def main():
 ## Generated Files
 
 1. **components.yml** - Complete components section with all schemas, responses, parameters
-2. **schemas.yml** - Just the schemas (can be imported separately)  
+2. **schemas.yml** - Just the schemas (can be imported separately)
 3. **responses.yml** - Just the responses (can be imported separately)
 4. **integration_example.yml** - Example of how to use these components
 
@@ -563,7 +564,7 @@ components:
   # Import all from components.yml
 ```
 
-### Option 2: Selective Integration  
+### Option 2: Selective Integration
 Import specific parts:
 
 ```yaml
@@ -573,9 +574,9 @@ components:
     ResponseCode: !include ./openapi-integration/schemas.yml#/ResponseCode
     SuccessResponse: !include ./openapi-integration/schemas.yml#/SuccessResponse
     ErrorResponse: !include ./openapi-integration/schemas.yml#/ErrorResponse
-  
+
   responses:
-    # Your existing responses  
+    # Your existing responses
     "400": !include ./openapi-integration/responses.yml#/400
     "401": !include ./openapi-integration/responses.yml#/401
     # ... etc
@@ -602,7 +603,7 @@ paths:
 ## Available Components
 
 - **{len(components['schemas'])} Schemas**: Response codes, success/error structures, problem types
-- **{len(components['responses'])} Response Objects**: Status-specific response templates  
+- **{len(components['responses'])} Response Objects**: Status-specific response templates
 - **{len(components['parameters'])} Parameters**: Response code filtering parameters
 - **{len(components['securitySchemes'])} Security Schemes**: Authentication with response code context
 
@@ -617,7 +618,7 @@ paths:
         instructions_path.write_text(instructions)
         print(f"Generated: {instructions_path}")
 
-        print(f"\n✓ OpenAPI integration generation successful!")
+        print("\n✓ OpenAPI integration generation successful!")
         print(f"  - Components generated: {len(components)} sections")
         print(f"  - Schemas: {len(components['schemas'])}")
         print(f"  - Responses: {len(components['responses'])}")

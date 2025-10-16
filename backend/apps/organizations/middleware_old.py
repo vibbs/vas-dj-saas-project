@@ -1,6 +1,6 @@
 # In core/middleware.py
 from django.http import Http404
-from django.shortcuts import get_object_or_404
+
 from apps.organizations.models import Organization
 
 

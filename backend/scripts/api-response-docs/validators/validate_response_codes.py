@@ -2,16 +2,16 @@
 """
 Validate API response codes for RFC 7807 compliance and uniqueness.
 
-This script validates all response codes (both success and error) defined across 
+This script validates all response codes (both success and error) defined across
 the application to ensure they follow the required format and are unique.
 """
 
 import os
 import sys
-import django
-from pathlib import Path
 from collections import defaultdict
-from typing import Dict, List, Set, Tuple
+from pathlib import Path
+
+import django
 
 # Add the backend directory to Python path if needed
 # Script is in: backend/scripts/api-response-docs/validators/
@@ -23,8 +23,7 @@ if str(backend_dir) not in sys.path:
 # Configure Django settings
 # Use environment variable or fallback to development settings
 django_settings = os.environ.get(
-    "DJANGO_SETTINGS_MODULE", 
-    "config.settings.development"
+    "DJANGO_SETTINGS_MODULE", "config.settings.development"
 )
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", django_settings)
 
@@ -41,42 +40,42 @@ from apps.core.code_registry import REGISTRY, CodeRegistryError
 from apps.core.codes import BaseAPICodeMixin
 
 
-def categorize_codes(codes: Set[str]) -> Dict[str, Dict[str, List[str]]]:
+def categorize_codes(codes: set[str]) -> dict[str, dict[str, list[str]]]:
     """Categorize codes by app and type (success/error)."""
     categorized = defaultdict(lambda: {"success": [], "error": []})
-    
+
     for code in codes:
         # Extract parts: VDJ-MODULE-USECASE-HTTP
-        parts = code.split('-')
+        parts = code.split("-")
         if len(parts) >= 4:
             module = parts[1]
             http_code = int(parts[-1])
-            
+
             if 200 <= http_code < 300:
                 categorized[module]["success"].append(code)
             else:
                 categorized[module]["error"].append(code)
         else:
             categorized["unknown"]["error"].append(code)
-    
+
     return categorized
 
 
-def validate_code_patterns(codes: Set[str]) -> List[str]:
+def validate_code_patterns(codes: set[str]) -> list[str]:
     """Validate that all codes follow the expected patterns."""
     errors = []
-    
+
     for code in codes:
         if not BaseAPICodeMixin.validate_code(code):
             errors.append(f"Invalid code format: {code}")
             continue
-            
+
         # Additional pattern validation
-        parts = code.split('-')
+        parts = code.split("-")
         if len(parts) < 4:
             errors.append(f"Code has insufficient parts: {code}")
             continue
-            
+
         # Validate HTTP status code
         try:
             http_code = int(parts[-1])
@@ -84,11 +83,13 @@ def validate_code_patterns(codes: Set[str]) -> List[str]:
                 errors.append(f"Invalid HTTP status code in: {code}")
         except ValueError:
             errors.append(f"Non-numeric HTTP status code in: {code}")
-    
+
     return errors
 
 
-def analyze_code_distribution(categorized_codes: Dict[str, Dict[str, List[str]]]) -> Dict:
+def analyze_code_distribution(
+    categorized_codes: dict[str, dict[str, list[str]]],
+) -> dict:
     """Analyze the distribution of codes across apps and types."""
     stats = {
         "total_codes": 0,
@@ -97,53 +98,53 @@ def analyze_code_distribution(categorized_codes: Dict[str, Dict[str, List[str]]]
         "apps_with_codes": 0,
         "apps_with_success": 0,
         "apps_with_errors": 0,
-        "app_breakdown": {}
+        "app_breakdown": {},
     }
-    
+
     for app, codes in categorized_codes.items():
         success_count = len(codes["success"])
         error_count = len(codes["error"])
         total_app_codes = success_count + error_count
-        
+
         if total_app_codes > 0:
             stats["apps_with_codes"] += 1
             stats["total_codes"] += total_app_codes
             stats["total_success"] += success_count
             stats["total_error"] += error_count
-            
+
             if success_count > 0:
                 stats["apps_with_success"] += 1
             if error_count > 0:
                 stats["apps_with_errors"] += 1
-                
+
             stats["app_breakdown"][app] = {
                 "success": success_count,
                 "error": error_count,
-                "total": total_app_codes
+                "total": total_app_codes,
             }
-    
+
     return stats
 
 
-def detect_potential_conflicts(codes: Set[str]) -> List[str]:
+def detect_potential_conflicts(codes: set[str]) -> list[str]:
     """Detect potential conflicts or issues in code assignments."""
     conflicts = []
     code_groups = defaultdict(list)
-    
+
     # Group codes by MODULE-USECASE pattern
     for code in codes:
-        parts = code.split('-')
+        parts = code.split("-")
         if len(parts) >= 4:
             key = f"{parts[1]}-{parts[2]}"  # MODULE-USECASE
             code_groups[key].append(code)
-    
+
     # Check for multiple HTTP codes for same use case
     for usecase, usecase_codes in code_groups.items():
         if len(usecase_codes) > 3:  # More than 3 might indicate over-specification
             conflicts.append(
                 f"Use case '{usecase}' has many codes ({len(usecase_codes)}): {', '.join(sorted(usecase_codes))}"
             )
-    
+
     return conflicts
 
 
@@ -187,7 +188,9 @@ def main():
 
         print("\nPer-App Breakdown:")
         for app, breakdown in sorted(stats["app_breakdown"].items()):
-            print(f"  - {app.upper()}: {breakdown['total']} total ({breakdown['success']} success, {breakdown['error']} error)")
+            print(
+                f"  - {app.upper()}: {breakdown['total']} total ({breakdown['success']} success, {breakdown['error']} error)"
+            )
 
         # Show detailed breakdown if verbose
         if "--verbose" in sys.argv or "-v" in sys.argv:
@@ -214,7 +217,7 @@ def main():
         problem_stats = REGISTRY.get_stats()
         print(f"\nProblem Types: {problem_stats['problem_types']} defined")
 
-        print(f"\n🎉 Response code validation completed successfully!")
+        print("\n🎉 Response code validation completed successfully!")
         return 0
 
     except CodeRegistryError as e:

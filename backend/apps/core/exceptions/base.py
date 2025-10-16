@@ -5,8 +5,10 @@ This module implements the RFC 7807 "Problem Details for HTTP APIs" specificatio
 with additional extensions for internationalization and validation issues.
 """
 
-from typing import Optional, Dict, Any, List, Union
+from typing import Any
+
 from rest_framework.exceptions import APIException
+
 from ..codes import APIResponseCodes
 
 
@@ -27,12 +29,12 @@ class BaseHttpException(APIException):
         type: str,
         title: str,
         status: int,
-        detail: Optional[str] = None,
-        code: Optional[Union[str, APIResponseCodes]] = None,
-        i18n_key: Optional[str] = None,
-        instance: Optional[str] = None,
-        issues: Optional[List[Dict[str, Any]]] = None,
-        meta: Optional[Dict[str, Any]] = None,
+        detail: str | None = None,
+        code: str | APIResponseCodes | None = None,
+        i18n_key: str | None = None,
+        instance: str | None = None,
+        issues: list[dict[str, Any]] | None = None,
+        meta: dict[str, Any] | None = None,
     ):
         """
         Initialize RFC 7807 compliant exception.
@@ -71,7 +73,7 @@ class BaseHttpException(APIException):
         # Call parent with detail for DRF compatibility
         super().__init__(detail=self.detail or title, code=self.code)
 
-    def to_dict(self, request=None) -> Dict[str, Any]:
+    def to_dict(self, request=None) -> dict[str, Any]:
         """
         Convert exception to RFC 7807 compliant dictionary.
 
@@ -110,7 +112,7 @@ class BaseHttpException(APIException):
         return f"{self.__class__.__name__}: {self.title} (code: {self.code}, status: {self.status_code})"
 
 
-def flatten_validation_errors(detail, path_prefix=None) -> List[Dict[str, Any]]:
+def flatten_validation_errors(detail, path_prefix=None) -> list[dict[str, Any]]:
     """
     Flatten DRF validation errors into RFC 7807 issues format.
 
@@ -123,7 +125,7 @@ def flatten_validation_errors(detail, path_prefix=None) -> List[Dict[str, Any]]:
     """
     if detail is None:
         return []
-        
+
     path_prefix = path_prefix or []
     issues = []
 

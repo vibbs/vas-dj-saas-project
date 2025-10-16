@@ -3,11 +3,13 @@ Utility functions for audit logging.
 """
 
 import logging
-from typing import Optional, Dict, Any
-from django.http import HttpRequest
-from .models import AuditLog, AuditAction
+from typing import Any
 
-logger = logging.getLogger('security.audit')
+from django.http import HttpRequest
+
+from .models import AuditLog
+
+logger = logging.getLogger("security.audit")
 
 
 def get_client_ip(request: HttpRequest) -> str:
@@ -16,30 +18,30 @@ def get_client_ip(request: HttpRequest) -> str:
 
     Checks X-Forwarded-For header first (for proxied requests), falls back to REMOTE_ADDR.
     """
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
     if x_forwarded_for:
         # X-Forwarded-For can contain multiple IPs, take the first one
-        ip = x_forwarded_for.split(',')[0].strip()
+        ip = x_forwarded_for.split(",")[0].strip()
     else:
-        ip = request.META.get('REMOTE_ADDR', '')
+        ip = request.META.get("REMOTE_ADDR", "")
     return ip
 
 
 def get_user_agent(request: HttpRequest) -> str:
     """Extract user agent from request."""
-    return request.META.get('HTTP_USER_AGENT', '')[:500]  # Limit length
+    return request.META.get("HTTP_USER_AGENT", "")[:500]  # Limit length
 
 
 def log_audit_event(
     action: str,
-    request: Optional[HttpRequest] = None,
+    request: HttpRequest | None = None,
     user=None,
     organization=None,
-    resource_type: str = '',
+    resource_type: str = "",
     resource_id=None,
-    details: Optional[Dict[str, Any]] = None,
+    details: dict[str, Any] | None = None,
     success: bool = True,
-    error_message: str = ''
+    error_message: str = "",
 ) -> AuditLog:
     """
     Log an audit event.
@@ -59,17 +61,17 @@ def log_audit_event(
         Created AuditLog instance
     """
     # Extract context from request if provided
-    ip_address = '0.0.0.0'
-    user_agent = ''
+    ip_address = "0.0.0.0"
+    user_agent = ""
 
     if request:
         ip_address = get_client_ip(request)
         user_agent = get_user_agent(request)
 
         # Use request context if not explicitly provided
-        if user is None and hasattr(request, 'user') and request.user.is_authenticated:
+        if user is None and hasattr(request, "user") and request.user.is_authenticated:
             user = request.user
-        if organization is None and hasattr(request, 'org'):
+        if organization is None and hasattr(request, "org"):
             organization = request.org
 
     # Create audit log entry
@@ -83,7 +85,7 @@ def log_audit_event(
         user_agent=user_agent,
         details=details or {},
         success=success,
-        error_message=error_message
+        error_message=error_message,
     )
 
     # Also log to file for real-time monitoring
@@ -92,14 +94,14 @@ def log_audit_event(
         log_level,
         f"AUDIT: {action} by {audit_log.user_email or 'anonymous'} from {ip_address}",
         extra={
-            'audit_id': str(audit_log.id),
-            'action': action,
-            'user': audit_log.user_email,
-            'organization': audit_log.organization_slug,
-            'ip': ip_address,
-            'success': success,
-            'details': details or {}
-        }
+            "audit_id": str(audit_log.id),
+            "action": action,
+            "user": audit_log.user_email,
+            "organization": audit_log.organization_slug,
+            "ip": ip_address,
+            "success": success,
+            "details": details or {},
+        },
     )
 
     return audit_log
@@ -110,8 +112,8 @@ def log_authentication_event(
     action: str,
     user=None,
     success: bool = True,
-    details: Optional[Dict[str, Any]] = None,
-    error_message: str = ''
+    details: dict[str, Any] | None = None,
+    error_message: str = "",
 ):
     """
     Convenience function for logging authentication events.
@@ -128,10 +130,10 @@ def log_authentication_event(
         action=action,
         request=request,
         user=user,
-        resource_type='authentication',
+        resource_type="authentication",
         success=success,
         details=details,
-        error_message=error_message
+        error_message=error_message,
     )
 
 
@@ -141,7 +143,7 @@ def log_authorization_event(
     resource_type: str,
     resource_id=None,
     success: bool = True,
-    details: Optional[Dict[str, Any]] = None
+    details: dict[str, Any] | None = None,
 ):
     """
     Convenience function for logging authorization events.
@@ -160,5 +162,5 @@ def log_authorization_event(
         resource_type=resource_type,
         resource_id=resource_id,
         success=success,
-        details=details
+        details=details,
     )

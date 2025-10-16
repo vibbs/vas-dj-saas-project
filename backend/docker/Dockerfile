@@ -16,10 +16,10 @@ WORKDIR /app
 # Install UV for 10-100x faster package installation
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-# Install dependencies via UV (much faster than poetry/pip)
-COPY pyproject.toml ./
+# Copy dependency files for better caching
+COPY pyproject.toml uv.lock ./
 
-# Install packages directly from pyproject.toml
+# Install packages from pyproject.toml for reproducible builds
 RUN uv pip install --system --no-cache -r pyproject.toml
 
 # Copy the rest of the application code
