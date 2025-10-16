@@ -7,7 +7,7 @@ This document summarizes the **robust CI/CD Security + Test + Lint + Coverage PR
 ### ✅ What Was Delivered
 
 **1. Pre-commit Hooks with Auto-fixing**
-- `.pre-commit-config.yaml` - Auto-fixes code without blocking commits
+- `.github/.pre-commit-config.yaml` - Auto-fixes code without blocking commits
 - Supports Black, isort, Ruff, MyPy, Bandit, and custom hooks
 - Solo developer workflow with `--fix` approach
 

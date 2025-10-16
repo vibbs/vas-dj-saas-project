@@ -251,8 +251,8 @@ show_setup_instructions() {
     echo "3️⃣  Alternatively, skip hooks for this commit:"
     echo "   git commit --no-verify -m 'Your message'"
     echo ""
-    echo "📖 Full guide: backend/PRE-COMMIT-GUIDE.md"
-    echo "🔧 Quick help: cat backend/.git-hooks-error-help.txt"
+    echo "📖 Full guide: backend/docs/development/PRE-COMMIT-GUIDE.md"
+    echo "🔧 Quick help: cat backend/docs/development/git-hooks-error-help.txt"
     print_separator
 }
 
@@ -262,8 +262,8 @@ show_error_help() {
 
     print_separator
     echo ""
-    cat "${PROJECT_ROOT}/.git-hooks-error-help.txt" 2>/dev/null || {
-        echo "📖 Troubleshooting guide: backend/TROUBLESHOOTING-GIT-HOOKS.md"
+    cat "${PROJECT_ROOT}/docs/development/git-hooks-error-help.txt" 2>/dev/null || {
+        echo "📖 Troubleshooting guide: backend/docs/development/TROUBLESHOOTING-GIT-HOOKS.md"
         echo "🔧 Quick fix: cd backend && make pre-commit-setup"
     }
     echo ""

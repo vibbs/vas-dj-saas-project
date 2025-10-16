@@ -118,7 +118,7 @@ Common fixes:
 
 ### Hook Configuration
 
-Located in [`.pre-commit-config.yaml`](.pre-commit-config.yaml):
+Located in [`.github/.pre-commit-config.yaml`](../../.github/.pre-commit-config.yaml):
 
 ```yaml
 # Django specific checks with smart auto-fix
@@ -277,7 +277,7 @@ Runs on `git push`:
 - Full test suite (optional)
 - Security scans (optional)
 
-Configure stages in `.pre-commit-config.yaml`:
+Configure stages in `.github/.pre-commit-config.yaml`:
 ```yaml
 default_stages: [pre-commit]
 ```
@@ -294,7 +294,7 @@ A: Yes, for formatting and migrations. Other issues require manual fixes.
 A: No, hooks run on your host machine. Ensure Python and dependencies are installed locally.
 
 **Q: Can I customize hook behavior?**
-A: Yes, edit [`.pre-commit-config.yaml`](.pre-commit-config.yaml) or [`scripts/pre-commit-helper.sh`](scripts/pre-commit-helper.sh)
+A: Yes, edit [`.github/.pre-commit-config.yaml`](../../.github/.pre-commit-config.yaml) or [`scripts/pre-commit-helper.sh`](../../scripts/pre-commit-helper.sh)
 
 **Q: What if hooks fail in CI?**
 A: CI runs the same hooks. Fix issues locally with `make pre-commit-run`

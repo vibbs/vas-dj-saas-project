@@ -23,8 +23,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `make pre-commit-check` - Run smart checks with auto-fix (formats code, creates migrations)
 - `make pre-commit-check-manual` - Run checks without auto-fix
 - `make pre-commit-run` - Run all hooks on all files
-- **If commit blocked**: See [TROUBLESHOOTING-GIT-HOOKS.md](TROUBLESHOOTING-GIT-HOOKS.md) for quick fixes
-- **Detailed guide**: [PRE-COMMIT-GUIDE.md](PRE-COMMIT-GUIDE.md)
+- **If commit blocked**: See [TROUBLESHOOTING-GIT-HOOKS.md](docs/development/TROUBLESHOOTING-GIT-HOOKS.md) for quick fixes
+- **Detailed guide**: [PRE-COMMIT-GUIDE.md](docs/development/PRE-COMMIT-GUIDE.md)
 
 ### Testing Framework
 This project uses pytest with comprehensive test coverage:

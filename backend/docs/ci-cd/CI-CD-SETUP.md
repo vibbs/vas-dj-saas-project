@@ -35,7 +35,8 @@ backend/
 ├── .github/workflows/
 │   ├── ci.yml                    # CI pipeline
 │   └── cd.yml                    # CD pipeline
-├── .pre-commit-config.yaml       # Auto-fixing hooks
+├── .github/
+│   └── .pre-commit-config.yaml   # Auto-fixing hooks
 ├── scripts/
 │   ├── lint.sh                   # Code quality script
 │   ├── test.sh                   # Testing script

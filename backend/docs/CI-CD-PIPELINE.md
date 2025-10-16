@@ -419,7 +419,7 @@ omit = ["*/migrations/*", "*/tests/*"]
 
 - **`.github/workflows/ci.yml`**: CI pipeline
 - **`.github/workflows/cd.yml`**: CD pipeline
-- **`.pre-commit-config.yaml`**: Pre-commit hooks
+- **`.github/.pre-commit-config.yaml`**: Pre-commit hooks
 - **`scripts/`**: Local validation scripts
 - **`Makefile`**: Convenience commands
 
