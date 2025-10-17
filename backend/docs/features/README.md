@@ -17,18 +17,19 @@ Welcome to the VAS-DJ SaaS Platform feature documentation. This directory contai
 
 ## Quick Navigation
 
-| Feature | Status | Documentation |
-|---------|--------|---------------|
-| User Registration | ✅ Production | [user-registration-flow.md](./user-registration-flow.md) |
+| Feature                        | Status       | Documentation                                                        |
+| ------------------------------ | ------------ | -------------------------------------------------------------------- |
+| Organization Registration      | ✅ Production | [org-registration-flow.md](./org-registration-flow.md)               |
+| User Invitation Flow           | ✅ Production | [user-invitation-flow.md](./user-invitation-flow.md)                 |
 | Authentication & Authorization | ✅ Production | [authentication-authorization.md](./authentication-authorization.md) |
-| Organization Management | ✅ Production | [organization-management.md](./organization-management.md) |
-| Organization Membership | ✅ Production | [organization-membership.md](./organization-membership.md) |
-| Team Invitations | ✅ Production | [team-invitations.md](./team-invitations.md) |
-| Billing & Subscriptions | ✅ Production | [billing-subscriptions.md](./billing-subscriptions.md) |
-| Feature Flags | ✅ Production | [feature-flags.md](./feature-flags.md) |
-| Progressive Onboarding | ✅ Production | [progressive-onboarding.md](./progressive-onboarding.md) |
-| Audit Logging | ✅ Production | [audit-logging.md](./audit-logging.md) |
-| Email Service | ✅ Production | [email-service.md](./email-service.md) |
+| Organization Management        | ✅ Production | [organization-management.md](./organization-management.md)           |
+| Organization Membership        | ✅ Production | [organization-membership.md](./organization-membership.md)           |
+| Team Invitations               | ✅ Production | [team-invitations.md](./team-invitations.md)                         |
+| Billing & Subscriptions        | ✅ Production | [billing-subscriptions.md](./billing-subscriptions.md)               |
+| Feature Flags                  | ✅ Production | [feature-flags.md](./feature-flags.md)                               |
+| Progressive Onboarding         | ✅ Production | [progressive-onboarding.md](./progressive-onboarding.md)             |
+| Audit Logging                  | ✅ Production | [audit-logging.md](./audit-logging.md)                               |
+| Email Service                  | ✅ Production | [email-service.md](./email-service.md)                               |
 
 ---
 
@@ -280,18 +281,18 @@ Template-based email system with comprehensive tracking and multi-category suppo
 
 ### Current Status
 
-| Feature | Implementation | Testing | Documentation | API | Status |
-|---------|---------------|---------|---------------|-----|--------|
-| User Registration | ✅ | ✅ | ✅ | ✅ | ✅ Production |
-| Authentication | ✅ | ✅ | ✅ | ✅ | ✅ Production |
-| Organizations | ✅ | ✅ | ✅ | ✅ | ✅ Production |
-| Memberships | ✅ | ✅ | ✅ | ✅ | ✅ Production |
-| Invitations | ✅ | ✅ | ✅ | ✅ | ✅ Production |
-| Billing | ✅ | ✅ | ✅ | ✅ | ✅ Production |
-| Feature Flags | ✅ | ✅ | ✅ | ✅ | ✅ Production |
-| Onboarding | ✅ | ✅ | ✅ | ✅ | ✅ Production |
-| Audit Logging | ✅ | ✅ | ✅ | ✅ | ✅ Production |
-| Email Service | ✅ | ✅ | ✅ | ✅ | ✅ Production |
+| Feature           | Implementation | Testing | Documentation | API | Status       |
+| ----------------- | -------------- | ------- | ------------- | --- | ------------ |
+| User Registration | ✅              | ✅       | ✅             | ✅   | ✅ Production |
+| Authentication    | ✅              | ✅       | ✅             | ✅   | ✅ Production |
+| Organizations     | ✅              | ✅       | ✅             | ✅   | ✅ Production |
+| Memberships       | ✅              | ✅       | ✅             | ✅   | ✅ Production |
+| Invitations       | ✅              | ✅       | ✅             | ✅   | ✅ Production |
+| Billing           | ✅              | ✅       | ✅             | ✅   | ✅ Production |
+| Feature Flags     | ✅              | ✅       | ✅             | ✅   | ✅ Production |
+| Onboarding        | ✅              | ✅       | ✅             | ✅   | ✅ Production |
+| Audit Logging     | ✅              | ✅       | ✅             | ✅   | ✅ Production |
+| Email Service     | ✅              | ✅       | ✅             | ✅   | ✅ Production |
 
 ---
 

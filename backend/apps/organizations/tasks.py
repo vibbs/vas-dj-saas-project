@@ -5,7 +5,7 @@ import logging
 from celery import shared_task
 from django.utils import timezone
 
-from apps.core.models import AuditLog
+from apps.core.audit.models import AuditLog
 
 logger = logging.getLogger(__name__)
 

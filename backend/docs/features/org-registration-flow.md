@@ -1,26 +1,53 @@
-# User Registration Flow
+# Organization Registration Flow
 
 ## Overview
 
-The VAS-DJ SaaS platform implements a comprehensive user registration system that automatically creates a personal organization for each new user, establishing a 1:1 relationship between users and their initial organization. This document describes the complete registration flow, including both traditional email/password registration and social authentication (Google, GitHub, etc.).
+The VAS-DJ SaaS platform implements a comprehensive organization registration system where business owners, team leads, and decision makers can create a new organization along with their owner account. This document describes the complete organization registration flow, including both traditional email/password registration and social authentication (Google, GitHub, etc.).
 
 ## Key Features
 
-- **Automatic Organization Creation**: Every new user gets their own organization
-- **Owner/Admin Privileges**: First user automatically becomes the organization owner
+- **Organization Creation**: Creates a new organization with custom branding and subdomain
+- **Automatic Owner Setup**: Organization creator automatically becomes the owner/admin
 - **14-Day Free Trial**: Automatic trial setup with trial subscription
-- **Email Verification**: Security-focused email verification workflow
+- **Custom Subdomain**: Unique subdomain for organization branding and routing
+- **Email Verification**: Security-focused email verification workflow (for email/password)
 - **Social Authentication**: Support for Google, GitHub, Facebook, Twitter
 - **Multi-Tenancy Ready**: Organization-scoped data from day one
 - **Transaction Safety**: Atomic operations ensure data consistency
 
+## Registration Target Audience
+
+This registration flow is designed for:
+- **Business Owners**: Creating their company's organization
+- **Team Leaders**: Setting up departmental or project organizations  
+- **Decision Makers**: Individuals who will manage billing and user invitations
+- **Enterprise Users**: Organizations requiring custom branding and multi-user support
+
+## Organization Registration vs User Invitation
+
+**Important Distinction**: This flow is for creating NEW organizations, not joining existing ones.
+
+### Organization Registration (This Document)
+- **Purpose**: Create a new organization + first owner account
+- **Who**: Business owners, team leads, decision makers
+- **Frontend**: Dedicated organization registration page
+- **Result**: New organization + user becomes owner/admin
+- **Fields**: Personal info + organization details + subdomain
+
+### User Invitation Flow (Separate Process)
+- **Purpose**: Join an existing organization via invitation
+- **Who**: Team members, employees, invited users  
+- **Frontend**: Simple user signup via invite link
+- **Result**: User joins existing organization as member
+- **Fields**: Personal info only (organization pre-determined)
+
 ## Registration Methods
 
-### 1. Email/Password Registration
-Traditional registration with email verification required.
+### 1. Email/Password Organization Registration
+Organization creator provides both personal details and organization information, with email verification required.
 
-### 2. Social Registration
-OAuth-based registration (Google, GitHub, Facebook, Twitter) with automatic email verification.
+### 2. Social Organization Registration
+OAuth-based registration (Google, GitHub, Facebook, Twitter) with automatic email verification and organization setup.
 
 ---
 
@@ -28,7 +55,7 @@ OAuth-based registration (Google, GitHub, Facebook, Twitter) with automatic emai
 
 ```mermaid
 graph TD
-    A[User Submits Registration] --> B{Registration Type?}
+    A[Organization Creator Submits Registration] --> B{Registration Type?}
 
     B -->|Email/Password| C[Validate Email & Password]
     B -->|Social Auth| D[Validate Social Provider Data]
@@ -47,11 +74,11 @@ graph TD
     M -->|Yes| N[Link Provider to Existing User]
     M -->|No| J
 
-    J --> O[Create User Account]
+    J --> O[Create Owner Account]
     O --> P[Generate Unique Subdomain]
     P --> Q[Create Organization]
     Q --> R[Create Owner Membership]
-    R --> S[Link User to Organization]
+    R --> S[Link Owner to Organization]
     S --> T[Create Trial Subscription]
     T --> U{Registration Type?}
 
@@ -66,50 +93,50 @@ graph TD
 
     Z --> AA[Add Custom Claims to JWT]
     AA --> AB[Commit Transaction]
-    AB --> AC[Return User + Org + Tokens]
+    AB --> AC[Return Owner + Org + Tokens]
 
     AC --> AD{Email/Password?}
-    AD -->|Yes| AE[User Verifies Email]
-    AD -->|No| AF[User Logged In]
+    AD -->|Yes| AE[Owner Verifies Email]
+    AD -->|No| AF[Owner Logged In]
 
     AE --> AG{Token Valid?}
     AG -->|Yes| AH[Activate Account]
     AG -->|No| AI[Return Error: Invalid Token]
 
-    AH --> AF[User Logged In & Active]
+    AH --> AF[Organization Owner Logged In & Active]
 ```
 
 ---
 
-## Registration Flow Steps
+## Organization Registration Flow Steps
 
-### Step 1: User Submission
+### Step 1: Organization Registration Submission
 
 **Endpoint**: `POST /api/v1/auth/register/`
 
 **Required Fields** (Email/Password):
-- `email`: Valid email address
+- `email`: Organization owner's email address
 - `password`: Minimum 8 characters
 - `passwordConfirm`: Must match password
-- `firstName`: User's first name
-- `lastName`: User's last name
+- `firstName`: Owner's first name
+- `lastName`: Owner's last name
 
 **Optional Fields**:
-- `phone`: Phone number
+- `phone`: Owner's phone number
 - `organizationName`: Custom organization name (defaults to "FirstName LastName")
-- `preferredSubdomain`: Custom subdomain (auto-generated if not provided)
+- `preferredSubdomain`: Custom subdomain for organization (auto-generated if not provided)
 
 **Required Fields** (Social Auth):
 - `provider`: Social provider (google, github, facebook, twitter)
 - `providerUserId`: Unique ID from social provider
-- `email`: Email from social provider
-- `firstName`: User's first name
-- `lastName`: User's last name
+- `email`: Owner's email from social provider
+- `firstName`: Owner's first name
+- `lastName`: Owner's last name
 
 **Optional Fields** (Social Auth):
-- `avatar`: Profile picture URL
+- `avatar`: Owner's profile picture URL
 - `organizationName`: Custom organization name
-- `preferredSubdomain`: Custom subdomain
+- `preferredSubdomain`: Custom subdomain for organization
 
 ### Step 2: Validation
 
@@ -133,7 +160,7 @@ All registration steps are wrapped in a database transaction (`@transaction.atom
 - If any step fails, everything rolls back
 - No partial accounts or orphaned organizations
 
-### Step 4: User Account Creation
+### Step 4: Owner Account Creation
 
 **Implementation**: [`apps/accounts/serializers.py:308-324`](apps/accounts/serializers.py#L308-L324)
 
@@ -148,10 +175,10 @@ user = Account.objects.create_user(
 )
 ```
 
-**User Fields Set**:
-- `email`: User's email address
+**Owner Account Fields Set**:
+- `email`: Organization owner's email address
 - `password`: Hashed password (or unusable for social-only)
-- `first_name`, `last_name`: User's name
+- `first_name`, `last_name`: Owner's name
 - `status`: "PENDING" (email/password) or "ACTIVE" (social auth)
 - `is_email_verified`: False (email/password) or True (social auth)
 - `date_joined`: Auto-set to current timestamp
@@ -358,7 +385,7 @@ If any step fails:
 ```json
 {
   "code": "AUTH_REGISTER_201",
-  "message": "Registration successful",
+  "message": "Organization registration successful",
   "data": {
     "access": "eyJ0eXAiOiJKV1QiLCJhbGc...",
     "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc...",
@@ -610,22 +637,22 @@ The system supports adding additional users with different roles:
 
 ### Common Registration Errors
 
-| Error Code | HTTP Status | Reason | User Action |
-|------------|-------------|--------|-------------|
-| `EMAIL_EXISTS` | 400 | Email already registered | Use different email or login |
-| `WEAK_PASSWORD` | 400 | Password doesn't meet requirements | Choose stronger password |
-| `PASSWORD_MISMATCH` | 400 | Password confirmation doesn't match | Re-enter passwords |
-| `SUBDOMAIN_TAKEN` | 400 | Preferred subdomain unavailable | Choose different subdomain |
-| `INVALID_SUBDOMAIN` | 400 | Subdomain format invalid | Use lowercase letters, numbers, hyphens |
-| `SOCIAL_PROVIDER_ERROR` | 400 | Social auth provider issue | Try again or use different method |
+| Error Code              | HTTP Status | Reason                              | User Action                             |
+| ----------------------- | ----------- | ----------------------------------- | --------------------------------------- |
+| `EMAIL_EXISTS`          | 400         | Email already registered            | Use different email or login            |
+| `WEAK_PASSWORD`         | 400         | Password doesn't meet requirements  | Choose stronger password                |
+| `PASSWORD_MISMATCH`     | 400         | Password confirmation doesn't match | Re-enter passwords                      |
+| `SUBDOMAIN_TAKEN`       | 400         | Preferred subdomain unavailable     | Choose different subdomain              |
+| `INVALID_SUBDOMAIN`     | 400         | Subdomain format invalid            | Use lowercase letters, numbers, hyphens |
+| `SOCIAL_PROVIDER_ERROR` | 400         | Social auth provider issue          | Try again or use different method       |
 
 ### Email Verification Errors
 
-| Error Code | HTTP Status | Reason | User Action |
-|------------|-------------|--------|-------------|
-| `INVALID_TOKEN` | 400 | Token invalid or expired | Request new verification email |
-| `EMAIL_ALREADY_VERIFIED` | 200 | Email already verified | Proceed to login |
-| `EMAIL_SERVICE_ERROR` | 500 | Email sending failed | Contact support or try again |
+| Error Code               | HTTP Status | Reason                   | User Action                    |
+| ------------------------ | ----------- | ------------------------ | ------------------------------ |
+| `INVALID_TOKEN`          | 400         | Token invalid or expired | Request new verification email |
+| `EMAIL_ALREADY_VERIFIED` | 200         | Email already verified   | Proceed to login               |
+| `EMAIL_SERVICE_ERROR`    | 500         | Email sending failed     | Contact support or try again   |
 
 ---
 
@@ -633,23 +660,23 @@ The system supports adding additional users with different roles:
 
 ### Registration Endpoints
 
-| Endpoint | Method | Auth | Description |
-|----------|--------|------|-------------|
-| `/api/v1/auth/register/` | POST | No | Email/password registration |
-| `/api/v1/auth/social-auth/` | POST | No | Social authentication (register/login) |
-| `/api/v1/auth/verify-email/` | POST | No | Verify email with token |
-| `/api/v1/auth/resend-verification/` | POST | Yes | Resend verification (authenticated) |
-| `/api/v1/auth/resend-verification-by-email/` | POST | No | Resend verification (unauthenticated) |
+| Endpoint                                     | Method | Auth | Description                            |
+| -------------------------------------------- | ------ | ---- | -------------------------------------- |
+| `/api/v1/auth/register/`                     | POST   | No   | Email/password registration            |
+| `/api/v1/auth/social-auth/`                  | POST   | No   | Social authentication (register/login) |
+| `/api/v1/auth/verify-email/`                 | POST   | No   | Verify email with token                |
+| `/api/v1/auth/resend-verification/`          | POST   | Yes  | Resend verification (authenticated)    |
+| `/api/v1/auth/resend-verification-by-email/` | POST   | No   | Resend verification (unauthenticated)  |
 
 ### Login Endpoints
 
-| Endpoint | Method | Auth | Description |
-|----------|--------|------|-------------|
-| `/api/v1/auth/login/` | POST | No | Email/password login |
-| `/api/v1/auth/social-login/` | POST | No | Social provider login (existing users) |
-| `/api/v1/auth/refresh/` | POST | No | Refresh JWT access token |
-| `/api/v1/auth/logout/` | POST | Yes | Logout (blacklist refresh token) |
-| `/api/v1/auth/verify-token/` | GET | Yes | Verify current JWT token |
+| Endpoint                     | Method | Auth | Description                            |
+| ---------------------------- | ------ | ---- | -------------------------------------- |
+| `/api/v1/auth/login/`        | POST   | No   | Email/password login                   |
+| `/api/v1/auth/social-login/` | POST   | No   | Social provider login (existing users) |
+| `/api/v1/auth/refresh/`      | POST   | No   | Refresh JWT access token               |
+| `/api/v1/auth/logout/`       | POST   | Yes  | Logout (blacklist refresh token)       |
+| `/api/v1/auth/verify-token/` | GET    | Yes  | Verify current JWT token               |
 
 ---
 
@@ -688,17 +715,17 @@ The system supports adding additional users with different roles:
 ### Test Coverage
 
 **Test Files**:
-- `apps/accounts/tests/test_registration_flow.py`: Registration flow tests
+- `apps/accounts/tests/test_registration_flow.py`: Organization registration flow tests
 - `apps/accounts/tests/test_auth_edge_cases.py`: Edge cases and error scenarios
 - `apps/accounts/tests/test_views.py`: API endpoint tests
 - `apps/accounts/tests/test_models.py`: Model tests
 
 ### Test Scenarios
 
-1. **Successful Registration**
-   - Email/password registration
-   - Social auth registration
-   - Organization auto-creation
+1. **Successful Organization Registration**
+   - Email/password organization registration
+   - Social auth organization registration
+   - Organization creation with custom subdomain
    - Trial setup verification
 
 2. **Validation Errors**
@@ -714,7 +741,7 @@ The system supports adding additional users with different roles:
    - Resend verification
 
 4. **Social Auth**
-   - New user registration
+   - New organization registration
    - Existing user login
    - Provider linking
    - Multi-provider support
@@ -810,13 +837,14 @@ make test-coverage
 
 ## Conclusion
 
-The user registration flow is designed to provide a seamless onboarding experience while maintaining security and multi-tenancy from day one. Every new user automatically receives:
+The organization registration flow is designed to provide business owners and team leaders with a seamless onboarding experience to create their organization while maintaining security and multi-tenancy from day one. Every new organization automatically receives:
 
-✅ Their own organization
-✅ Owner/admin privileges
-✅ 14-day free trial
-✅ Professional subdomain
-✅ Secure authentication
-✅ Email verification (email/password) or instant activation (social auth)
+✅ Custom organization setup with branding
+✅ Owner/admin privileges for the creator
+✅ 14-day free trial with full features
+✅ Professional subdomain for organization identity
+✅ Secure authentication and email verification
+✅ Multi-tenant architecture ready for team growth
+✅ Immediate billing and user management capabilities
 
-This architecture ensures that users can immediately start using the platform with full control over their organization and data.
+This architecture ensures that organization creators can immediately start managing their business with full control over their organization, billing, and team member invitations. The atomic transaction design guarantees data consistency, while the separation from user invitation flows provides a clear distinction between organization creation and team member onboarding.
