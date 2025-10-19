@@ -214,3 +214,65 @@ class AuditLog(models.Model):
         if self.organization and not self.organization_slug:
             self.organization_slug = self.organization.slug
         super().save(*args, **kwargs)
+
+    @classmethod
+    def log_event(
+        cls,
+        action=None,
+        event_type=None,  # Alias for action
+        user=None,
+        organization=None,
+        resource_type="",
+        resource_id=None,
+        ip_address="0.0.0.0",
+        user_agent="",
+        details=None,
+        success=None,
+        outcome=None,  # Alias for success
+        error_message="",
+    ):
+        """
+        Convenience method to create an audit log entry.
+
+        Args:
+            action/event_type: Action type (use AuditAction constants)
+            user: User who performed the action
+            organization: Organization context
+            resource_type: Type of resource affected
+            resource_id: ID of affected resource
+            ip_address: Client IP address
+            user_agent: Client user agent
+            details: Additional structured data
+            success/outcome: Whether action succeeded
+            error_message: Error message if failed
+
+        Returns:
+            AuditLog: Created audit log instance
+        """
+        # Support both action and event_type parameters
+        action_value = action or event_type
+        if not action_value:
+            raise ValueError("Either 'action' or 'event_type' parameter is required")
+
+        # Support both success and outcome parameters
+        success_value = success
+        if success_value is None:
+            if outcome == "success":
+                success_value = True
+            elif outcome == "failure":
+                success_value = False
+            else:
+                success_value = True  # Default to True
+
+        return cls.objects.create(
+            action=action_value,
+            user=user,
+            organization=organization,
+            resource_type=resource_type,
+            resource_id=resource_id,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            details=details or {},
+            success=success_value,
+            error_message=error_message,
+        )

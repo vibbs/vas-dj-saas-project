@@ -121,10 +121,11 @@ vas-dj-saas-project/
    make migrate
    ```
 
-5. **Create a superuser:**
+5. **Set up local test data:**
    ```bash
-   docker compose -f ./docker/docker-compose.yml run --rm web python manage.py createsuperuser
+   make setup-local-data
    ```
+   This will create a superuser, test organization, and demo user for local testing. See [Local Data Setup Guide](docs/development/LOCAL-DATA-SETUP.md) for details.
 
 #### Local Development Setup
 
@@ -188,7 +189,16 @@ make migrate
 make clean
 
 # Check System Status
-make check-status
+make check-system
+
+# Set up local test data (superuser + dummy data)
+make setup-local-data
+
+# Quick setup (skip superuser)
+make setup-local-data-quick
+
+# Reset and recreate test data
+make setup-local-data-reset
 ```
 
 ### Local Development with UV
@@ -273,6 +283,12 @@ The project includes production-ready configurations:
 
 ## 📚 Related Documentation
 
+### Development Guides
+- **[Local Data Setup](docs/development/LOCAL-DATA-SETUP.md)** - Set up test data for local development
+- **[Pre-Commit Guide](docs/development/PRE-COMMIT-GUIDE.md)** - Git hooks and code quality
+- **[Troubleshooting Git Hooks](docs/development/TROUBLESHOOTING-GIT-HOOKS.md)** - Fix common hook issues
+
+### Project Documentation
 - **[Monorepo Overview](../README.md)** - Complete project documentation
 - **[Frontend Applications](../apps/)** - Web and mobile app integration
 - **[Shared Packages](../packages/)** - Reusable components and utilities

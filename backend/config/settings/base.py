@@ -47,7 +47,15 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="", cast=Csv())
 
 # Application definition
 
-INSTALLED_APPS = [
+# Try to import unfold, add it to INSTALLED_APPS if available
+INSTALLED_APPS = []
+try:
+    import unfold  # noqa: F401
+    INSTALLED_APPS.append("unfold")  # Modern admin theme - must be before django.contrib.admin
+except ImportError:
+    pass
+
+INSTALLED_APPS += [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -179,7 +187,13 @@ LOCALE_PATHS = [BASE_DIR / path for path in LOCALE_PATHS_RELATIVE]
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Additional locations of static files
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -199,6 +213,19 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
+
+# Celery Beat Schedule - Periodic Tasks
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'cleanup-unverified-accounts': {
+        'task': 'apps.accounts.tasks.cleanup_unverified_accounts',
+        'schedule': crontab(hour=2, minute=0),  # Daily at 2:00 AM
+        'options': {
+            'expires': 3600,  # Task expires after 1 hour if not picked up
+        }
+    },
+}
 
 # Email configuration
 # Email Configuration
@@ -382,6 +409,20 @@ TRACING_ENABLED = config("TRACING_ENABLED", default=False, cast=bool)
 DETAILED_METRICS_ENABLED = config("DETAILED_METRICS_ENABLED", default=False, cast=bool)
 METRICS_SAMPLE_RATE = config("METRICS_SAMPLE_RATE", default=1.0, cast=float)
 TRACING_SAMPLE_RATE = config("TRACING_SAMPLE_RATE", default=0.01, cast=float)
+
+# Global Mode Configuration
+# When enabled, the application operates in single-tenant mode with a shared platform scope
+# All users operate under a single implicit organization (the "platform")
+# This removes organization creation, switching, and management friction
+# Can be reversed to multi-tenant mode later with minimal rework
+GLOBAL_MODE_ENABLED = config("GLOBAL_MODE_ENABLED", default=False, cast=bool)
+
+# The slug of the canonical organization used as the global scope
+# This organization is created automatically via bootstrap command
+GLOBAL_SCOPE_ORG_SLUG = config("GLOBAL_SCOPE_ORG_SLUG", default="platform")
+
+# Optional: Custom name for the global organization
+GLOBAL_SCOPE_ORG_NAME = config("GLOBAL_SCOPE_ORG_NAME", default="Platform")
 
 # Initialize OpenTelemetry instrumentation if observability is enabled
 if OBSERVABILITY_ENABLED:

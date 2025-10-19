@@ -75,19 +75,40 @@ def cleanup_expired_deletions():
             'schedule': crontab(hour=2, minute=0),  # Run at 2 AM daily
         },
     }
+
+    In Global Mode: Skips platform organization
     """
+    from django.conf import settings
+
     from apps.organizations.models import Organization
+
+    # Get platform org slug if in global mode
+    is_global_mode = getattr(settings, "GLOBAL_MODE_ENABLED", False)
+    platform_slug = getattr(settings, "GLOBAL_SCOPE_ORG_SLUG", "platform")
 
     # Find all organizations that are past their scheduled deletion date
     expired_orgs = Organization.objects.filter(
         deleted_at__isnull=False, scheduled_permanent_deletion__lte=timezone.now()
     )
 
+    # In global mode, exclude platform organization
+    if is_global_mode:
+        expired_orgs = expired_orgs.exclude(slug=platform_slug)
+
     deleted_count = 0
     error_count = 0
+    skipped_count = 0
 
     for org in expired_orgs:
         try:
+            # Double-check: Skip protected platform organization
+            if org.extended_properties.get("is_global_scope", False):
+                logger.warning(
+                    f"Skipping deletion of protected platform organization: {org.name}"
+                )
+                skipped_count += 1
+                continue
+
             org_name = org.name
             org_id = str(org.id)
             logger.info(f"Cleaning up expired organization: {org_name} ({org_id})")
@@ -103,6 +124,7 @@ def cleanup_expired_deletions():
     result = {
         "deleted_count": deleted_count,
         "error_count": error_count,
+        "skipped_count": skipped_count,
         "timestamp": timezone.now().isoformat(),
     }
 
@@ -118,7 +140,7 @@ def cleanup_expired_deletions():
     )
 
     logger.info(
-        f"Cleanup task completed. Deleted: {deleted_count}, Errors: {error_count}"
+        f"Cleanup task completed. Deleted: {deleted_count}, Errors: {error_count}, Skipped: {skipped_count}"
     )
     return result
 

@@ -1,9 +1,17 @@
+from django.conf import settings
 from django.db.models import Count, Prefetch, Q
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from apps.core.permissions import (
+    CanCreateOrganization,
+    CanDeleteOrganization,
+    CanInviteMembers,
+    CanManageOrganization,
+)
 
 from .models import Invite, Organization, OrganizationMembership
 from .serializers import (
@@ -52,6 +60,27 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     serializer_class = OrganizationSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_permissions(self):
+        """
+        Instantiate and return the list of permissions that this view requires.
+
+        Different actions require different permissions:
+        - create: Requires CanCreateOrganization (blocked in global mode)
+        - update/partial_update: Requires CanManageOrganization
+        - destroy/soft_delete: Requires CanDeleteOrganization
+        - list/retrieve: Requires IsAuthenticated
+        """
+        if self.action == 'create':
+            permission_classes = [IsAuthenticated, CanCreateOrganization]
+        elif self.action in ['update', 'partial_update']:
+            permission_classes = [IsAuthenticated, CanManageOrganization]
+        elif self.action in ['destroy', 'soft_delete']:
+            permission_classes = [IsAuthenticated, CanDeleteOrganization]
+        else:
+            permission_classes = [IsAuthenticated]
+
+        return [permission() for permission in permission_classes]
+
     def get_queryset(self):
         """
         Filter organizations to only those where the user has active membership.
@@ -91,6 +120,53 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         )
 
         return queryset.filter(id__in=user_org_ids, is_active=True).distinct()
+
+    def update(self, request, *args, **kwargs):
+        """
+        Update organization settings.
+        Only ADMIN or OWNER can update organization.
+        """
+        from apps.core.audit.models import AuditAction, AuditLog
+
+        organization = self.get_object()
+
+        # RBAC check - only ADMIN or OWNER can update
+        if not request.user.is_admin_of(organization) and not request.user.is_superuser:
+            return Response(
+                {"error": "Only organization administrators or owners can update settings"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Perform update
+        partial = kwargs.pop('partial', False)
+        serializer = self.get_serializer(organization, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+
+        # Log what fields are being updated
+        updated_fields = list(request.data.keys())
+
+        self.perform_update(serializer)
+
+        # Audit log
+        AuditLog.log_event(
+            event_type=AuditAction.ORG_UPDATE,
+            resource_type='organization',
+            resource_id=str(organization.id),
+            user=request.user,
+            organization=organization,
+            outcome='success',
+            details={
+                'updated_fields': updated_fields,
+                'changes': request.data
+            }
+        )
+
+        return Response(serializer.data)
+
+    def partial_update(self, request, *args, **kwargs):
+        """Partial update with RBAC checks."""
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
 
     @extend_schema(
         summary="Get organization stats",

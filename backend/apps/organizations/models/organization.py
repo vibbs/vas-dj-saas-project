@@ -99,6 +99,13 @@ class Organization(models.Model):
         ],
     )
 
+    # Extended properties for Global Mode and other metadata
+    extended_properties = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Extended properties for special organization flags (e.g., is_global_scope, protected)",
+    )
+
     # Manager
     objects = OrganizationManager()
 

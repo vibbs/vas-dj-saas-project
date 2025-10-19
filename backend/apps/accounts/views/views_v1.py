@@ -155,3 +155,127 @@ class AccountViewSet(viewsets.ModelViewSet):
         providers = AccountAuthProvider.objects.filter(user=user)
         serializer = AccountAuthProviderSerializer(providers, many=True)
         return Response(serializer.data)
+
+    @extend_schema(
+        summary="Change password",
+        description="Change the current user's password. Requires the current password for verification and validates the new password meets security requirements.",
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "old_password": {
+                        "type": "string",
+                        "description": "Current password for verification"
+                    },
+                    "new_password": {
+                        "type": "string",
+                        "description": "New password (must meet security requirements)"
+                    }
+                },
+                "required": ["old_password", "new_password"]
+            }
+        },
+        responses={
+            200: {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Password changed successfully"
+                    }
+                }
+            }
+        },
+        tags=["Accounts"],
+    )
+    @action(detail=False, methods=["post"])
+    def change_password(self, request):
+        """
+        Change user password.
+
+        Requires:
+        - old_password: Current password for verification
+        - new_password: New password (must meet security requirements)
+
+        Returns: 200 OK on success
+
+        Security features:
+        - Validates current password
+        - Enforces Django password validators
+        - Logs password change in audit log
+        """
+        from django.contrib.auth.password_validation import validate_password
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        from apps.core.audit.models import AuditAction, AuditLog
+
+        old_password = request.data.get("old_password")
+        new_password = request.data.get("new_password")
+
+        # Validation - check required fields
+        if not old_password or not new_password:
+            issues = []
+            if not old_password:
+                issues.append({
+                    "message": "Current password is required",
+                    "path": ["old_password"],
+                    "type": "field_validation"
+                })
+            if not new_password:
+                issues.append({
+                    "message": "New password is required",
+                    "path": ["new_password"],
+                    "type": "field_validation"
+                })
+            raise ValidationException(
+                detail="Both old_password and new_password are required",
+                issues=issues
+            )
+
+        # Verify current password
+        if not request.user.check_password(old_password):
+            raise ValidationException(
+                detail="Current password is incorrect",
+                issues=[
+                    {
+                        "message": "The current password you entered is incorrect",
+                        "path": ["old_password"],
+                        "type": "password_validation"
+                    }
+                ]
+            )
+
+        # Validate new password using Django validators
+        try:
+            validate_password(new_password, request.user)
+        except DjangoValidationError as e:
+            raise ValidationException(
+                detail="New password does not meet security requirements",
+                issues=[
+                    {
+                        "message": str(error),
+                        "path": ["new_password"],
+                        "type": "password_validation"
+                    }
+                    for error in e.messages
+                ]
+            )
+
+        # Change password
+        request.user.set_password(new_password)
+        request.user.save(update_fields=["password"])
+
+        # Audit log
+        AuditLog.log_event(
+            event_type=AuditAction.PASSWORD_CHANGE,
+            resource_type="user",
+            resource_id=str(request.user.id),
+            user=request.user,
+            organization=request.user.get_primary_organization(),
+            outcome="success",
+            details={"action": "password_changed"}
+        )
+
+        return Response({
+            "message": "Password changed successfully. Please login again with your new password."
+        })

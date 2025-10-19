@@ -44,7 +44,7 @@ class TestMembershipListAPI:
 
         assert response.status_code == status.HTTP_200_OK
         # Should see: user_with_org + 2 additional members = 3 total
-        assert len(response.data["results"]) >= 2
+        assert len(response.data["data"]) >= 2
 
     def test_admin_can_list_org_members(self, api_client):
         """Test that admins can list organization members."""
@@ -60,7 +60,7 @@ class TestMembershipListAPI:
         response = api_client.get(url)
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data["results"]) == 3  # admin + 2 members
+        assert len(response.data["data"]) == 3  # admin + 2 members
 
     def test_non_member_cannot_list_members(self, api_client):
         """Test that non-members cannot list organization members."""
@@ -76,7 +76,7 @@ class TestMembershipListAPI:
         response = api_client.get(url)
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data["results"]) == 0
+        assert len(response.data["data"]) == 0
 
     def test_list_includes_suspended_members(self, api_client):
         """Test that listing includes suspended members."""
@@ -91,7 +91,7 @@ class TestMembershipListAPI:
         response = api_client.get(url)
 
         assert response.status_code == status.HTTP_200_OK
-        member_ids = [m["id"] for m in response.data["results"]]
+        member_ids = [m["id"] for m in response.data["data"]]
         assert str(suspended.id) in member_ids
 
 

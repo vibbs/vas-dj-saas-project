@@ -208,6 +208,18 @@ createsuperuser:
 check-system:
 	docker compose -f ./docker/docker-compose.yml run --rm web python manage.py check
 
+setup-local-data:
+	@echo "🔧 Setting up local development data..."
+	docker compose -f ./docker/docker-compose.yml run --rm web python manage.py setup_local_data
+
+setup-local-data-quick:
+	@echo "🔧 Setting up dummy data only (skip superuser)..."
+	docker compose -f ./docker/docker-compose.yml run --rm web python manage.py setup_local_data --skip-superuser
+
+setup-local-data-reset:
+	@echo "🔧 Resetting and recreating local data..."
+	docker compose -f ./docker/docker-compose.yml run --rm web python manage.py setup_local_data --reset
+
 # Testing Commands
 
 test-build:

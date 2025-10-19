@@ -3,8 +3,13 @@ Custom managers for core models supporting multi-tenant architecture.
 
 This module provides managers that automatically filter queries based on
 organization context and provide utility methods for tenant-aware operations.
+
+Supports both Multi-Tenant Mode and Global Mode:
+- Multi-Tenant: Queries scoped to user's accessible organizations
+- Global Mode: Queries scoped to the platform organization
 """
 
+from django.conf import settings
 from django.db import models
 
 
@@ -46,6 +51,9 @@ class OrganizationManager(models.Manager):
         """
         Get records for all organizations the user has access to.
 
+        In Global Mode: Returns records for the platform organization
+        In Multi-Tenant Mode: Returns records for user's accessible organizations
+
         Args:
             user: User instance
 
@@ -62,7 +70,12 @@ class OrganizationManager(models.Manager):
             # User object doesn't have is_authenticated (invalid user type)
             return self.none()
 
-        # Get user's organization memberships
+        # Global Mode: Scope to platform organization
+        is_global_mode = getattr(settings, "GLOBAL_MODE_ENABLED", False)
+        if is_global_mode:
+            return self.global_mode_queryset()
+
+        # Multi-Tenant Mode: Get user's organization memberships
         from apps.organizations.models import OrganizationMembership
 
         user_orgs = OrganizationMembership.objects.filter(
@@ -73,6 +86,29 @@ class OrganizationManager(models.Manager):
             models.Q(organization_id__in=user_orgs)
             | models.Q(organization__isnull=True)  # Include global records
         )
+
+    def global_mode_queryset(self):
+        """
+        Get records scoped to the global platform organization.
+
+        Only applicable when GLOBAL_MODE_ENABLED=True.
+
+        Returns:
+            QuerySet filtered to platform organization or global records
+        """
+        global_org_slug = getattr(settings, "GLOBAL_SCOPE_ORG_SLUG", "platform")
+
+        from apps.organizations.models import Organization
+
+        try:
+            global_org = Organization.objects.get(slug=global_org_slug)
+            return self.filter(
+                models.Q(organization=global_org)
+                | models.Q(organization__isnull=True)  # Include truly global records
+            )
+        except Organization.DoesNotExist:
+            # If platform org doesn't exist, return only global records
+            return self.global_records()
 
     def create_for_organization(self, organization, **kwargs):
         """

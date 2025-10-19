@@ -143,5 +143,5 @@ SIMPLE_JWT.update(
 # File upload settings for tests
 FILE_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 50  # 50MB
 
-# Test-specific allowed hosts
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
+# Test-specific allowed hosts (allow subdomains for multi-tenant tests)
+ALLOWED_HOSTS = ["*"]  # Allow all hosts in test environment

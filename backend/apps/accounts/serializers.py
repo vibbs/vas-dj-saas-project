@@ -280,32 +280,21 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        """Create user account with automatic organization setup and trial initialization."""
-        # Extract organization-specific data
+        """
+        Create user account with automatic organization setup and trial initialization.
+
+        In Global Mode: Skips organization creation, user joins platform org automatically
+        In Multi-Tenant Mode: Creates personal organization for the user
+        """
+        from django.conf import settings
+
+        # Extract organization-specific data (even if not used in global mode)
         organization_name = validated_data.pop("organization_name", "")
         preferred_subdomain = validated_data.pop("preferred_subdomain", None)
         password_confirm = validated_data.pop("password_confirm")
         password = validated_data.pop("password")
 
-        # Set default organization name if not provided
-        if not organization_name:
-            first_name = validated_data.get("first_name", "")
-            last_name = validated_data.get("last_name", "")
-            organization_name = (
-                f"{first_name} {last_name}".strip() or "Personal Organization"
-            )
-
-        # Ensure organization name doesn't exceed database limit
-        organization_name = organization_name[:100]
-
-        # Generate unique subdomain
-        subdomain = self._generate_unique_subdomain(
-            validated_data.get("first_name", ""),
-            validated_data.get("last_name", ""),
-            preferred_subdomain,
-        )
-
-        # Create user account first (without organization)
+        # Create user account first
         validated_data["status"] = "PENDING"  # Pending email verification
         try:
             user = Account.objects.create_user(password=password, **validated_data)
@@ -323,47 +312,76 @@ class RegistrationSerializer(serializers.ModelSerializer):
                     }
                 )
 
-        # Create organization and link via membership
-        organization = Organization.objects.create(
-            name=organization_name,
-            slug=subdomain,  # Use subdomain as slug as well
-            sub_domain=subdomain,
-            creator_email=validated_data["email"],
-            creator_name=f"{validated_data.get('first_name', '')} {validated_data.get('last_name', '')}".strip(),
-            created_by=user,
-            plan="free_trial",
-            on_trial=True,
-            trial_ends_on=timezone.now().date() + timedelta(days=14),  # 14-day trial
-            is_active=True,
-        )
+        # Check if Global Mode is enabled
+        is_global_mode = getattr(settings, "GLOBAL_MODE_ENABLED", False)
 
-        # Create owner membership
-        OrganizationMembership.objects.create(
-            organization=organization, user=user, role="owner", status="active"
-        )
-
-        # Set organization on user for backward compatibility
-        user.organization = organization
-        user.save(update_fields=["organization"])
-
-        # Initialize trial subscription if there's a free trial plan
-        try:
-            trial_plan = Plan.objects.filter(amount=0, trial_period_days__gt=0).first()
-            if trial_plan:
-                Subscription.objects.create(
-                    organization=organization,
-                    plan=trial_plan,
-                    status=SubscriptionStatus.TRIALING,
-                    current_period_start=timezone.now(),
-                    current_period_end=timezone.now() + timedelta(days=14),
-                    trial_start=timezone.now(),
-                    trial_end=timezone.now() + timedelta(days=14),
-                    stripe_subscription_id="trial_" + str(user.id),  # Placeholder
-                    stripe_customer_id="trial_customer_" + str(user.id),  # Placeholder
-                )
-        except Exception:
-            # If subscription creation fails, continue - user can still use basic features
+        if is_global_mode:
+            # Global Mode: User will be automatically assigned to platform org by middleware
+            # No need to create organization or membership here
+            # Middleware will handle membership creation on first authenticated request
             pass
+        else:
+            # Multi-Tenant Mode: Create personal organization
+
+            # Set default organization name if not provided
+            if not organization_name:
+                first_name = validated_data.get("first_name", "")
+                last_name = validated_data.get("last_name", "")
+                organization_name = (
+                    f"{first_name} {last_name}".strip() or "Personal Organization"
+                )
+
+            # Ensure organization name doesn't exceed database limit
+            organization_name = organization_name[:100]
+
+            # Generate unique subdomain
+            subdomain = self._generate_unique_subdomain(
+                user.first_name,
+                user.last_name,
+                preferred_subdomain,
+            )
+
+            # Create organization and link via membership
+            organization = Organization.objects.create(
+                name=organization_name,
+                slug=subdomain,  # Use subdomain as slug as well
+                sub_domain=subdomain,
+                creator_email=user.email,
+                creator_name=user.full_name,
+                created_by=user,
+                plan="free_trial",
+                on_trial=True,
+                trial_ends_on=timezone.now().date() + timedelta(days=14),  # 14-day trial
+                is_active=True,
+            )
+
+            # Create owner membership
+            OrganizationMembership.objects.create(
+                organization=organization, user=user, role="owner", status="active"
+            )
+
+            # Set organization on user for backward compatibility (multi-tenant only)
+            user.organization = organization
+            user.save(update_fields=["organization"])
+
+            # Initialize trial subscription if there's a free trial plan (multi-tenant only)
+            try:
+                trial_plan = Plan.objects.filter(amount=0, trial_period_days__gt=0).first()
+                if trial_plan:
+                    Subscription.objects.create(
+                        organization=organization,
+                        plan=trial_plan,
+                        status=SubscriptionStatus.TRIALING,
+                        current_period_start=timezone.now(),
+                        current_period_end=timezone.now() + timedelta(days=14),
+                        trial_start=timezone.now(),
+                        trial_end=timezone.now() + timedelta(days=14),
+                        stripe_subscription_id="trial_" + str(user.id),  # Placeholder
+                        stripe_customer_id="trial_customer_" + str(user.id),  # Placeholder
+                    )
+            except Exception:
+                # If subscription creation fails, continue - user can still use basic features
+                pass
 
         # Send email verification
         try:

@@ -31,6 +31,83 @@ from apps.core.responses import created, ok
 from apps.core.utils.rate_limiting import rate_limit
 
 
+def add_custom_claims(access_token, user):
+    """
+    Add organization context and permissions to JWT access token.
+
+    This function enriches the JWT with:
+    - Organization membership information
+    - User role within primary organization
+    - Computed permissions based on role
+    - List of all organizations user belongs to
+
+    In Global Mode:
+    - Sets platform organization as primary
+    - Grants appropriate permissions for global scope
+    - Organizations list contains only platform org
+
+    Args:
+        access_token: JWT access token object to modify
+        user: Account instance
+    """
+    from django.conf import settings
+
+    # Basic user info
+    access_token["email"] = user.email
+    access_token["is_email_verified"] = user.is_email_verified
+
+    # Check if Global Mode is enabled
+    is_global_mode = getattr(settings, "GLOBAL_MODE_ENABLED", False)
+
+    if is_global_mode:
+        # Global Mode: Use platform organization
+        from apps.organizations.models import Organization
+
+        global_org_slug = getattr(settings, "GLOBAL_SCOPE_ORG_SLUG", "platform")
+        try:
+            primary_org = Organization.objects.get(slug=global_org_slug)
+            membership = user.get_membership_in(primary_org)
+
+            # Set organization context
+            access_token["primary_organization_id"] = str(primary_org.id)
+            access_token["organization_role"] = membership.role if membership else "member"
+            access_token["permissions"] = membership.get_permissions() if membership else ["view_organization"]
+
+            # In global mode, organizations list contains only platform org
+            access_token["organizations"] = [
+                {
+                    "id": str(primary_org.id),
+                    "slug": primary_org.slug,
+                    "role": membership.role if membership else "member"
+                }
+            ]
+        except Organization.DoesNotExist:
+            # Fallback if platform org not found
+            access_token["primary_organization_id"] = None
+            access_token["organization_role"] = None
+            access_token["permissions"] = []
+            access_token["organizations"] = []
+    else:
+        # Multi-Tenant Mode: Use user's primary organization
+        primary_org = user.get_primary_organization()
+        membership = user.get_membership_in(primary_org) if primary_org else None
+
+        # Organization context
+        access_token["primary_organization_id"] = str(primary_org.id) if primary_org else None
+        access_token["organization_role"] = membership.role if membership else None
+        access_token["permissions"] = membership.get_permissions() if membership else []
+
+        # All organizations user belongs to (for org switching)
+        access_token["organizations"] = [
+            {
+                "id": str(m.organization.id),
+                "slug": m.organization.slug,
+                "role": m.role
+            }
+            for m in user.get_active_memberships()
+        ]
+
+
 def convert_serializer_errors_to_rfc7807(serializer_errors):
     """Convert Django serializer errors to RFC 7807 format with issues array."""
     issues = []
@@ -258,15 +335,8 @@ def login(request):
     refresh = RefreshToken.for_user(user)
     access = refresh.access_token
 
-    # Add custom claims
-    access["email"] = user.email
-    access["role"] = user.role
-    access["is_admin"] = user.is_admin
-    access["org_id"] = (
-        str(user.organization.id)
-        if hasattr(user, "organization") and user.organization
-        else None
-    )
+    # Add custom claims (organization context, role, permissions)
+    add_custom_claims(access, user)
 
     # Update last login
     update_last_login(None, user)
@@ -341,16 +411,9 @@ def refresh_token(request):
         refresh = RefreshToken(refresh_token)
         access = refresh.access_token
 
-        # Get user and add custom claims
+        # Get user and add custom claims (organization context, role, permissions)
         user = Account.objects.get(id=refresh["user_id"])
-        access["email"] = user.email
-        access["role"] = user.role
-        access["is_admin"] = user.is_admin
-        access["org_id"] = (
-            str(user.organization.id)
-            if hasattr(user, "organization") and user.organization
-            else None
-        )
+        add_custom_claims(access, user)
 
         return ok(
             data={"access": str(access), "refresh": str(refresh)},
@@ -546,20 +609,14 @@ def register(request):
     refresh = RefreshToken.for_user(user)
     access = refresh.access_token
 
-    # Add custom claims
-    access["email"] = user.email
-    access["role"] = user.role
-    access["is_admin"] = user.is_admin
-    access["org_id"] = (
-        str(user.organization.id)
-        if hasattr(user, "organization") and user.organization
-        else None
-    )
+    # Add custom claims (organization context, role, permissions)
+    add_custom_claims(access, user)
+
+    # Add trial information
+    primary_org = user.get_primary_organization()
     access["trial_ends_on"] = (
-        user.organization.trial_ends_on.isoformat()
-        if hasattr(user, "organization")
-        and user.organization
-        and user.organization.trial_ends_on
+        primary_org.trial_ends_on.isoformat()
+        if primary_org and primary_org.trial_ends_on
         else None
     )
 
@@ -1201,20 +1258,14 @@ def social_auth(request):
     refresh = RefreshToken.for_user(user)
     access = refresh.access_token
 
-    # Add custom claims
-    access["email"] = user.email
-    access["role"] = user.role
-    access["is_admin"] = user.is_admin
-    access["org_id"] = (
-        str(user.organization.id)
-        if hasattr(user, "organization") and user.organization
-        else None
-    )
+    # Add custom claims (organization context, role, permissions)
+    add_custom_claims(access, user)
+
+    # Add trial information
+    primary_org = user.get_primary_organization()
     access["trial_ends_on"] = (
-        user.organization.trial_ends_on.isoformat()
-        if hasattr(user, "organization")
-        and user.organization
-        and user.organization.trial_ends_on
+        primary_org.trial_ends_on.isoformat()
+        if primary_org and primary_org.trial_ends_on
         else None
     )
 
@@ -1293,20 +1344,14 @@ def social_login(request):
     refresh = RefreshToken.for_user(user)
     access = refresh.access_token
 
-    # Add custom claims
-    access["email"] = user.email
-    access["role"] = user.role
-    access["is_admin"] = user.is_admin
-    access["org_id"] = (
-        str(user.organization.id)
-        if hasattr(user, "organization") and user.organization
-        else None
-    )
+    # Add custom claims (organization context, role, permissions)
+    add_custom_claims(access, user)
+
+    # Add trial information
+    primary_org = user.get_primary_organization()
     access["trial_ends_on"] = (
-        user.organization.trial_ends_on.isoformat()
-        if hasattr(user, "organization")
-        and user.organization
-        and user.organization.trial_ends_on
+        primary_org.trial_ends_on.isoformat()
+        if primary_org and primary_org.trial_ends_on
         else None
     )
 

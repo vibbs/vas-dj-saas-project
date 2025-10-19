@@ -50,8 +50,8 @@ class TestInviteListAPI:
         response = api_client.get(url)
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data["results"]) == 2
-        invite_ids = [invite["id"] for invite in response.data["results"]]
+        assert len(response.data["data"]) == 2
+        invite_ids = [invite["id"] for invite in response.data["data"]]
         assert str(invite1.id) in invite_ids
         assert str(invite2.id) in invite_ids
 
@@ -68,7 +68,7 @@ class TestInviteListAPI:
 
         # Regular users can only see invites sent to their email
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data["results"]) == 0
+        assert len(response.data["data"]) == 0
 
     def test_user_can_list_own_invites(self, api_client, user_with_org):
         """Test that users can list invites sent to their email."""
@@ -85,8 +85,8 @@ class TestInviteListAPI:
         response = api_client.get(url)
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data["results"]) == 1
-        assert response.data["results"][0]["id"] == str(invite.id)
+        assert len(response.data["data"]) == 1
+        assert response.data["data"][0]["id"] == str(invite.id)
 
     def test_non_member_cannot_list_invites(self, api_client):
         """Test that non-members cannot list organization invites."""
@@ -102,7 +102,7 @@ class TestInviteListAPI:
         response = api_client.get(url)
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data["results"]) == 0
+        assert len(response.data["data"]) == 0
 
 
 class TestInviteCreateAPI:
