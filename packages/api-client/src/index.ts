@@ -1,9 +1,128 @@
-// Re-export the modern API client architecture
-export { http, wireAuth, type TokenPair } from './http';
-export * from './endpoints';
+/**
+ * @vas-dj-saas/api-client
+ * Type-safe API client for VAS-DJ SaaS Platform (v1 API)
+ *
+ * Features:
+ * - Fetch-first HTTP client with automatic retry
+ * - JWT authentication with token refresh
+ * - Multi-tenant support (X-Org-Id header)
+ * - Request tracing (X-Request-Id)
+ * - Standardized error handling
+ * - Tree-shakeable exports
+ * - Full TypeScript support
+ *
+ * @example Basic Usage
+ * ```ts
+ * import { AuthService, wireAuth } from '@vas-dj-saas/api-client';
+ *
+ * // Configure authentication
+ * wireAuth({
+ *   getAccessToken: () => localStorage.getItem('token'),
+ *   refreshToken: async () => {
+ *     // Your refresh logic
+ *   }
+ * });
+ *
+ * // Use services
+ * const response = await AuthService.login({
+ *   email: 'user@example.com',
+ *   password: 'password123'
+ * });
+ * ```
+ *
+ * @example With Custom Configuration
+ * ```ts
+ * import { ApiClient } from '@vas-dj-saas/api-client';
+ *
+ * const client = new ApiClient({
+ *   baseUrl: 'https://api.example.com',
+ *   defaultOrgId: 'org-123',
+ *   retry: { attempts: 5 }
+ * });
+ * ```
+ */
 
-// Keep the legacy ApiClient for backward compatibility if needed
-export { ApiClient } from './legacy';
+// === Core Client ===
+export { ApiClient, defaultClient, request } from './core/ApiClient';
 
-// Default http instance is already configured and ready to use
-export { http as default } from './http';
+// === Authentication Wire-up ===
+import { defaultClient } from './core/ApiClient';
+import type { WireAuthOptions } from './core/types';
+
+/**
+ * Configure authentication for the default client
+ * Call this once during app initialization
+ *
+ * @example
+ * ```ts
+ * wireAuth({
+ *   getAccessToken: () => localStorage.getItem('accessToken'),
+ *   refreshToken: async () => {
+ *     const refresh = localStorage.getItem('refreshToken');
+ *     const response = await fetch('/api/v1/auth/refresh/', {
+ *       method: 'POST',
+ *       body: JSON.stringify({ refresh })
+ *     });
+ *     const data = await response.json();
+ *     localStorage.setItem('accessToken', data.access);
+ *   }
+ * });
+ * ```
+ */
+export function wireAuth(options: WireAuthOptions): void {
+  defaultClient.configure({
+    auth: {
+      getAccessToken: options.getAccessToken,
+      refreshToken: options.refreshToken,
+    },
+  });
+}
+
+/**
+ * Set default organization ID for all requests
+ *
+ * @example
+ * ```ts
+ * setDefaultOrg('org-123');
+ * ```
+ */
+export function setDefaultOrg(orgId: string): void {
+  defaultClient.configure({ defaultOrgId: orgId });
+}
+
+/**
+ * Configure base URL for API requests
+ *
+ * @example
+ * ```ts
+ * setBaseUrl('https://api.example.com');
+ * ```
+ */
+export function setBaseUrl(baseUrl: string): void {
+  defaultClient.configure({ baseUrl });
+}
+
+// === Services ===
+export { AuthService } from './services/auth';
+export { UsersService } from './services/users';
+export { OrganizationsService } from './services/organizations';
+
+// === Pagination Utilities ===
+export {
+  extractPageNumber,
+  extractCursor,
+  hasNextPage,
+  hasPreviousPage,
+  iterateAll,
+  iterateCursor,
+  collectAll,
+  collectAllCursor,
+} from './core/pagination';
+
+// === Types ===
+// Export all types from types barrel
+export * from './types';
+
+// === Version ===
+export const VERSION = '1.0.0';
+export const API_VERSION = 'v1';

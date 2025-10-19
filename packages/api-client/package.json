@@ -1,21 +1,50 @@
 {
   "name": "@vas-dj-saas/api-client",
-  "version": "0.1.0",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "lint": "eslint src/",
-    "type-check": "tsc --noEmit"
+  "version": "1.0.0",
+  "description": "Type-safe API client for VAS-DJ SaaS platform (v1 API)",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./axios": {
+      "types": "./dist/axios.d.ts",
+      "import": "./dist/axios.mjs",
+      "require": "./dist/axios.cjs"
+    }
   },
-  "dependencies": {
-    "@vas-dj-saas/types": "workspace:*",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "codegen": "orval --config orval.config.ts",
+    "lint": "eslint src/",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "dependencies": {},
+  "peerDependencies": {
     "axios": "^1.6.0"
+  },
+  "peerDependenciesMeta": {
+    "axios": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "typescript": "~5.8.3",
-    "eslint": "^9.25.0"
+    "eslint": "^9.25.0",
+    "orval": "^7.3.0",
+    "tsup": "^8.0.0",
+    "typescript": "~5.8.3"
   }
 }
