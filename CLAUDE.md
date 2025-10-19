@@ -2,6 +2,33 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with this monorepo.
 
+## AI Development Guidelines
+
+### File Organization for AI Sessions
+
+**IMPORTANT:** When creating test files, experimental code, or temporary analysis files during AI-assisted development:
+
+- ✅ **DO:** Create all temporary files in the `ai-playground/` folder
+- ✅ **DO:** Any relevant documentation should be created under the respective `_docs/` at root level and `backend/docs` folder for backend-specific docs
+- ✅ **DO:** Use the ai-playground for test scripts, reports, and experiments
+- ❌ **DON'T:** Create test/temporary files in the root directory
+- ❌ **DON'T:** Clutter the main repository with AI-generated artifacts
+
+**Example:**
+```bash
+# Good ✅
+ai-playground/test_workflows.py
+ai-playground/TEST_REPORT.md
+ai-playground/experimental_feature.ts
+
+# Bad ❌
+test_workflows.py
+TEST_REPORT.md
+experimental_feature.ts
+```
+
+The `ai-playground/` folder keeps the repository clean while preserving useful AI-generated artifacts for reference.
+
 ## Monorepo Structure
 
 This is a turborepo-powered monorepo containing:
@@ -17,11 +44,13 @@ This is a turborepo-powered monorepo containing:
 │   ├── api-client/         # Type-safe API client for Django backend
 │   ├── utils/              # Shared utility functions
 │   └── types/              # Shared TypeScript type definitions
-└── backend/                # Django REST API backend
-    ├── apps/               # Django apps (accounts, organizations, billing, etc.)
-    ├── config/             # Django settings and configuration
-    ├── docker/             # Docker configuration
-    └── manage.py           # Django management script
+├── backend/                # Django REST API backend
+│   ├── apps/               # Django apps (accounts, organizations, billing, etc.)
+│   ├── config/             # Django settings and configuration
+│   ├── docker/             # Docker configuration
+│   └── manage.py           # Django management script
+└── ai-playground/          # AI-generated test files, reports, and experiments
+    └── README.md           # Documentation for AI-generated artifacts
 ```
 
 ## Development Commands
