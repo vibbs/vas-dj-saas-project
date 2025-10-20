@@ -41,8 +41,10 @@ export const useAuth = create<AuthState>()(
           refreshToken: async () => {
             // Attempt to refresh the token
             try {
+              // Use correct base URL without /api/v1 suffix (it's already in the endpoint path)
+              const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
               const resp = await fetch(
-                (process.env.NEXT_PUBLIC_API_BASE_URL || process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1') + '/auth/refresh/',
+                `${baseUrl}/api/v1/auth/refresh/`,
                 {
                   method: 'POST',
                   credentials: 'include',
@@ -53,7 +55,10 @@ export const useAuth = create<AuthState>()(
               );
 
               if (resp.ok) {
-                const data = await resp.json();
+                const responseData = await resp.json();
+                // Handle both nested and flat response structures
+                const data = responseData.data || responseData;
+
                 set({
                   accessToken: data.access_token || data.access,
                   account: data.user,
@@ -83,12 +88,18 @@ export const useAuth = create<AuthState>()(
         if (currentState.accessToken) {
           try {
             const response = await UsersService.me();
-            if (response.status === 200 && response.data.data) {
-              set({ account: response.data.data, status: 'authenticated', error: undefined });
+
+            // Handle both nested and flat response structures
+            // Type assertion needed because the response is a union type
+            const accountData = (response.data as any)?.data || response.data;
+
+            if (response.status === 200 && accountData) {
+              set({ account: accountData, status: 'authenticated', error: undefined });
             } else {
               throw new Error('Failed to fetch account');
             }
           } catch (error) {
+            console.warn('Failed to fetch user account:', error);
             // Token is invalid, clear it
             set({
               status: 'unauthenticated',
@@ -107,18 +118,29 @@ export const useAuth = create<AuthState>()(
 
         try {
           const response = await AuthService.login({ email, password });
-          if (response.status === 200 && response.data.data) {
-            const data = response.data.data;
+
+          // Backend returns: { status: 200, code: "...", data: { access, refresh, user } }
+          // Response type is V1AuthLoginCreate200 which wraps LoginResponse in data field
+          if (response.status === 200 && response.data) {
+            // Type assertion needed because the generated types use intersection types
+            const loginData = (response.data as any).data;
+
+            if (!loginData || !loginData.access || !loginData.user) {
+              console.error('Login response missing expected fields:', response);
+              throw new Error('Invalid login response structure');
+            }
+
             set({
-              accessToken: data.access,
-              account: data.user,
+              accessToken: loginData.access,
+              account: loginData.user,
               status: 'authenticated',
               error: undefined
             });
           } else {
-            throw new Error('Login failed');
+            throw new Error('Login failed: Unexpected status code');
           }
         } catch (error: any) {
+          console.error('Login error:', error);
           const errorMessage = error?.data?.detail ||
                               error?.message ||
                               'Login failed';
