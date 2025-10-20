@@ -27,11 +27,31 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "codegen": "orval --config orval.config.ts",
+    "codegen:check": "pnpm codegen && git diff --exit-code src/generated/",
+    "size": "size-limit",
+    "smoke:node": "node smoke-tests/node-smoke.cjs",
+    "smoke": "pnpm smoke:node",
     "lint": "eslint src/",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
-  "dependencies": {},
+  "size-limit": [
+    {
+      "name": "Core (fetch client)",
+      "path": "dist/index.mjs",
+      "limit": "20 KB",
+      "gzip": true
+    },
+    {
+      "name": "Axios client",
+      "path": "dist/axios.mjs",
+      "limit": "8 KB",
+      "gzip": true
+    }
+  ],
+  "dependencies": {
+    "zod": "^4.0.16"
+  },
   "peerDependencies": {
     "axios": "^1.6.0"
   },
@@ -41,9 +61,11 @@
     }
   },
   "devDependencies": {
+    "@size-limit/preset-small-lib": "^11.2.0",
     "@types/node": "^20.0.0",
     "eslint": "^9.25.0",
     "orval": "^7.3.0",
+    "size-limit": "^11.2.0",
     "tsup": "^8.0.0",
     "typescript": "~5.8.3"
   }

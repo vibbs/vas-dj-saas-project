@@ -7,8 +7,8 @@
  * - Standardized error handling
  */
 
-import { ApiError } from './errors';
-import type { AuthProvider } from './types';
+import { ApiError } from "./errors";
+import type { AuthProvider } from "./types";
 
 interface RequestConfig extends RequestInit {
   url: string;
@@ -30,28 +30,31 @@ interface ApiClientConfig {
   retry?: RetryConfig;
   defaultOrgId?: string;
   onError?: (error: ApiError) => void;
+  logging?: {
+    requests?: boolean;
+    responses?: boolean;
+  };
 }
 
 const DEFAULT_RETRY_CONFIG: Required<RetryConfig> = {
   attempts: 3,
   baseMs: 300,
-  methods: ['GET', 'PUT', 'DELETE'], // Safe idempotent methods
+  methods: ["GET", "PUT", "DELETE"], // Safe idempotent methods
 };
 
 const DEFAULT_BASE_URL =
-  typeof window !== 'undefined'
-    ? window.location.origin
-    : process.env['NEXT_PUBLIC_API_BASE_URL'] ||
-      process.env['EXPO_PUBLIC_API_BASE_URL'] ||
-      'http://localhost:8000';
+  process.env["NEXT_PUBLIC_API_BASE_URL"] ||
+  process.env["EXPO_PUBLIC_API_BASE_URL"] ||
+  (typeof window !== "undefined" && (window as any).__API_BASE_URL__) ||
+  "http://localhost:8000";
 
 /**
  * Generate a UUID v4 for request tracking
  */
 function generateRequestId(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
@@ -59,7 +62,11 @@ function generateRequestId(): string {
 /**
  * Build URL with query parameters
  */
-function buildUrl(baseUrl: string, path: string, params?: Record<string, unknown>): string {
+function buildUrl(
+  baseUrl: string,
+  path: string,
+  params?: Record<string, unknown>
+): string {
   const url = new URL(path, baseUrl);
 
   if (params) {
@@ -113,10 +120,14 @@ export class ApiClient {
   constructor(config: ApiClientConfig = {}) {
     this.config = {
       baseUrl: config.baseUrl || DEFAULT_BASE_URL,
-      auth: config.auth || { getAccessToken: () => undefined, refreshToken: async () => {} },
+      auth: config.auth || {
+        getAccessToken: () => undefined,
+        refreshToken: async () => {},
+      },
       retry: { ...DEFAULT_RETRY_CONFIG, ...config.retry },
-      defaultOrgId: config.defaultOrgId || '',
+      defaultOrgId: config.defaultOrgId || "",
       onError: config.onError || (() => {}),
+      logging: config.logging || { requests: false, responses: false },
     };
   }
 
@@ -128,7 +139,18 @@ export class ApiClient {
       ...this.config,
       ...updates,
       retry: { ...this.config.retry, ...updates.retry },
+      logging: { ...this.config.logging, ...updates.logging },
     };
+  }
+
+  /**
+   * Enable/disable logging
+   */
+  public enableLogging(options: {
+    requests?: boolean;
+    responses?: boolean;
+  }): void {
+    this.configure({ logging: options });
   }
 
   /**
@@ -136,7 +158,7 @@ export class ApiClient {
    */
   public async request<T>(config: RequestConfig): Promise<T> {
     const { url, params, retry, skipAuth, orgId, ...fetchOptions } = config;
-    const method = fetchOptions.method || 'GET';
+    const method = fetchOptions.method || "GET";
     const retryConfig = { ...this.config.retry, ...retry };
 
     let attempt = 0;
@@ -157,16 +179,22 @@ export class ApiClient {
 
         return response;
       } catch (error) {
-        lastError = error instanceof ApiError ? error : new ApiError(
-          'An unexpected error occurred',
-          500,
-          'UNKNOWN_ERROR'
-        );
+        lastError =
+          error instanceof ApiError
+            ? error
+            : new ApiError(
+                "An unexpected error occurred",
+                500,
+                "UNKNOWN_ERROR"
+              );
 
         // Check if we should retry
         const shouldRetry =
           attempt < maxAttempts &&
-          isRetriableMethod(method, retryConfig.methods ?? DEFAULT_RETRY_CONFIG.methods) &&
+          isRetriableMethod(
+            method,
+            retryConfig.methods ?? DEFAULT_RETRY_CONFIG.methods
+          ) &&
           (lastError.status === 0 || isRetriableStatus(lastError.status));
 
         if (!shouldRetry) {
@@ -174,14 +202,17 @@ export class ApiClient {
         }
 
         // Wait before retry with exponential backoff
-        const backoffMs = calculateBackoff(attempt, retryConfig.baseMs ?? DEFAULT_RETRY_CONFIG.baseMs);
+        const backoffMs = calculateBackoff(
+          attempt,
+          retryConfig.baseMs ?? DEFAULT_RETRY_CONFIG.baseMs
+        );
         await sleep(backoffMs);
         attempt++;
       }
     }
 
     // This should never be reached, but TypeScript requires it
-    throw lastError || new ApiError('Request failed', 500, 'UNKNOWN_ERROR');
+    throw lastError || new ApiError("Request failed", 500, "UNKNOWN_ERROR");
   }
 
   /**
@@ -196,29 +227,55 @@ export class ApiClient {
     // Add authentication
     if (!skipAuth) {
       const token = this.config.auth.getAccessToken();
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
+      // Only add Authorization header if token exists and is not an empty string
+      if (token && token.trim() !== "") {
+        headers.set("Authorization", `Bearer ${token}`);
       }
     }
 
     // Add multi-tenant header
     const tenantId = orgId || this.config.defaultOrgId;
     if (tenantId) {
-      headers.set('X-Org-Id', tenantId);
+      headers.set("X-Org-Id", tenantId);
     }
 
     // Add request tracking
-    if (!headers.has('X-Request-Id')) {
-      headers.set('X-Request-Id', generateRequestId());
+    if (!headers.has("X-Request-Id")) {
+      headers.set("X-Request-Id", generateRequestId());
     }
 
     // Add content type for JSON requests
-    if (fetchOptions.body && !headers.has('Content-Type')) {
-      headers.set('Content-Type', 'application/json');
+    if (fetchOptions.body && !headers.has("Content-Type")) {
+      headers.set("Content-Type", "application/json");
     }
 
     // Build full URL
     const fullUrl = buildUrl(this.config.baseUrl, url, params);
+
+    // Log request if enabled
+    if (this.config.logging?.requests) {
+      const sanitizedHeaders: Record<string, string> = {};
+      headers.forEach((value, key) => {
+        // Redact sensitive headers
+        if (
+          key.toLowerCase() === "authorization" ||
+          key.toLowerCase() === "cookie"
+        ) {
+          sanitizedHeaders[key] = "[REDACTED]";
+        } else {
+          sanitizedHeaders[key] = value;
+        }
+      });
+
+      console.log("[API Request]", {
+        method: fetchOptions.method || "GET",
+        url: fullUrl,
+        headers: sanitizedHeaders,
+        body: fetchOptions.body
+          ? JSON.parse(fetchOptions.body as string)
+          : undefined,
+      });
+    }
 
     // Execute fetch
     let response: Response;
@@ -226,13 +283,14 @@ export class ApiClient {
       response = await fetch(fullUrl, {
         ...fetchOptions,
         headers,
+        credentials: "include", // Include cookies for CORS requests
       });
     } catch (error) {
       // Network error
       throw new ApiError(
-        error instanceof Error ? error.message : 'Network request failed',
+        error instanceof Error ? error.message : "Network request failed",
         0,
-        'NETWORK_ERROR'
+        "NETWORK_ERROR"
       );
     }
 
@@ -251,6 +309,16 @@ export class ApiClient {
     // Parse response
     const data = await this.parseResponse<T>(response);
 
+    // Log response if enabled
+    if (this.config.logging?.responses) {
+      console.log("[API Response]", {
+        status: response.status,
+        statusText: response.statusText,
+        url: fullUrl,
+        data,
+      });
+    }
+
     // Check if response is OK
     if (!response.ok) {
       throw ApiError.fromResponse(response, data);
@@ -263,9 +331,9 @@ export class ApiClient {
    * Parse response based on content type
    */
   private async parseResponse<T>(response: Response): Promise<T> {
-    const contentType = response.headers.get('Content-Type') || '';
+    const contentType = response.headers.get("Content-Type") || "";
 
-    if (contentType.includes('application/json')) {
+    if (contentType.includes("application/json")) {
       return response.json() as Promise<T>;
     }
 
@@ -287,9 +355,9 @@ export class ApiClient {
         await this.config.auth.refreshToken();
       } catch (error) {
         throw new ApiError(
-          'Authentication refresh failed',
+          "Authentication refresh failed",
           401,
-          'AUTH_REFRESH_FAILED'
+          "AUTH_REFRESH_FAILED"
         );
       } finally {
         this.refreshPromise = null;

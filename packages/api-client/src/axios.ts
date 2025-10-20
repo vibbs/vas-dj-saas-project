@@ -8,18 +8,23 @@
  * Note: Requires axios as peer dependency
  */
 
-import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { ApiError } from './core/errors';
-import type { AuthProvider } from './core/types';
+import type {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from "axios";
+import { ApiError } from "./core/errors";
+import type { AuthProvider } from "./core/types";
 
-let axiosModule: typeof import('axios') | null = null;
+let axiosModule: typeof import("axios") | null = null;
 
 /**
  * Lazy load axios to avoid bundling if not used
  */
 async function getAxios() {
   if (!axiosModule) {
-    axiosModule = await import('axios');
+    axiosModule = await import("axios");
   }
   return axiosModule.default;
 }
@@ -32,19 +37,18 @@ interface AxiosClientConfig {
 }
 
 const DEFAULT_BASE_URL =
-  typeof window !== 'undefined'
-    ? window.location.origin
-    : process.env['NEXT_PUBLIC_API_BASE_URL'] ||
-      process.env['EXPO_PUBLIC_API_BASE_URL'] ||
-      'http://localhost:8000';
+  process.env["NEXT_PUBLIC_API_BASE_URL"] ||
+  process.env["EXPO_PUBLIC_API_BASE_URL"] ||
+  (typeof window !== "undefined" && (window as any).__API_BASE_URL__) ||
+  "http://localhost:8000";
 
 /**
  * Generate a UUID v4 for request tracking
  */
 function generateRequestId(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
@@ -60,8 +64,11 @@ export class AxiosClient {
   constructor(config: AxiosClientConfig = {}) {
     this.config = {
       baseURL: config.baseURL || DEFAULT_BASE_URL,
-      auth: config.auth || { getAccessToken: () => undefined, refreshToken: async () => {} },
-      defaultOrgId: config.defaultOrgId || '',
+      auth: config.auth || {
+        getAccessToken: () => undefined,
+        refreshToken: async () => {},
+      },
+      defaultOrgId: config.defaultOrgId || "",
       timeout: config.timeout || 30000,
     };
   }
@@ -79,7 +86,7 @@ export class AxiosClient {
       baseURL: this.config.baseURL,
       timeout: this.config.timeout,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -94,12 +101,12 @@ export class AxiosClient {
 
         // Add org ID
         if (this.config.defaultOrgId && config.headers) {
-          config.headers['X-Org-Id'] = this.config.defaultOrgId;
+          config.headers["X-Org-Id"] = this.config.defaultOrgId;
         }
 
         // Add request ID
-        if (config.headers && !config.headers['X-Request-Id']) {
-          config.headers['X-Request-Id'] = generateRequestId();
+        if (config.headers && !config.headers["X-Request-Id"]) {
+          config.headers["X-Request-Id"] = generateRequestId();
         }
 
         return config;
@@ -111,7 +118,9 @@ export class AxiosClient {
     this.instance.interceptors.response.use(
       (response: AxiosResponse) => response,
       async (error) => {
-        const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+        const originalRequest = error.config as InternalAxiosRequestConfig & {
+          _retry?: boolean;
+        };
 
         // Handle 401 - attempt token refresh
         if (error.response?.status === 401 && !originalRequest._retry) {
@@ -132,7 +141,8 @@ export class AxiosClient {
               status: error.response.status,
               statusText: error.response.statusText,
               headers: {
-                get: (name: string) => error.response.headers[name.toLowerCase()],
+                get: (name: string) =>
+                  error.response.headers[name.toLowerCase()],
               },
               ok: false,
             } as Response,
@@ -142,9 +152,9 @@ export class AxiosClient {
 
         // Network error
         throw new ApiError(
-          error.message || 'Network request failed',
+          error.message || "Network request failed",
           0,
-          'NETWORK_ERROR'
+          "NETWORK_ERROR"
         );
       }
     );
@@ -165,9 +175,9 @@ export class AxiosClient {
         await this.config.auth.refreshToken();
       } catch (error) {
         throw new ApiError(
-          'Authentication refresh failed',
+          "Authentication refresh failed",
           401,
-          'AUTH_REFRESH_FAILED'
+          "AUTH_REFRESH_FAILED"
         );
       } finally {
         this.refreshPromise = null;
@@ -222,8 +232,4 @@ export async function request<T>(config: AxiosRequestConfig): Promise<T> {
 /**
  * Re-export axios types for convenience
  */
-export type {
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-} from 'axios';
+export type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";

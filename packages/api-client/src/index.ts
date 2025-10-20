@@ -102,10 +102,23 @@ export function setBaseUrl(baseUrl: string): void {
   defaultClient.configure({ baseUrl });
 }
 
+/**
+ * Enable/disable request and response logging
+ *
+ * @example
+ * ```ts
+ * enableLogging({ requests: true, responses: true });
+ * ```
+ */
+export function enableLogging(options: { requests?: boolean; responses?: boolean }): void {
+  defaultClient.enableLogging(options);
+}
+
 // === Services ===
 export { AuthService } from './services/auth';
 export { UsersService } from './services/users';
 export { OrganizationsService } from './services/organizations';
+export { InvitesService } from './services/invites';
 
 // === Pagination Utilities ===
 export {
@@ -119,9 +132,17 @@ export {
   collectAllCursor,
 } from './core/pagination';
 
+// === Error Handling ===
+export { ApiError, formatApiError } from './core/errors';
+export type { ProblemDetails } from './core/errors';
+
 // === Types ===
 // Export all types from types barrel
 export * from './types';
+
+// === Validation Schemas ===
+// Export Zod schemas for form validation
+export * from './schemas';
 
 // === Version ===
 export const VERSION = '1.0.0';
