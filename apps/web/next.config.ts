@@ -37,7 +37,7 @@ const nextConfig: NextConfig = {
 
     return config;
   },
-  transpilePackages: ['@vas-dj-saas/ui', '@vas-dj-saas/auth', '@vas-dj-saas/api-client'],
+  transpilePackages: ['@vas-dj-saas/ui', '@vas-dj-saas/auth', '@vas-dj-saas/api-client', '@vas-dj-saas/core'],
 };
 
 export default nextConfig;

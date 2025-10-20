@@ -1,14 +1,14 @@
 'use client';
 
 import React from 'react';
-import { DashboardNav } from '@/components/dashboard/DashboardNav';
+import { MainSidebar } from '@/components/navigation/MainSidebar';
 import { useAuthGuard } from '@/hooks/useAuthGuard';
 
 /**
- * Dashboard Layout
- * Protected layout for authenticated pages
+ * Protected Layout
+ * Layout for all authenticated pages with unified sidebar navigation
  */
-export default function DashboardLayout({
+export default function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -30,13 +30,15 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Navigation */}
-      <DashboardNav account={account} />
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Unified Sidebar Navigation */}
+      <MainSidebar />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        {children}
+      <main className="flex-1 overflow-y-auto">
+        <div className="container mx-auto px-6 py-8 max-w-7xl">
+          {children}
+        </div>
       </main>
     </div>
   );

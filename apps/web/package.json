@@ -12,13 +12,16 @@
   "dependencies": {
     "@vas-dj-saas/api-client": "workspace:*",
     "@vas-dj-saas/auth": "workspace:*",
+    "@vas-dj-saas/core": "workspace:^",
     "@vas-dj-saas/ui": "workspace:*",
     "@vas-dj-saas/utils": "workspace:*",
+    "clsx": "^2.1.1",
     "cookie": "^1.0.2",
     "next": "15.4.5",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "react-native-web": "~0.20.0"
+    "react-native-web": "~0.20.0",
+    "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
