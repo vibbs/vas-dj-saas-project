@@ -1,4 +1,6 @@
-import { ValidationErrors, RegistrationData, LoginCredentials } from '@vas-dj-saas/types';
+import { LoginCredentials, RegistrationFormData } from '@vas-dj-saas/api-client';
+
+export type ValidationErrors = Record<string, string[]>;
 
 export interface ValidationResult {
   isValid: boolean;
@@ -216,7 +218,7 @@ export function validateLoginForm(credentials: LoginCredentials): ValidationResu
 /**
  * Registration form validation
  */
-export function validateRegistrationForm(data: RegistrationData): ValidationResult {
+export function validateRegistrationForm(data: RegistrationFormData): ValidationResult {
   const errors: ValidationErrors = {};
   
   // Email validation
@@ -272,7 +274,7 @@ export function validateRegistrationForm(data: RegistrationData): ValidationResu
 /**
  * Real-time field validation for forms
  */
-export function validateField(fieldName: keyof RegistrationData, value: string, allData?: Partial<RegistrationData>): string | null {
+export function validateField(fieldName: keyof RegistrationFormData, value: string, allData?: Partial<RegistrationFormData>): string | null {
   switch (fieldName) {
     case 'email':
       return validateEmail(value);

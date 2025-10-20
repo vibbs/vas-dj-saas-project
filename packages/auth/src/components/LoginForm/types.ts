@@ -1,4 +1,4 @@
-import { LoginCredentials, ValidationErrors } from '@vas-dj-saas/types';
+import type { LoginCredentials } from '@vas-dj-saas/api-client';
 
 export interface LoginFormProps {
   onSubmit: (credentials: LoginCredentials) => Promise<void>;
@@ -17,7 +17,7 @@ export interface LoginFormState {
   email: string;
   password: string;
   rememberMe: boolean;
-  errors: ValidationErrors;
+  errors: Record<string, string[]>;
   touched: {
     email: boolean;
     password: boolean;

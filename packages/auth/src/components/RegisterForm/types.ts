@@ -1,7 +1,7 @@
-import { RegisterCredentials, ValidationErrors } from '@vas-dj-saas/types';
+import type { RegistrationFormData } from '@vas-dj-saas/api-client';
 
 export interface RegisterFormProps {
-  onSubmit: (credentials: RegisterCredentials) => Promise<void>;
+  onSubmit: (credentials: Omit<RegistrationFormData, 'passwordConfirm'>) => Promise<void>;
   isLoading?: boolean;
   error?: string | null;
   onLoginClick?: () => void;
@@ -18,7 +18,7 @@ export interface RegisterFormState {
   preferredSubdomain: string;
   password: string;
   passwordConfirm: string;
-  errors: ValidationErrors;
+  errors: Record<string, string[]>;
   touched: {
     firstName: boolean;
     lastName: boolean;

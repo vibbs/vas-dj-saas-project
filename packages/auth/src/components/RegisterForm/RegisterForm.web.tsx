@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTheme, Button, Input, Text, Link, Divider, Heading } from '@vas-dj-saas/ui';
+import { useTheme, Button, Input, Text, Link, Divider, Heading, Stepper, StepperStep } from '@vas-dj-saas/ui';
 import { RegisterFormProps, RegisterFormState } from './types';
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({
@@ -11,6 +11,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   style,
 }) => {
   const { theme } = useTheme();
+  const [currentStep, setCurrentStep] = useState(0);
   const [formState, setFormState] = useState<RegisterFormState>({
     firstName: '',
     lastName: '',
@@ -32,6 +33,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       passwordConfirm: false,
     },
   });
+
+  const steps: StepperStep[] = [
+    { label: 'Personal Info', description: 'Your details' },
+    { label: 'Organization', description: 'Setup your org', optional: true },
+    { label: 'Security', description: 'Set password' },
+  ];
 
   const validateField = (name: keyof RegisterFormState, value: any) => {
     switch (name) {
@@ -94,18 +101,25 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate all required fields
-    const requiredFields: (keyof RegisterFormState)[] = ['firstName', 'lastName', 'email', 'password', 'passwordConfirm'];
-    const optionalFields: (keyof RegisterFormState)[] = ['phone', 'organizationName', 'preferredSubdomain'];
-    const allFields = [...requiredFields, ...optionalFields];
-    
+  const validateStep = (step: number): boolean => {
+    let fieldsToValidate: (keyof RegisterFormState)[] = [];
+
+    switch (step) {
+      case 0: // Personal Info
+        fieldsToValidate = ['firstName', 'lastName', 'email', 'phone'];
+        break;
+      case 1: // Organization (all optional)
+        fieldsToValidate = ['organizationName', 'preferredSubdomain'];
+        break;
+      case 2: // Security
+        fieldsToValidate = ['password', 'passwordConfirm'];
+        break;
+    }
+
     const errors: any = {};
     let hasErrors = false;
 
-    allFields.forEach(field => {
+    fieldsToValidate.forEach(field => {
       const error = validateField(field, formState[field]);
       if (error) {
         errors[field] = [error];
@@ -114,25 +128,48 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         errors[field] = [];
       }
     });
-    
+
     setFormState(prev => ({
       ...prev,
-      errors,
-      touched: allFields.reduce((acc, field) => ({ ...acc, [field]: true }), {} as any),
+      errors: { ...prev.errors, ...errors },
+      touched: fieldsToValidate.reduce((acc, field) => ({ ...acc, [field]: true }), prev.touched as any),
     }));
-    
-    // If no errors, submit
-    if (!hasErrors) {
-      await onSubmit({
-        firstName: formState.firstName,
-        lastName: formState.lastName,
-        email: formState.email,
-        phone: formState.phone || undefined,
-        organizationName: formState.organizationName || undefined,
-        preferredSubdomain: formState.preferredSubdomain || undefined,
-        password: formState.password,
-      });
+
+    return !hasErrors;
+  };
+
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      if (currentStep < steps.length - 1) {
+        setCurrentStep(currentStep + 1);
+      }
     }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate current step (should be the last step)
+    if (!validateStep(currentStep)) {
+      return;
+    }
+
+    // Submit the form
+    await onSubmit({
+      firstName: formState.firstName,
+      lastName: formState.lastName,
+      email: formState.email,
+      phone: formState.phone || undefined,
+      organizationName: formState.organizationName || undefined,
+      preferredSubdomain: formState.preferredSubdomain || undefined,
+      password: formState.password,
+    });
   };
 
   const containerStyles: React.CSSProperties = {
@@ -173,129 +210,147 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     marginTop: `${theme.spacing.xs}px`,
   };
 
+  const buttonContainerStyles: React.CSSProperties = {
+    display: 'flex',
+    gap: `${theme.spacing.md}px`,
+    marginTop: `${theme.spacing.lg}px`,
+  };
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        // Personal Information Step
+        return (
+          <div style={sectionStyles}>
+            <div style={fieldRowStyles}>
+              <Input
+                type="text"
+                label="First Name"
+                value={formState.firstName}
+                onChange={(e) => handleFieldChange('firstName', e.target.value)}
+                errorText={formState.touched.firstName ? formState.errors.firstName?.[0] : undefined}
+                disabled={isLoading}
+                autoComplete="given-name"
+                required
+              />
+
+              <Input
+                type="text"
+                label="Last Name"
+                value={formState.lastName}
+                onChange={(e) => handleFieldChange('lastName', e.target.value)}
+                errorText={formState.touched.lastName ? formState.errors.lastName?.[0] : undefined}
+                disabled={isLoading}
+                autoComplete="family-name"
+                required
+              />
+            </div>
+
+            <Input
+              type="email"
+              label="Email"
+              value={formState.email}
+              onChange={(e) => handleFieldChange('email', e.target.value)}
+              errorText={formState.touched.email ? formState.errors.email?.[0] : undefined}
+              disabled={isLoading}
+              autoComplete="email"
+              required
+            />
+
+            <Input
+              type="tel"
+              label="Phone (Optional)"
+              value={formState.phone}
+              onChange={(e) => handleFieldChange('phone', e.target.value)}
+              errorText={formState.touched.phone ? formState.errors.phone?.[0] : undefined}
+              disabled={isLoading}
+              autoComplete="tel"
+            />
+          </div>
+        );
+
+      case 1:
+        // Organization Step
+        return (
+          <div style={sectionStyles}>
+            <div>
+              <Input
+                type="text"
+                label="Organization Name (Optional)"
+                value={formState.organizationName}
+                onChange={(e) => handleFieldChange('organizationName', e.target.value)}
+                errorText={formState.touched.organizationName ? formState.errors.organizationName?.[0] : undefined}
+                disabled={isLoading}
+                autoComplete="organization"
+              />
+              <Text style={helperTextStyles}>
+                Leave empty to use your personal name
+              </Text>
+            </div>
+
+            <div>
+              <Input
+                type="text"
+                label="Preferred Subdomain (Optional)"
+                value={formState.preferredSubdomain}
+                onChange={(e) => handleFieldChange('preferredSubdomain', e.target.value)}
+                errorText={formState.touched.preferredSubdomain ? formState.errors.preferredSubdomain?.[0] : undefined}
+                disabled={isLoading}
+                placeholder="your-subdomain"
+              />
+              <Text style={helperTextStyles}>
+                Your organization will be accessible at [subdomain].vas-dj.com
+              </Text>
+            </div>
+          </div>
+        );
+
+      case 2:
+        // Security Step
+        return (
+          <div style={sectionStyles}>
+            <Input
+              type="password"
+              label="Password"
+              value={formState.password}
+              onChange={(e) => handleFieldChange('password', e.target.value)}
+              errorText={formState.touched.password ? formState.errors.password?.[0] : undefined}
+              disabled={isLoading}
+              autoComplete="new-password"
+              required
+            />
+
+            <Input
+              type="password"
+              label="Confirm Password"
+              value={formState.passwordConfirm}
+              onChange={(e) => handleFieldChange('passwordConfirm', e.target.value)}
+              errorText={formState.touched.passwordConfirm ? formState.errors.passwordConfirm?.[0] : undefined}
+              disabled={isLoading}
+              autoComplete="new-password"
+              required
+            />
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <form className={className} style={containerStyles} onSubmit={handleSubmit}>
-      {/* Personal Information Section */}
-      <div>
-        <Heading level={3} style={{ marginBottom: theme.spacing.md, color: theme.colors.foreground }}>
-          Personal Information
-        </Heading>
-        
-        <div style={fieldRowStyles}>
-          <Input
-            type="text"
-            label="First Name"
-            value={formState.firstName}
-            onChange={(e) => handleFieldChange('firstName', e.target.value)}
-            errorText={formState.touched.firstName ? formState.errors.firstName?.[0] : undefined}
-            disabled={isLoading}
-            autoComplete="given-name"
-            required
-          />
-          
-          <Input
-            type="text"
-            label="Last Name"
-            value={formState.lastName}
-            onChange={(e) => handleFieldChange('lastName', e.target.value)}
-            errorText={formState.touched.lastName ? formState.errors.lastName?.[0] : undefined}
-            disabled={isLoading}
-            autoComplete="family-name"
-            required
-          />
-        </div>
-        
-        <Input
-          type="email"
-          label="Email"
-          value={formState.email}
-          onChange={(e) => handleFieldChange('email', e.target.value)}
-          errorText={formState.touched.email ? formState.errors.email?.[0] : undefined}
-          disabled={isLoading}
-          autoComplete="email"
-          required
-        />
-        
-        <Input
-          type="tel"
-          label="Phone (Optional)"
-          value={formState.phone}
-          onChange={(e) => handleFieldChange('phone', e.target.value)}
-          errorText={formState.touched.phone ? formState.errors.phone?.[0] : undefined}
-          disabled={isLoading}
-          autoComplete="tel"
-        />
-      </div>
+      <Stepper
+        steps={steps}
+        activeStep={currentStep}
+        orientation="horizontal"
+        showStepNumbers
+        showConnectors
+        size="md"
+        variant="default"
+      />
 
-      <Divider />
-
-      {/* Organization Section */}
-      <div style={sectionStyles}>
-        <Heading level={3} style={{ marginBottom: theme.spacing.md, color: theme.colors.foreground }}>
-          Organization
-        </Heading>
-        
-        <div>
-          <Input
-            type="text"
-            label="Organization Name (Optional)"
-            value={formState.organizationName}
-            onChange={(e) => handleFieldChange('organizationName', e.target.value)}
-            errorText={formState.touched.organizationName ? formState.errors.organizationName?.[0] : undefined}
-            disabled={isLoading}
-            autoComplete="organization"
-          />
-          <Text style={helperTextStyles}>
-            Leave empty to use your personal name
-          </Text>
-        </div>
-        
-        <div>
-          <Input
-            type="text"
-            label="Preferred Subdomain (Optional)"
-            value={formState.preferredSubdomain}
-            onChange={(e) => handleFieldChange('preferredSubdomain', e.target.value)}
-            errorText={formState.touched.preferredSubdomain ? formState.errors.preferredSubdomain?.[0] : undefined}
-            disabled={isLoading}
-            placeholder="your-subdomain"
-          />
-          <Text style={helperTextStyles}>
-            Your organization will be accessible at [subdomain].vas-dj.com
-          </Text>
-        </div>
-      </div>
-
-      <Divider />
-
-      {/* Security Section */}
-      <div style={sectionStyles}>
-        <Heading level={3} style={{ marginBottom: theme.spacing.md, color: theme.colors.foreground }}>
-          Security
-        </Heading>
-        
-        <Input
-          type="password"
-          label="Password"
-          value={formState.password}
-          onChange={(e) => handleFieldChange('password', e.target.value)}
-          errorText={formState.touched.password ? formState.errors.password?.[0] : undefined}
-          disabled={isLoading}
-          autoComplete="new-password"
-          required
-        />
-        
-        <Input
-          type="password"
-          label="Confirm Password"
-          value={formState.passwordConfirm}
-          onChange={(e) => handleFieldChange('passwordConfirm', e.target.value)}
-          errorText={formState.touched.passwordConfirm ? formState.errors.passwordConfirm?.[0] : undefined}
-          disabled={isLoading}
-          autoComplete="new-password"
-          required
-        />
-      </div>
+      {renderStepContent()}
 
       {error && (
         <Text style={errorStyles}>
@@ -303,16 +358,44 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         </Text>
       )}
 
-      <Button
-        type="submit"
-        variant="primary"
-        size="lg"
-        loading={isLoading}
-        disabled={isLoading}
-        style={{ width: '100%' }}
-      >
-        {isLoading ? 'Creating Account...' : 'Create Account'}
-      </Button>
+      <div style={buttonContainerStyles}>
+        {currentStep > 0 && (
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            onClick={handleBack}
+            disabled={isLoading}
+            style={{ flex: 1 }}
+          >
+            Back
+          </Button>
+        )}
+
+        {currentStep < steps.length - 1 ? (
+          <Button
+            type="button"
+            variant="primary"
+            size="lg"
+            onClick={handleNext}
+            disabled={isLoading}
+            style={{ flex: 1 }}
+          >
+            Next
+          </Button>
+        ) : (
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            loading={isLoading}
+            disabled={isLoading}
+            style={{ flex: 1 }}
+          >
+            {isLoading ? 'Creating Account...' : 'Create Account'}
+          </Button>
+        )}
+      </div>
 
       {onLoginClick && (
         <div style={loginLinkStyles}>

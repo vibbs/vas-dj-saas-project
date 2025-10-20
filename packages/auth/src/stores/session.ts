@@ -1,14 +1,17 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { wireAuth } from '@vas-dj-saas/api-client';
-import { login, me, logout, refreshToken, type Session } from '@vas-dj-saas/api-client/endpoints';
-import type { User } from '@vas-dj-saas/types';
+import {
+  wireAuth,
+  AuthService,
+  UsersService,
+  type Account
+} from '@vas-dj-saas/api-client';
 import { createStorage } from '../utils/storage';
 
 type AuthStatus = 'idle' | 'authenticating' | 'authenticated' | 'unauthenticated';
 
 interface AuthState {
-  user?: User;
+  account?: Account;
   accessToken?: string;
   status: AuthStatus;
   error?: string;
@@ -31,11 +34,11 @@ export const useAuth = create<AuthState>()(
 
       async hydrate() {
         const currentState = get();
-        
+
         // Wire the auth system with our token management
         wireAuth({
           getAccessToken: () => get().accessToken,
-          onAuthError: async () => {
+          refreshToken: async () => {
             // Attempt to refresh the token
             try {
               const resp = await fetch(
@@ -51,9 +54,9 @@ export const useAuth = create<AuthState>()(
 
               if (resp.ok) {
                 const data = await resp.json();
-                set({ 
-                  accessToken: data.access_token || data.access, 
-                  user: data.user,
+                set({
+                  accessToken: data.access_token || data.access,
+                  account: data.user,
                   status: 'authenticated',
                   error: undefined
                 });
@@ -62,28 +65,35 @@ export const useAuth = create<AuthState>()(
             } catch (error) {
               console.warn('Token refresh failed:', error);
             }
-            
+
             // Refresh failed, mark as unauthenticated
-            set({ 
-              status: 'unauthenticated', 
-              accessToken: undefined, 
-              user: undefined,
+            set({
+              status: 'unauthenticated',
+              accessToken: undefined,
+              account: undefined,
               error: undefined
             });
+
+            // Re-throw to signal refresh failure
+            throw new Error('Token refresh failed');
           },
         });
 
-        // If we have a token, try to get the current user
+        // If we have a token, try to get the current account
         if (currentState.accessToken) {
           try {
-            const user = await me();
-            set({ user, status: 'authenticated', error: undefined });
+            const response = await UsersService.me();
+            if (response.status === 200 && response.data.data) {
+              set({ account: response.data.data, status: 'authenticated', error: undefined });
+            } else {
+              throw new Error('Failed to fetch account');
+            }
           } catch (error) {
             // Token is invalid, clear it
-            set({ 
-              status: 'unauthenticated', 
-              accessToken: undefined, 
-              user: undefined,
+            set({
+              status: 'unauthenticated',
+              accessToken: undefined,
+              account: undefined,
               error: undefined
             });
           }
@@ -94,21 +104,25 @@ export const useAuth = create<AuthState>()(
 
       async login(email, password) {
         set({ status: 'authenticating', error: undefined });
-        
+
         try {
-          const session = await login({ email, password });
-          set({ 
-            accessToken: session.access, 
-            user: session.user, 
-            status: 'authenticated',
-            error: undefined
-          });
+          const response = await AuthService.login({ email, password });
+          if (response.status === 200 && response.data.data) {
+            const data = response.data.data;
+            set({
+              accessToken: data.access,
+              account: data.user,
+              status: 'authenticated',
+              error: undefined
+            });
+          } else {
+            throw new Error('Login failed');
+          }
         } catch (error: any) {
-          const errorMessage = error?.response?.data?.message || 
-                              error?.response?.data?.detail || 
-                              error?.message || 
+          const errorMessage = error?.data?.detail ||
+                              error?.message ||
                               'Login failed';
-          set({ 
+          set({
             status: 'unauthenticated',
             error: errorMessage
           });
@@ -118,14 +132,16 @@ export const useAuth = create<AuthState>()(
 
       async logout() {
         try {
-          await logout();
+          // Note: Backend logout requires refresh token, but we use httpOnly cookies
+          // So we call logout with an empty string (the cookie will be sent automatically)
+          await AuthService.logout({ refresh: '' });
         } catch (error) {
           // Continue with logout even if API call fails
           console.warn('Logout API call failed:', error);
         } finally {
-          set({ 
-            accessToken: undefined, 
-            user: undefined, 
+          set({
+            accessToken: undefined,
+            account: undefined,
             status: 'unauthenticated',
             error: undefined
           });
@@ -144,10 +160,10 @@ export const useAuth = create<AuthState>()(
       name: 'auth-session',
       storage: createJSONStorage(() => storage),
       partialize: (state) => ({
-        // Only persist the access token and user info
+        // Only persist the access token and account info
         // Don't persist status or error
         accessToken: state.accessToken,
-        user: state.user,
+        account: state.account,
       }),
       onRehydrateStorage: () => (state) => {
         // After rehydration, trigger the hydration process
@@ -161,12 +177,18 @@ export const useAuth = create<AuthState>()(
 
 // Convenience hooks
 export const useAuthStatus = () => useAuth((state) => state.status);
-export const useAuthUser = () => useAuth((state) => state.user);
+export const useAuthAccount = () => useAuth((state) => state.account);
 export const useAuthError = () => useAuth((state) => state.error);
-export const useAuthActions = () => useAuth((state) => ({
-  login: state.login,
-  logout: state.logout,
-  hydrate: state.hydrate,
-  clearError: state.clearError,
-  setError: state.setError,
-}));
+
+// Use a selector that returns a stable reference to avoid infinite loops
+// We select multiple primitive values and construct the actions object outside
+export const useAuthActions = () => {
+  const login = useAuth((state) => state.login);
+  const logout = useAuth((state) => state.logout);
+  const hydrate = useAuth((state) => state.hydrate);
+  const clearError = useAuth((state) => state.clearError);
+  const setError = useAuth((state) => state.setError);
+
+  // These are already stable references from the store
+  return { login, logout, hydrate, clearError, setError };
+};
