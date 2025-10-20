@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 from django.db import transaction
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.utils import OpenApiExample, extend_schema
 from rest_framework import permissions, serializers, status
 from rest_framework.decorators import api_view, permission_classes
@@ -70,15 +71,19 @@ def add_custom_claims(access_token, user):
 
             # Set organization context
             access_token["primary_organization_id"] = str(primary_org.id)
-            access_token["organization_role"] = membership.role if membership else "member"
-            access_token["permissions"] = membership.get_permissions() if membership else ["view_organization"]
+            access_token["organization_role"] = (
+                membership.role if membership else "member"
+            )
+            access_token["permissions"] = (
+                membership.get_permissions() if membership else ["view_organization"]
+            )
 
             # In global mode, organizations list contains only platform org
             access_token["organizations"] = [
                 {
                     "id": str(primary_org.id),
                     "slug": primary_org.slug,
-                    "role": membership.role if membership else "member"
+                    "role": membership.role if membership else "member",
                 }
             ]
         except Organization.DoesNotExist:
@@ -93,17 +98,15 @@ def add_custom_claims(access_token, user):
         membership = user.get_membership_in(primary_org) if primary_org else None
 
         # Organization context
-        access_token["primary_organization_id"] = str(primary_org.id) if primary_org else None
+        access_token["primary_organization_id"] = (
+            str(primary_org.id) if primary_org else None
+        )
         access_token["organization_role"] = membership.role if membership else None
         access_token["permissions"] = membership.get_permissions() if membership else []
 
         # All organizations user belongs to (for org switching)
         access_token["organizations"] = [
-            {
-                "id": str(m.organization.id),
-                "slug": m.organization.slug,
-                "role": m.role
-            }
+            {"id": str(m.organization.id), "slug": m.organization.slug, "role": m.role}
             for m in user.get_active_memberships()
         ]
 
@@ -210,6 +213,7 @@ class TokenVerifyResponseSerializer(serializers.Serializer):
     ],
     tags=["Authentication"],
 )
+@csrf_exempt
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def login(request):
@@ -588,6 +592,7 @@ def verify_token(request):
     ],
     tags=["Authentication"],
 )
+@csrf_exempt
 @api_view(["POST"])
 @permission_classes([AllowAny])
 @transaction.atomic  # Ensure all-or-nothing: user, org, membership creation

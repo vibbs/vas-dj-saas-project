@@ -44,6 +44,12 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="", cast=Csv())
 
+# CSRF Configuration - Required for Django 4.0+ cross-origin POST requests
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS",
+    default="http://localhost:3000,http://localhost:3001",
+    cast=lambda v: [s.strip() for s in v.split(",") if s.strip()],
+)
 
 # Application definition
 
@@ -51,7 +57,10 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="", cast=Csv())
 INSTALLED_APPS = []
 try:
     import unfold  # noqa: F401
-    INSTALLED_APPS.append("unfold")  # Modern admin theme - must be before django.contrib.admin
+
+    INSTALLED_APPS.append(
+        "unfold"
+    )  # Modern admin theme - must be before django.contrib.admin
 except ImportError:
     pass
 
@@ -218,12 +227,12 @@ CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
 from celery.schedules import crontab
 
 CELERY_BEAT_SCHEDULE = {
-    'cleanup-unverified-accounts': {
-        'task': 'apps.accounts.tasks.cleanup_unverified_accounts',
-        'schedule': crontab(hour=2, minute=0),  # Daily at 2:00 AM
-        'options': {
-            'expires': 3600,  # Task expires after 1 hour if not picked up
-        }
+    "cleanup-unverified-accounts": {
+        "task": "apps.accounts.tasks.cleanup_unverified_accounts",
+        "schedule": crontab(hour=2, minute=0),  # Daily at 2:00 AM
+        "options": {
+            "expires": 3600,  # Task expires after 1 hour if not picked up
+        },
     },
 }
 
@@ -374,6 +383,14 @@ CORS_ALLOWED_ORIGINS = config(
     cast=lambda v: [s.strip() for s in v.split(",") if s.strip()],
 )
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
 CORS_ALLOW_HEADERS = [
     "accept",
     "accept-encoding",
@@ -385,7 +402,20 @@ CORS_ALLOW_HEADERS = [
     "x-csrftoken",
     "x-requested-with",
     "x-org-slug",  # Custom header for tenant resolution
+    "x-org-id",  # Custom header for organization ID
+    "x-request-id",  # Custom header for request tracking
 ]
+
+# CSRF Cookie Configuration
+# Note: For cross-origin requests, CSRF protection is handled via CSRF_TRUSTED_ORIGINS
+# SameSite=Lax works for both same-origin (admin) and allows CORS for API requests
+CSRF_COOKIE_SAMESITE = (
+    "Lax"  # Lax allows cookies in top-level navigation and same-origin requests
+)
+CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
+CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read CSRF token for API requests
+SESSION_COOKIE_SAMESITE = "Lax"  # Lax for session cookies
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
 
 # Cache Configuration (Development uses in-memory, Production uses Redis)
 CACHES = {
