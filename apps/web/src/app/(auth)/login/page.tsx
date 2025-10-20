@@ -43,8 +43,8 @@ export default function LoginPage() {
       // Use the login action from auth store
       await login(credentials.email, credentials.password);
 
-      // Get return URL from query params or default to dashboard
-      const returnUrl = searchParams.get('returnUrl') || '/dashboard';
+      // Get return URL from query params or default to home
+      const returnUrl = searchParams.get('returnUrl') || '/home';
 
       // Redirect to intended destination
       router.push(returnUrl);

@@ -21,7 +21,7 @@ export interface UseAuthGuardOptions {
   /**
    * Path to redirect authenticated users to
    * Only used if requireUnauthenticated is true
-   * @default '/dashboard'
+   * @default '/home'
    */
   authenticatedRedirect?: string;
 }
@@ -31,7 +31,7 @@ export interface UseAuthGuardOptions {
  *
  * @example Protected route
  * ```tsx
- * function DashboardPage() {
+ * function HomePage() {
  *   const { isLoading } = useAuthGuard();
  *   if (isLoading) return <LoadingSpinner />;
  *   return <Dashboard />;
@@ -51,7 +51,7 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}) {
   const {
     redirectTo = '/login',
     requireUnauthenticated = false,
-    authenticatedRedirect = '/dashboard',
+    authenticatedRedirect = '/home',
   } = options;
 
   const router = useRouter();
