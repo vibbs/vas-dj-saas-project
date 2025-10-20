@@ -18,7 +18,6 @@
     "@react-navigation/native": "^7.1.6",
     "@vas-dj-saas/api-client": "workspace:*",
     "@vas-dj-saas/auth": "workspace:*",
-    "@vas-dj-saas/types": "workspace:*",
     "@vas-dj-saas/ui": "workspace:*",
     "@vas-dj-saas/utils": "workspace:*",
     "expo": "~53.0.20",

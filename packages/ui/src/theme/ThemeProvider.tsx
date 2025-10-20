@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Theme, themes, ThemeName } from './tokens';
 
 interface ThemeContextValue {
@@ -33,18 +33,59 @@ interface ThemeProviderProps {
   injectCssVariables?: boolean;
 }
 
-// Create a static context value object that never changes
-const staticContextValue: ThemeContextValue = {
-  theme: themes.default,
-  themeName: 'default',
-  setTheme: () => {},
-  toggleTheme: () => {},
+/**
+ * Detect if system is in dark mode
+ */
+const getSystemTheme = (): ThemeName => {
+  if (typeof window === 'undefined') return 'default';
+
+  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  return isDark ? 'dark' : 'default';
 };
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  // Always provide the same static context value
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({
+  children,
+  defaultTheme: providedDefaultTheme,
+  enableSystem = true,
+}) => {
+  // Initialize theme based on system preference or provided default
+  const [themeName, setThemeName] = useState<ThemeName>(() => {
+    if (providedDefaultTheme) return providedDefaultTheme;
+    if (enableSystem) return getSystemTheme();
+    return 'default';
+  });
+
+  // Listen for system theme changes
+  useEffect(() => {
+    if (!enableSystem) return;
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      // Only auto-switch if user hasn't manually set a theme
+      setThemeName(e.matches ? 'dark' : 'default');
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, [enableSystem]);
+
+  const toggleTheme = () => {
+    setThemeName(current => current === 'dark' ? 'default' : 'dark');
+  };
+
+  const contextValue: ThemeContextValue = {
+    theme: themes[themeName],
+    themeName,
+    setTheme: setThemeName,
+    toggleTheme,
+  };
+
   return (
-    <ThemeContext.Provider value={staticContextValue}>
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );

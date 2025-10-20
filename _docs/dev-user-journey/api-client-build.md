@@ -414,35 +414,35 @@ export const UserService = {
 
 ## Quick workboard snapshot
 
-* [ ] 0.1 Package skeleton
-* [ ] 0.2 Dual-module exports
-* [ ] 0.3 TS strict config
-* [ ] 0.4 Pick and pin codegen
-* [ ] 0.5 Codegen config
-* [ ] 1.1 Fetch ApiClient
-* [ ] 1.2 Retry/backoff
-* [ ] 1.3 Auth refresh
-* [ ] 1.4 Tenancy/tracing headers
-* [ ] 1.5 Error normalization
-* [ ] 1.6 Axios subpath (optional)
-* [ ] 2.1 Service wrappers
-* [ ] 2.2 Pagination helpers
-* [ ] 2.3 Domain types barrel
-* [ ] 2.4 Index exports (tree-shakeable)
-* [ ] 3.1 Spectral
-* [ ] 3.2 oasdiff
-* [ ] 3.3 Determinism check
-* [ ] 3.4 Node/Next smoke
-* [ ] 3.5 RN build check
-* [ ] 3.6 Size guard
-* [ ] 4.1 Changelog automation
-* [ ] 4.2 Dist-tags policy
-* [ ] 4.3 Renovate rules
-* [ ] 4.4 Upgrade guide template
-* [ ] 5.1 Source maps
-* [ ] 5.2 Error formatter
-* [ ] 5.3 Logging toggle
-* [ ] 5.4 Examples
+* [x] 0.1 Package skeleton
+* [x] 0.2 Dual-module exports
+* [x] 0.3 TS strict config
+* [x] 0.4 Pick and pin codegen
+* [x] 0.5 Codegen config
+* [x] 1.1 Fetch ApiClient
+* [x] 1.2 Retry/backoff
+* [x] 1.3 Auth refresh
+* [x] 1.4 Tenancy/tracing headers
+* [x] 1.5 Error normalization
+* [x] 1.6 Axios subpath (optional)
+* [x] 2.1 Service wrappers
+* [x] 2.2 Pagination helpers
+* [x] 2.3 Domain types barrel
+* [x] 2.4 Index exports (tree-shakeable)
+* [ ] 3.1 Spectral (CI - pending)
+* [ ] 3.2 oasdiff (CI - pending)
+* [x] 3.3 Determinism check (`pnpm codegen:check` script)
+* [x] 3.4 Node/Next smoke (`pnpm smoke:node`, Next.js component in smoke-tests/)
+* [ ] 3.5 RN build check (pending - can use existing mobile app)
+* [x] 3.6 Size guard (size-limit configured, 20KB core / 8KB axios)
+* [ ] 4.1 Changelog automation (pending - needs changesets)
+* [ ] 4.2 Dist-tags policy (pending - pre-publish)
+* [ ] 4.3 Renovate rules (pending - CI setup)
+* [ ] 4.4 Upgrade guide template (pending - pre-publish)
+* [x] 5.1 Source maps (enabled in tsconfig + tsup)
+* [x] 5.2 Error formatter (`formatApiError` exported)
+* [x] 5.3 Logging toggle (`enableLogging` function)
+* [x] 5.4 Examples (4 comprehensive examples + README in examples/)
 * [ ] 6.1 Hook factory (later)
 * [ ] 7.1 Enforce single-version imports
 * [ ] 7.2 Pre-publish check
