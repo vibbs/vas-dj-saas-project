@@ -1,16 +1,15 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Button, Text, Heading, Card } from '@vas-dj-saas/ui';
-import { useTheme } from '@vas-dj-saas/ui';
+import { Button, Text, Card, useTheme } from '@vas-dj-saas/ui';
 
 export default function LandingScreen() {
   const router = useRouter();
   const { theme } = useTheme();
-  
+
   // Disable auth check to test theme provider
   // const [authChecked, setAuthChecked] = React.useState(false);
-  
+
   // React.useEffect(() => {
   //   // Simple timeout to simulate auth check
   //   const timer = setTimeout(() => {
@@ -21,11 +20,15 @@ export default function LandingScreen() {
   // }, []);
 
   const handleSignIn = () => {
-    router.push('/auth/login' as any);
+    router.push('auth/login' as any);
   };
 
   const handleSignUp = () => {
-    router.push('/auth/register' as any);
+    // Registration only available on web
+    Alert.alert(
+      'Web Only',
+      'Organization registration is only available on the web app. Please contact your admin for an invitation.'
+    );
   };
 
   const styles = StyleSheet.create({
@@ -127,17 +130,17 @@ export default function LandingScreen() {
 
         {/* Action Buttons */}
         <View style={styles.buttonContainer}>
-          <Button 
-            variant="primary" 
+          <Button
+            variant="primary"
             size="lg"
             onPress={handleSignIn}
             style={{ width: '100%' }}
           >
             Sign In
           </Button>
-          
-          <Button 
-            variant="outline" 
+
+          <Button
+            variant="outline"
             size="lg"
             onPress={handleSignUp}
             style={{ width: '100%' }}
@@ -149,7 +152,7 @@ export default function LandingScreen() {
         {/* Features Section */}
         <View style={styles.featuresSection}>
           <Text style={styles.featuresTitle}>Why Choose VAS-DJ?</Text>
-          
+
           <View style={styles.featuresGrid}>
             <Card style={styles.featureCard}>
               <Text style={styles.featureIcon}>🚀</Text>
