@@ -12,7 +12,6 @@
   "dependencies": {
     "@vas-dj-saas/api-client": "workspace:*",
     "@vas-dj-saas/auth": "workspace:*",
-    "@vas-dj-saas/types": "workspace:*",
     "@vas-dj-saas/ui": "workspace:*",
     "@vas-dj-saas/utils": "workspace:*",
     "cookie": "^1.0.2",
@@ -29,6 +28,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.4.5",
+    "null-loader": "^4.0.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

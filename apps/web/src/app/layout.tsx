@@ -2,6 +2,8 @@
 
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@vas-dj-saas/ui";
+import { AuthProvider } from "@/providers/AuthProvider";
+import { validateEnv } from "@/lib/env";
 
 import "./globals.css";
 
@@ -15,7 +17,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Metadata moved to individual pages since this is now a client component
+// Validate environment on app initialization
+if (typeof window === 'undefined') {
+  validateEnv();
+}
 
 export default function RootLayout({
   children,
@@ -31,7 +36,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ThemeProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
