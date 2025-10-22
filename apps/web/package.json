@@ -10,6 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@vas-dj-saas/adapters": "workspace:*",
     "@vas-dj-saas/api-client": "workspace:*",
     "@vas-dj-saas/auth": "workspace:*",
     "@vas-dj-saas/core": "workspace:^",

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthAccount, useAuthActions } from '@vas-dj-saas/auth';
 import { useNavigation, type NavItem } from '@vas-dj-saas/core/navigation';
+import { Icon } from '@vas-dj-saas/ui';
 import { cn } from '@/lib/utils';
 import { env } from '@/lib/env';
 
@@ -19,9 +20,6 @@ export function MainSidebar() {
   const { logout } = useAuthActions();
 
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(['settings-personal']) // Personal settings expanded by default
-  );
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Get filtered navigation based on account and platform
@@ -43,114 +41,37 @@ export function MainSidebar() {
     }
   };
 
-  const toggleSection = (itemId: string) => {
-    setExpandedSections((prev) => {
-      const next = new Set(prev);
-      if (next.has(itemId)) {
-        next.delete(itemId);
-      } else {
-        next.add(itemId);
-      }
-      return next;
-    });
-  };
-
   const isItemActive = (item: NavItem): boolean => {
-    if (item.href) {
-      return pathname === item.href || pathname.startsWith(item.href + '/');
-    }
-    if (item.children) {
-      return item.children.some((child) => isItemActive(child));
-    }
-    return false;
+    if (!item.href) return false;
+    // Match exact path or any sub-path (for tab-based pages)
+    return pathname === item.href || pathname.startsWith(item.href + '/');
   };
 
-  const renderNavItem = (item: NavItem, depth: number = 0) => {
-    const isExpanded = expandedSections.has(item.id);
+  const renderNavItem = (item: NavItem) => {
     const isActive = isItemActive(item);
-    const hasChildren = item.children && item.children.length > 0;
 
-    if (item.expandable && hasChildren) {
-      // Expandable item with children
-      return (
-        <div key={item.id}>
-          <button
-            onClick={() => toggleSection(item.id)}
-            className={cn(
-              'w-full flex items-center justify-between px-3 py-2 rounded-md transition-colors',
-              isActive
-                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
-              depth > 0 && 'ml-4 text-sm'
-            )}
-            title={isCollapsed ? item.label : undefined}
-          >
-            <div
-              className={cn(
-                'flex items-center',
-                isCollapsed ? 'justify-center w-full' : 'space-x-3'
-              )}
-            >
-              <span className={cn(depth > 0 ? 'text-base' : 'text-lg')}>
-                {item.icon}
-              </span>
-              {!isCollapsed && (
-                <span className={cn('font-medium', depth > 0 ? 'text-sm' : 'text-sm')}>
-                  {item.label}
-                </span>
-              )}
-            </div>
-            {!isCollapsed && (
-              <svg
-                className={cn(
-                  'w-4 h-4 transition-transform',
-                  isExpanded ? 'rotate-90' : ''
-                )}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            )}
-          </button>
-
-          {/* Render children when expanded */}
-          {isExpanded && !isCollapsed && hasChildren && (
-            <div className="mt-1 space-y-1">
-              {item.children!.map((child) => renderNavItem(child, depth + 1))}
-            </div>
-          )}
-        </div>
-      );
+    // Skip items without href (shouldn't happen with new flat structure)
+    if (!item.href) {
+      console.warn(`Navigation item "${item.label}" is missing href`);
+      return null;
     }
 
-    // Direct link item
+    // All items are now direct links (no expandable sections)
     return (
       <Link
         key={item.id}
-        href={item.href!}
+        href={item.href}
         className={cn(
-          'flex items-center px-3 py-2 rounded-md transition-colors',
+          'flex items-center px-3 py-2 rounded-md transition-colors text-sm font-medium',
           isActive
             ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
             : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
-          isCollapsed ? 'justify-center' : 'space-x-3',
-          depth > 0 && 'ml-4 text-sm'
+          isCollapsed ? 'justify-center' : 'space-x-3'
         )}
         title={isCollapsed ? item.label : item.description}
       >
-        <span className={cn(depth > 0 ? 'text-base' : 'text-lg')}>{item.icon}</span>
-        {!isCollapsed && (
-          <span className={cn('font-medium', depth > 0 ? 'text-sm' : 'text-sm')}>
-            {item.label}
-          </span>
-        )}
+        <Icon name={item.icon} size="md" className="flex-shrink-0" />
+        {!isCollapsed && <span>{item.label}</span>}
       </Link>
     );
   };
@@ -179,22 +100,14 @@ export function MainSidebar() {
           className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          <svg
+          <Icon
+            name="ChevronsLeft"
+            size="md"
             className={cn(
-              'w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform',
+              'transition-transform',
               isCollapsed ? 'rotate-180' : ''
             )}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
-            />
-          </svg>
+          />
         </button>
       </div>
 
@@ -238,7 +151,7 @@ export function MainSidebar() {
               disabled={isLoggingOut}
               className="w-full flex items-center space-x-3 px-3 py-2 rounded-md text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
             >
-              <span className="text-lg">🚪</span>
+              <Icon name="LogOut" size="md" />
               <span>{isLoggingOut ? 'Signing out...' : 'Sign Out'}</span>
             </button>
           </>
@@ -249,7 +162,7 @@ export function MainSidebar() {
             className="w-full flex items-center justify-center p-2 rounded-md text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
             title="Sign Out"
           >
-            <span className="text-lg">🚪</span>
+            <Icon name="LogOut" size="md" />
           </button>
         )}
       </div>
