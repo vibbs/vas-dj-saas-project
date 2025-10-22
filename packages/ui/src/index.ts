@@ -117,6 +117,16 @@ export type {
   DrawerSize,
 } from "./components/EntityDrawer";
 
+// Hub + Secondary Sidebar components
+export { SettingsHub } from "./components/SettingsHub";
+export type { SettingsHubProps } from "./components/SettingsHub";
+
+export { HubCard } from "./components/HubCard";
+export type { HubCardProps } from "./components/HubCard";
+
+export { SecondarySidebar } from "./components/SecondarySidebar";
+export type { SecondarySidebarProps } from "./components/SecondarySidebar";
+
 export { Table } from "./components/Table";
 export type { TableProps, TableColumn } from "./components/Table";
 

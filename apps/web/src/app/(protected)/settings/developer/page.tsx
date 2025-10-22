@@ -1,71 +1,79 @@
 'use client';
 
 import React from 'react';
-import { useNextTabRouter } from '@vas-dj-saas/adapters/next-router';
-import { ShallowTabs } from '@vas-dj-saas/ui';
+import { useRouter } from 'next/navigation';
+import { SettingsHub } from '@vas-dj-saas/ui';
+import { navigationConfig } from '@vas-dj-saas/core';
+import { convertToHubConfig } from '@/utils/navigation-helpers';
 import { SettingsHeader } from '@/components/settings/SettingsHeader';
-import { APIKeysTab } from '@/components/settings/developer/APIKeysTab';
-import { WebhooksTab } from '@/components/settings/developer/WebhooksTab';
-import { OAuthTab } from '@/components/settings/developer/OAuthTab';
-import { ServiceAccountsTab } from '@/components/settings/developer/ServiceAccountsTab';
 
 /**
- * Developer Settings Page
+ * Developer Settings Hub Page
  *
- * Uses ShallowTabs pattern for:
- * - API Keys (generate and manage API keys)
- * - Webhooks (configure webhook endpoints)
- * - OAuth (manage OAuth applications)
- * - Service Accounts (automated workflow accounts)
+ * Hub page that provides:
+ * - Overview cards for developer tools (API Keys, Webhooks, OAuth, Service Accounts)
+ * - Quick actions bar (Create API Key, Add Webhook, etc.)
+ * - Discovery-focused design to reduce cognitive load
  *
- * Benefits:
- * - Single page, no route changes
- * - URL query params for state (?tab=webhooks)
- * - Shareable deep links
- * - No full page reloads
+ * Navigation:
+ * - Clicking a card navigates to the detail page with secondary sidebar
+ * - URL: /settings/developer (hub)
+ * - Child routes: /settings/developer/api-keys, /settings/developer/webhooks, etc.
  */
 export default function DeveloperSettingsPage() {
-  const router = useNextTabRouter();
+    const router = useRouter();
 
-  return (
-    <>
-      <SettingsHeader
-        title="Developer Settings"
-        description="Manage API keys, webhooks, OAuth applications, and service accounts"
-        breadcrumbs={[
-          { label: 'Settings', href: '/settings' },
-          { label: 'Developer' },
-        ]}
-      />
+    // Get developer settings config from navigation
+    const devConfig = React.useMemo(() => {
+        return navigationConfig.sections
+            .find(s => s.id === 'settings')
+            ?.items.find(i => i.id === 'settings-developer');
+    }, []);
 
-      <div className="flex-1 p-6">
-        <ShallowTabs
-          router={router}
-          defaultTab="api-keys"
-          tabs={[
-            {
-              value: 'api-keys',
-              label: 'API Keys',
-              component: <APIKeysTab />,
-            },
-            {
-              value: 'webhooks',
-              label: 'Webhooks',
-              component: <WebhooksTab />,
-            },
-            {
-              value: 'oauth',
-              label: 'OAuth',
-              component: <OAuthTab />,
-            },
-            {
-              value: 'service-accounts',
-              label: 'Service Accounts',
-              component: <ServiceAccountsTab />,
-            },
-          ]}
-        />
-      </div>
-    </>
-  );
+    const handleNavigate = React.useCallback((href: string) => {
+        router.push(href);
+    }, [router]);
+
+    if (!devConfig?.hubConfig) {
+        return (
+            <>
+                <SettingsHeader
+                    title="Developer Settings"
+                    description="Manage API keys, webhooks, and integrations"
+                    breadcrumbs={[
+                        { label: 'Settings', href: '/settings' },
+                        { label: 'Developer' },
+                    ]}
+                />
+                <div className="flex-1 p-6">
+                    <p className="text-red-500">
+                        Error: Hub configuration not found for developer settings.
+                        Please check the navigation configuration.
+                    </p>
+                </div>
+            </>
+        );
+    }
+
+    const hubConfig = convertToHubConfig(devConfig.hubConfig);
+
+    return (
+        <>
+            <SettingsHeader
+                title={hubConfig.title}
+                description={hubConfig.description}
+                breadcrumbs={[
+                    { label: 'Settings', href: '/settings' },
+                    { label: 'Developer' },
+                ]}
+            />
+
+            <div className="flex-1 p-6">
+                <SettingsHub
+                    config={hubConfig}
+                    onNavigate={handleNavigate}
+                />
+            </div>
+        </>
+    );
 }

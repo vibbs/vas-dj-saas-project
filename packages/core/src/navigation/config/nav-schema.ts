@@ -26,6 +26,157 @@ export interface NavFeatureFlag {
 }
 
 /**
+ * Quick action configuration for hub pages
+ */
+export interface QuickAction {
+  /** Unique identifier */
+  id: string;
+
+  /** Action label */
+  label: string;
+
+  /** Icon name */
+  icon: string;
+
+  /** Navigation path or handler */
+  href?: string;
+
+  /** Custom action handler ID */
+  onClick?: string;
+
+  /** Variant style */
+  variant?: "primary" | "secondary" | "outline" | "ghost";
+
+  /** Permission requirements */
+  permission?: NavPermission;
+
+  /** Feature flag requirements */
+  featureFlags?: NavFeatureFlag;
+
+  /** Order/priority */
+  order?: number;
+}
+
+/**
+ * Hub card configuration
+ */
+export interface HubCard {
+  /** Unique identifier */
+  id: string;
+
+  /** Card title */
+  title: string;
+
+  /** Card description */
+  description?: string;
+
+  /** Icon name */
+  icon: string;
+
+  /** Navigation path when card is clicked */
+  href: string;
+
+  /** Metric value (e.g., "12 members", "5 roles") */
+  metric?: string | number;
+
+  /** Metric label (e.g., "Active", "Total") */
+  metricLabel?: string;
+
+  /** Badge text/count */
+  badge?: string | number;
+
+  /** Badge variant */
+  badgeVariant?: "default" | "success" | "warning" | "danger";
+
+  /** Permission requirements */
+  permission?: NavPermission;
+
+  /** Feature flag requirements */
+  featureFlags?: NavFeatureFlag;
+
+  /** Order/priority */
+  order?: number;
+}
+
+/**
+ * Hub configuration for a section
+ */
+export interface HubConfig {
+  /** Hub title */
+  title: string;
+
+  /** Hub description */
+  description?: string;
+
+  /** Hub cards */
+  cards: HubCard[];
+
+  /** Quick actions */
+  quickActions?: QuickAction[];
+
+  /** Summary metrics (displayed above cards) */
+  summaryMetrics?: Array<{
+    label: string;
+    value: string | number;
+    icon?: string;
+  }>;
+}
+
+/**
+ * Secondary sidebar item configuration
+ */
+export interface SecondaryNavItem {
+  /** Unique identifier */
+  id: string;
+
+  /** Display label */
+  label: string;
+
+  /** Icon name */
+  icon?: string;
+
+  /** Navigation path */
+  href: string;
+
+  /** Badge text/count */
+  badge?: string | number;
+
+  /** Permission requirements */
+  permission?: NavPermission;
+
+  /** Feature flag requirements */
+  featureFlags?: NavFeatureFlag;
+
+  /** Order/priority */
+  order?: number;
+
+  /** Child items (for nested secondary nav) */
+  children?: SecondaryNavItem[];
+}
+
+/**
+ * Secondary sidebar configuration for a section
+ */
+export interface SecondarySidebarConfig {
+  /** Items to display in secondary sidebar */
+  items: SecondaryNavItem[];
+
+  /** Include "Overview" link back to hub */
+  showOverviewLink?: boolean;
+
+  /** Label for overview link (default: "Overview") */
+  overviewLabel?: string;
+
+  /** Custom overview link href (defaults to section base path) */
+  overviewHref?: string;
+}
+
+/**
+ * View type for routing and layout logic
+ */
+export type ViewType = "hub" | "detail" | "tabs" | "standalone";
+
+/**
  * Navigation item configuration
  */
 export interface NavItem {
@@ -78,6 +229,16 @@ export interface NavItem {
 
   /** Order/priority for sorting */
   order?: number;
+
+  // Hub + Secondary Sidebar
+  /** View type for this item */
+  viewType?: ViewType;
+
+  /** Hub configuration (if viewType is "hub") */
+  hubConfig?: HubConfig;
+
+  /** Secondary sidebar configuration (for detail pages under this item) */
+  secondarySidebar?: SecondarySidebarConfig;
 }
 
 /**
