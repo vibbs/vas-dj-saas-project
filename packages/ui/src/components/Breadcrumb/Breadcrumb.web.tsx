@@ -1,9 +1,9 @@
 import React from 'react';
-import { BreadcrumbsProps, BreadcrumbItem } from './types';
+import { BreadcrumbProps, BreadcrumbItem } from './types';
 import { useTheme } from '../../theme/ThemeProvider';
 import { ChevronRight, Home, MoreHorizontal } from 'lucide-react';
 
-export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
+export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   items,
   separator,
   showHomeIcon = false,

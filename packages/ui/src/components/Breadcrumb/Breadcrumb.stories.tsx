@@ -1,17 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
-import { Breadcrumbs } from './Breadcrumbs';
-import { Breadcrumbs as WebBreadcrumbs } from './Breadcrumbs.web';
-import { Breadcrumbs as NativeBreadcrumbs } from './Breadcrumbs.native';
-import { BreadcrumbsProps } from './types';
+import { Breadcrumb } from './Breadcrumb';
+import { Breadcrumb as WebBreadcrumbs } from './Breadcrumb.web';
+import { Breadcrumb as NativeBreadcrumbs } from './Breadcrumb.native';
+import { BreadcrumbProps } from './types';
 import { ThemeProvider } from '../../theme/ThemeProvider';
 import { Home, Folder, File, Settings, User } from 'lucide-react';
 
 // Create a simple wrapper for Storybook to avoid renderer issues
-const BreadcrumbsStoryComponent = React.forwardRef<any, BreadcrumbsProps>((props, _ref) => {
-  return <Breadcrumbs {...props} />;
+const BreadcrumbsStoryComponent = React.forwardRef<any, BreadcrumbProps>((props, _ref) => {
+  return <Breadcrumb {...props} />;
 });
-BreadcrumbsStoryComponent.displayName = 'Breadcrumbs';
+BreadcrumbsStoryComponent.displayName = 'Breadcrumb';
 
 const sampleItems = [
   { label: 'Home', href: '/' },
@@ -28,15 +28,15 @@ const sampleItemsWithIcons = [
   { label: 'Report.pdf', href: '/documents/projects/report.pdf', icon: <File size={14} /> },
 ];
 
-const meta: Meta<BreadcrumbsProps> = {
-  title: 'Navigation/Breadcrumbs',
+const meta: Meta<BreadcrumbProps> = {
+  title: 'Navigation/Breadcrumb',
   component: BreadcrumbsStoryComponent,
   parameters: {
     layout: 'centered',
     docs: {
       description: {
         component: `
-# Cross-Platform Breadcrumbs Component
+# Cross-Platform Breadcrumb Component
 
 A unified breadcrumbs navigation component that automatically renders the appropriate implementation based on the platform.
 
@@ -56,7 +56,7 @@ A unified breadcrumbs navigation component that automatically renders the approp
 
 ### Basic Usage
 \`\`\`tsx
-import { Breadcrumbs } from '@vas-dj-saas/ui';
+import { Breadcrumb } from '@vas-dj-saas/ui';
 
 const items = [
   { label: 'Home', href: '/' },
@@ -64,7 +64,7 @@ const items = [
   { label: 'Electronics', href: '/products/electronics' },
 ];
 
-<Breadcrumbs 
+<Breadcrumb 
   items={items}
   onItemClick={(item, index) => navigate(item.href)}
 />
@@ -72,7 +72,7 @@ const items = [
 
 ### With Icons and Custom Configuration
 \`\`\`tsx
-import { Breadcrumbs } from '@vas-dj-saas/ui';
+import { Breadcrumb } from '@vas-dj-saas/ui';
 import { Home, Folder } from 'lucide-react';
 
 const items = [
@@ -81,7 +81,7 @@ const items = [
   { label: 'Current File' },
 ];
 
-<Breadcrumbs 
+<Breadcrumb 
   items={items}
   showHomeIcon={true}
   maxItems={4}
@@ -94,13 +94,13 @@ const items = [
 ### Platform-Specific Handlers
 \`\`\`tsx
 // React Native
-<Breadcrumbs 
+<Breadcrumb 
   items={items}
   onItemPress={(item) => navigation.navigate(item.href)}
 />
 
 // Web
-<Breadcrumbs 
+<Breadcrumb 
   items={items}
   onItemClick={(item) => window.location.href = item.href}
 />
@@ -174,7 +174,7 @@ const items = [
 };
 
 export default meta;
-type Story = StoryObj<BreadcrumbsProps>;
+type Story = StoryObj<BreadcrumbProps>;
 
 // Interactive playground story with all controls
 export const Interactive: Story = {
@@ -421,7 +421,7 @@ export const AllVariants: Story = {
   name: '🎨 All Variants',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-      <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Breadcrumbs Variants - Side by Side</h3>
+      <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Breadcrumb Variants - Side by Side</h3>
 
       <div style={{
         display: 'grid',
@@ -482,7 +482,7 @@ export const AllSizes: Story = {
   name: '📏 All Sizes',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', width: '100%' }}>
-      <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Breadcrumbs Sizes - Side by Side</h3>
+      <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Breadcrumb Sizes - Side by Side</h3>
 
       <div style={{
         display: 'grid',

@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, ViewStyle, TextStyle } from 'react-native';
-import { BreadcrumbsProps, BreadcrumbItem } from './types';
+import { BreadcrumbProps, BreadcrumbItem } from './types';
 import { useTheme } from '../../theme/ThemeProvider';
 
-export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
+export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   items,
   separator = '›',
   showHomeIcon = false,

@@ -48,6 +48,9 @@ export type { SliderProps } from "./components/Slider";
 export { FormField } from "./components/FormField";
 export type { FormFieldProps } from "./components/FormField";
 
+export { Label } from "./components/Label";
+export type { LabelProps } from "./components/Label";
+
 export { Radio } from "./components/Radio";
 export type { RadioProps, RadioOption } from "./components/Radio";
 
@@ -76,6 +79,9 @@ export type { FileUploadProps } from "./components/FileUpload";
 export { Divider } from "./components/Divider";
 export type { DividerProps } from "./components/Divider";
 
+export { Separator } from "./components/Separator";
+export type { SeparatorProps } from "./components/Separator";
+
 export { Collapse } from "./components/Collapse";
 export type { CollapseProps } from "./components/Collapse";
 
@@ -84,6 +90,32 @@ export type { ScrollAreaProps } from "./components/ScrollArea";
 
 export { Dialog } from "./components/Dialog";
 export type { DialogProps } from "./components/Dialog";
+
+export { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/Tabs";
+export type {
+  TabsProps,
+  TabsListProps,
+  TabsTriggerProps,
+  TabsContentProps,
+} from "./components/Tabs";
+
+// Router Port Interface (Hexagonal Architecture)
+export type {
+  TabRouterPort,
+  RouterNavigationOptions,
+} from "./adapters/router-port";
+export { useTabRouter, useDrawerRouter } from "./adapters/router-port";
+
+// Framework-agnostic navigation components (require router adapter)
+export { ShallowTabs } from "./components/ShallowTabs";
+export type { ShallowTabsProps, ShallowTab } from "./components/ShallowTabs";
+
+export { EntityDrawer } from "./components/EntityDrawer";
+export type {
+  EntityDrawerProps,
+  DrawerSide,
+  DrawerSize,
+} from "./components/EntityDrawer";
 
 export { Table } from "./components/Table";
 export type { TableProps, TableColumn } from "./components/Table";
@@ -114,12 +146,12 @@ export type {
   PaginationItemProps,
 } from "./components/Pagination";
 
-export { Breadcrumbs } from "./components/Breadcrumbs";
+export { Breadcrumb } from "./components/Breadcrumb";
 export type {
-  BreadcrumbsProps,
+  BreadcrumbProps,
   BreadcrumbItem,
   BreadcrumbItemComponentProps,
-} from "./components/Breadcrumbs";
+} from "./components/Breadcrumb";
 
 export { Stepper } from "./components/Stepper";
 export type {
@@ -185,4 +217,3 @@ export type {
 export * from "./stores/layout";
 export * from "./stores/toast";
 export * from "./stores/modal";
-

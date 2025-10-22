@@ -5,7 +5,7 @@ export interface BreadcrumbItem {
   disabled?: boolean;
 }
 
-export interface BreadcrumbsProps {
+export interface BreadcrumbProps {
   items: BreadcrumbItem[];
   
   // Display options

@@ -38,12 +38,20 @@ export function useNavigation(
   } = options;
 
   const sections = useMemo(() => {
-    return filterSections(
+    const filtered = filterSections(
       navigationConfig.sections,
       account,
       platform,
       featureFlags
     );
+
+    // Debug logging
+    console.log('[useNavigation] Raw sections:', navigationConfig.sections);
+    console.log('[useNavigation] Filtered sections:', filtered);
+    console.log('[useNavigation] Account:', account);
+    console.log('[useNavigation] Platform:', platform);
+
+    return filtered;
   }, [account, platform, featureFlags]);
 
   return {

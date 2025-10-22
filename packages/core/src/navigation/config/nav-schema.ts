@@ -1,14 +1,14 @@
-import type { Account } from '@vas-dj-saas/api-client';
+import type { Account } from "@vas-dj-saas/api-client";
 
 /**
  * Permission configuration for navigation items
  */
 export interface NavPermission {
   /** Permission check type */
-  type: 'role' | 'custom';
+  type: "role" | "custom";
 
   /** Required roles (OR logic - any role matches) */
-  roles?: Array<'admin' | 'orgAdmin' | 'orgCreator' | 'user'>;
+  roles?: Array<"admin" | "orgAdmin" | "orgCreator" | "user">;
 
   /** Custom permission check function */
   customCheck?: (account: Account) => boolean;
@@ -35,7 +35,7 @@ export interface NavItem {
   /** Display label */
   label: string;
 
-  /** Icon identifier (can be emoji or icon library key) */
+  /** Icon name (lucide-react icon name, e.g., 'Home', 'User', 'Settings') */
   icon: string;
 
   /** Navigation path */
@@ -67,7 +67,7 @@ export interface NavItem {
 
   // Platform Targeting
   /** Supported platforms */
-  platforms?: Array<'web' | 'mobile' | 'all'>;
+  platforms?: Array<"web" | "mobile" | "all">;
 
   // Behavior
   /** Custom click handler ID */
@@ -100,7 +100,7 @@ export interface NavSection {
   featureFlags?: NavFeatureFlag;
 
   /** Supported platforms */
-  platforms?: Array<'web' | 'mobile' | 'all'>;
+  platforms?: Array<"web" | "mobile" | "all">;
 
   /** Order/priority */
   order?: number;

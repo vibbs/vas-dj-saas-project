@@ -9,20 +9,38 @@ export function checkPermission(
   account: Account | undefined
 ): boolean {
   // No permission requirement = always visible
-  if (!permission) return true;
+  if (!permission) {
+    console.log('[checkPermission] No permission required, allowing access');
+    return true;
+  }
 
   // No account = not authenticated
-  if (!account) return false;
+  if (!account) {
+    console.log('[checkPermission] No account, denying access');
+    return false;
+  }
 
   // Role-based permission check
   if (permission.type === 'role' && permission.roles) {
-    return permission.roles.some((role) => hasRole(account, role));
+    const hasAccess = permission.roles.some((role) => hasRole(account, role));
+    console.log('[checkPermission] Role check:', {
+      requiredRoles: permission.roles,
+      accountRoles: {
+        isAdmin: account.isAdmin,
+        isOrgAdmin: account.isOrgAdmin,
+        isOrgCreator: account.isOrgCreator,
+      },
+      hasAccess
+    });
+    return hasAccess;
   }
 
   // Custom permission check
   if (permission.type === 'custom' && permission.customCheck) {
     try {
-      return permission.customCheck(account);
+      const hasAccess = permission.customCheck(account);
+      console.log('[checkPermission] Custom check result:', hasAccess);
+      return hasAccess;
     } catch (error) {
       console.error('Custom permission check failed:', error);
       return false;
@@ -30,6 +48,7 @@ export function checkPermission(
   }
 
   // Default deny
+  console.log('[checkPermission] No matching permission type, denying access');
   return false;
 }
 
