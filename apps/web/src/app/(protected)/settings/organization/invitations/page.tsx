@@ -5,7 +5,6 @@ import { useRouter, usePathname } from 'next/navigation';
 import { SecondarySidebar, Card, Heading, Text, Button, Badge } from '@vas-dj-saas/ui';
 import { navigationConfig } from '@vas-dj-saas/core';
 import { convertToSecondarySidebarConfig } from '@/utils/navigation-helpers';
-import { SettingsHeader } from '@/components/settings/SettingsHeader';
 
 /**
  * Organization Invitations Page
@@ -33,22 +32,11 @@ export default function OrganizationInvitationsPage() {
 
     if (!orgConfig?.secondarySidebar) {
         return (
-            <>
-                <SettingsHeader
-                    title="Invitations"
-                    description="Manage pending invitations"
-                    breadcrumbs={[
-                        { label: 'Settings', href: '/settings' },
-                        { label: 'Organization', href: '/settings/organization' },
-                        { label: 'Invitations' },
-                    ]}
-                />
-                <div className="flex-1 p-6">
-                    <p className="text-red-500">
-                        Error: Secondary sidebar configuration not found.
-                    </p>
-                </div>
-            </>
+            <div className="flex-1 p-6">
+                <p className="text-red-500">
+                    Error: Secondary sidebar configuration not found.
+                </p>
+            </div>
         );
     }
 
@@ -56,16 +44,6 @@ export default function OrganizationInvitationsPage() {
 
     return (
         <>
-            <SettingsHeader
-                title="Invitations"
-                description="Manage pending invitations to your organization"
-                breadcrumbs={[
-                    { label: 'Settings', href: '/settings' },
-                    { label: 'Organization', href: '/settings/organization' },
-                    { label: 'Invitations' },
-                ]}
-            />
-
             <div className="flex flex-1">
                 {/* Secondary Sidebar */}
                 <SecondarySidebar

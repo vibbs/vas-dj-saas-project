@@ -5,7 +5,6 @@ import { useRouter, usePathname } from 'next/navigation';
 import { SecondarySidebar, Card, Heading, Text, Button } from '@vas-dj-saas/ui';
 import { navigationConfig } from '@vas-dj-saas/core';
 import { convertToSecondarySidebarConfig } from '@/utils/navigation-helpers';
-import { SettingsHeader } from '@/components/settings/SettingsHeader';
 
 /**
  * Organization Roles Page
@@ -33,23 +32,12 @@ export default function OrganizationRolesPage() {
 
     if (!orgConfig?.secondarySidebar) {
         return (
-            <>
-                <SettingsHeader
-                    title="Roles & Permissions"
-                    description="Define roles and permission sets"
-                    breadcrumbs={[
-                        { label: 'Settings', href: '/settings' },
-                        { label: 'Organization', href: '/settings/organization' },
-                        { label: 'Roles' },
-                    ]}
-                />
-                <div className="flex-1 p-6">
-                    <p className="text-red-500">
-                        Error: Secondary sidebar configuration not found.
-                        Please check the navigation configuration.
-                    </p>
-                </div>
-            </>
+            <div className="flex-1 p-6">
+                <p className="text-red-500">
+                    Error: Secondary sidebar configuration not found.
+                    Please check the navigation configuration.
+                </p>
+            </div>
         );
     }
 
@@ -57,16 +45,6 @@ export default function OrganizationRolesPage() {
 
     return (
         <>
-            <SettingsHeader
-                title="Roles & Permissions"
-                description="Define roles and permission sets for your organization"
-                breadcrumbs={[
-                    { label: 'Settings', href: '/settings' },
-                    { label: 'Organization', href: '/settings/organization' },
-                    { label: 'Roles' },
-                ]}
-            />
-
             <div className="flex flex-1">
                 {/* Secondary Sidebar */}
                 <SecondarySidebar

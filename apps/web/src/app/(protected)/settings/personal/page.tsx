@@ -3,7 +3,6 @@
 import React from 'react';
 import { useNextTabRouter } from '@vas-dj-saas/adapters/next-router';
 import { ShallowTabs } from '@vas-dj-saas/ui';
-import { SettingsHeader } from '@/components/settings/SettingsHeader';
 import { ProfileTab } from '@/components/settings/personal/ProfileTab';
 import { SecurityTab } from '@/components/settings/personal/SecurityTab';
 import { NotificationsTab } from '@/components/settings/personal/NotificationsTab';
@@ -26,17 +25,7 @@ export default function PersonalSettingsPage() {
   const router = useNextTabRouter();
 
   return (
-    <>
-      <SettingsHeader
-        title="Personal Settings"
-        description="Manage your personal account settings and preferences"
-        breadcrumbs={[
-          { label: 'Settings', href: '/settings' },
-          { label: 'Personal' },
-        ]}
-      />
-
-      <div className="flex-1 p-6">
+    <div className="flex-1">
         <ShallowTabs
           router={router}
           defaultTab="profile"
@@ -58,7 +47,6 @@ export default function PersonalSettingsPage() {
             },
           ]}
         />
-      </div>
-    </>
+    </div>
   );
 }

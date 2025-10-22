@@ -6,7 +6,6 @@ import { SecondarySidebar, Card, Heading, Text, Button, Table, Badge } from '@va
 import type { TableColumn } from '@vas-dj-saas/ui';
 import { navigationConfig } from '@vas-dj-saas/core';
 import { convertToSecondarySidebarConfig } from '@/utils/navigation-helpers';
-import { SettingsHeader } from '@/components/settings/SettingsHeader';
 import { MemberDrawer } from '@/components/settings/organization/MemberDrawer';
 
 // Mock member data
@@ -131,23 +130,12 @@ export default function OrganizationMembersPage() {
 
     if (!orgConfig?.secondarySidebar) {
         return (
-            <>
-                <SettingsHeader
-                    title="Members"
-                    description="Manage your organization's members"
-                    breadcrumbs={[
-                        { label: 'Settings', href: '/settings' },
-                        { label: 'Organization', href: '/settings/organization' },
-                        { label: 'Members' },
-                    ]}
-                />
-                <div className="flex-1 p-6">
-                    <p className="text-red-500">
-                        Error: Secondary sidebar configuration not found.
-                        Please check the navigation configuration in packages/core/src/navigation/config/nav-items.ts
-                    </p>
-                </div>
-            </>
+            <div className="flex-1 p-6">
+                <p className="text-red-500">
+                    Error: Secondary sidebar configuration not found.
+                    Please check the navigation configuration in packages/core/src/navigation/config/nav-items.ts
+                </p>
+            </div>
         );
     }
 
@@ -155,16 +143,6 @@ export default function OrganizationMembersPage() {
 
     return (
         <>
-            <SettingsHeader
-                title="Members"
-                description="Manage your organization's members and their roles"
-                breadcrumbs={[
-                    { label: 'Settings', href: '/settings' },
-                    { label: 'Organization', href: '/settings/organization' },
-                    { label: 'Members' },
-                ]}
-            />
-
             <div className="flex flex-1">
                 {/* Secondary Sidebar */}
                 <SecondarySidebar

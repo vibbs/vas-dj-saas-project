@@ -4,7 +4,6 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { SettingsHub } from '@vas-dj-saas/ui';
 import { navigationConfig } from '@vas-dj-saas/core';
-import { SettingsHeader } from '@/components/settings/SettingsHeader';
 import { convertToHubConfig } from '@/utils/navigation-helpers';
 
 /**
@@ -51,44 +50,21 @@ export default function OrganizationSettingsPage() {
 
     if (!orgConfig || !orgConfig.hubConfig) {
         return (
-            <>
-                <SettingsHeader
-                    title="Organization Settings"
-                    description="Manage your organization"
-                    breadcrumbs={[
-                        { label: 'Settings', href: '/settings' },
-                        { label: 'Organization' },
-                    ]}
-                />
-                <div className="flex-1 p-6">
-                    <p className="text-red-500">
-                        Error: Hub configuration not found for organization settings.
-                        Please check the navigation configuration in packages/core/src/navigation/config/nav-items.ts
-                    </p>
-                </div>
-            </>
+            <div className="flex-1 p-6">
+                <p className="text-red-500">
+                    Error: Hub configuration not found for organization settings.
+                    Please check the navigation configuration in packages/core/src/navigation/config/nav-items.ts
+                </p>
+            </div>
         );
     }
 
     const hubConfig = convertToHubConfig(orgConfig.hubConfig);
 
     return (
-        <>
-            <SettingsHeader
-                title={hubConfig.title}
-                description={hubConfig.description}
-                breadcrumbs={[
-                    { label: 'Settings', href: '/settings' },
-                    { label: 'Organization' },
-                ]}
-            />
-
-            <div className="flex-1 p-6">
-                <SettingsHub
-                    config={hubConfig}
-                    onNavigate={handleNavigate}
-                />
-            </div>
-        </>
+        <SettingsHub
+            config={hubConfig}
+            onNavigate={handleNavigate}
+        />
     );
 }

@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { SettingsHub } from '@vas-dj-saas/ui';
 import { navigationConfig } from '@vas-dj-saas/core';
 import { convertToHubConfig } from '@/utils/navigation-helpers';
-import { SettingsHeader } from '@/components/settings/SettingsHeader';
 
 /**
  * Developer Settings Hub Page
@@ -36,44 +35,21 @@ export default function DeveloperSettingsPage() {
 
     if (!devConfig?.hubConfig) {
         return (
-            <>
-                <SettingsHeader
-                    title="Developer Settings"
-                    description="Manage API keys, webhooks, and integrations"
-                    breadcrumbs={[
-                        { label: 'Settings', href: '/settings' },
-                        { label: 'Developer' },
-                    ]}
-                />
-                <div className="flex-1 p-6">
-                    <p className="text-red-500">
-                        Error: Hub configuration not found for developer settings.
-                        Please check the navigation configuration.
-                    </p>
-                </div>
-            </>
+            <div className="flex-1 p-6">
+                <p className="text-red-500">
+                    Error: Hub configuration not found for developer settings.
+                    Please check the navigation configuration.
+                </p>
+            </div>
         );
     }
 
     const hubConfig = convertToHubConfig(devConfig.hubConfig);
 
     return (
-        <>
-            <SettingsHeader
-                title={hubConfig.title}
-                description={hubConfig.description}
-                breadcrumbs={[
-                    { label: 'Settings', href: '/settings' },
-                    { label: 'Developer' },
-                ]}
-            />
-
-            <div className="flex-1 p-6">
-                <SettingsHub
-                    config={hubConfig}
-                    onNavigate={handleNavigate}
-                />
-            </div>
-        </>
+        <SettingsHub
+            config={hubConfig}
+            onNavigate={handleNavigate}
+        />
     );
 }

@@ -1,5 +1,11 @@
 import type { HubConfig, QuickAction, SecondarySidebarConfig, SecondaryNavItem } from '@vas-dj-saas/ui';
-import type { HubConfig as CoreHubConfig, SecondarySidebarConfig as CoreSecondarySidebarConfig } from '@vas-dj-saas/core';
+import type {
+  HubConfig as CoreHubConfig,
+  SecondarySidebarConfig as CoreSecondarySidebarConfig,
+  NavConfig,
+  NavItem,
+  NavSection
+} from '@vas-dj-saas/core';
 import type { HubCardProps } from '@vas-dj-saas/ui';
 
 /**
@@ -53,5 +59,90 @@ export function convertToSecondarySidebarConfig(
     showOverviewLink: coreConfig.showOverviewLink,
     overviewLabel: coreConfig.overviewLabel,
     overviewHref: coreConfig.overviewHref,
+  };
+}
+
+/**
+ * Find a navigation item by its href path
+ */
+export function findNavItemByPath(
+  pathname: string,
+  navConfig: NavConfig
+): NavItem | null {
+  for (const section of navConfig.sections) {
+    const found = findItemInSection(pathname, section);
+    if (found) return found;
+  }
+  return null;
+}
+
+/**
+ * Recursively search for nav item in section
+ */
+function findItemInSection(
+  pathname: string,
+  section: NavSection
+): NavItem | null {
+  for (const item of section.items) {
+    if (item.href === pathname) return item;
+
+    // Check children
+    if (item.children) {
+      for (const child of item.children) {
+        if (child.href === pathname) return child;
+
+        // Recursively check nested children
+        if (child.children) {
+          const found = findItemInChildren(pathname, child.children);
+          if (found) return found;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Recursively search in nested children
+ */
+function findItemInChildren(
+  pathname: string,
+  children: NavItem[]
+): NavItem | null {
+  for (const child of children) {
+    if (child.href === pathname) return child;
+    if (child.children) {
+      const found = findItemInChildren(pathname, child.children);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+/**
+ * Get page metadata (title and description) from navigation config
+ */
+export function getPageMetadata(
+  pathname: string,
+  navConfig: NavConfig
+): { title: string; description?: string } | null {
+  const navItem = findNavItemByPath(pathname, navConfig);
+
+  if (!navItem) {
+    return null;
+  }
+
+  // For hub pages, use hubConfig title/description if available
+  if (navItem.viewType === 'hub' && navItem.hubConfig) {
+    return {
+      title: navItem.hubConfig.title,
+      description: navItem.hubConfig.description,
+    };
+  }
+
+  // Otherwise use nav item label and description
+  return {
+    title: navItem.label,
+    description: navItem.description,
   };
 }
