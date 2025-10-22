@@ -130,6 +130,8 @@ export const HubCard: React.FC<HubCardProps> = ({
               flex: 1,
               display: 'flex',
               flexDirection: 'column',
+              justifyContent: 'space-between',
+              gap: `${theme.spacing.md}px`,
             }}
           >
             {/* Title and description */}
@@ -138,13 +140,11 @@ export const HubCard: React.FC<HubCardProps> = ({
                 {title}
               </Heading>
 
-              <div style={{ minHeight: description ? 'auto' : '40px' }}>
-                {description && (
-                  <Text color="secondary" size="sm" style={{ margin: 0, lineHeight: 1.4 }}>
-                    {description}
-                  </Text>
-                )}
-              </div>
+              {description && (
+                <Text color="secondary" size="sm" style={{ margin: 0, lineHeight: 1.4 }}>
+                  {description}
+                </Text>
+              )}
             </div>
 
             {/* Metric - always at the bottom if present */}
@@ -154,8 +154,6 @@ export const HubCard: React.FC<HubCardProps> = ({
                   display: 'flex',
                   alignItems: 'baseline',
                   gap: `${theme.spacing.xs}px`,
-                  marginTop: 'auto',
-                  paddingTop: `${theme.spacing.md}px`,
                 }}
               >
                 <Text
