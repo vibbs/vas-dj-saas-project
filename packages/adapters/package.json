@@ -1,0 +1,47 @@
+{
+  "name": "@vas-dj-saas/adapters",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Framework adapters implementing ports defined in @vas-dj-saas/ui",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./next-router": {
+      "types": "./dist/next-router/index.d.ts",
+      "default": "./dist/next-router/index.js"
+    },
+    "./react-navigation-router": {
+      "types": "./dist/react-navigation-router/index.d.ts",
+      "default": "./dist/react-navigation-router/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@vas-dj-saas/ui": "workspace:*"
+  },
+  "peerDependencies": {
+    "@react-navigation/native": "^7.0.0",
+    "next": "^15.0.0",
+    "react": "19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@react-navigation/native": {
+      "optional": true
+    },
+    "next": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@react-navigation/native": "^7.0.21",
+    "@types/react": "^19.0.14",
+    "next": "^15.4.5",
+    "react": "19.0.0",
+    "typescript": "5.8.3"
+  }
+}
