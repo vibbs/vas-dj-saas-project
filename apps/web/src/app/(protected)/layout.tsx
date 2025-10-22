@@ -78,7 +78,7 @@ export default function ProtectedLayout({
         )}
 
         {/* Content Area with Breadcrumbs */}
-        <div className="flex-1 container mx-auto px-6 py-6 max-w-7xl">
+        <div className="flex-1 container mx-auto px-4 py-4 max-w-7xl">
           {isMounted && <FloatingBreadcrumb />}
           {children}
         </div>

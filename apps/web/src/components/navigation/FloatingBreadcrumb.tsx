@@ -49,11 +49,6 @@ export function FloatingBreadcrumb({ items, className }: FloatingBreadcrumbProps
   return (
     <div
       className={`
-        bg-white dark:bg-gray-800
-        border border-gray-200 dark:border-gray-700
-        rounded-lg
-        shadow-sm
-        px-4 py-2.5
         mb-6
         ${className || ''}
       `.trim()}

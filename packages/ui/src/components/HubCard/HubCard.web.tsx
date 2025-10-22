@@ -18,9 +18,7 @@ import type { HubCardProps } from './types';
  * - Optional metric/count
  * - Optional badge
  *
- * Fixed heights:
- * - Cards with metrics: 220px
- * - Cards without metrics: 180px
+ * Fixed height: 220px (consistent for all cards)
  *
  * @example
  * ```tsx
@@ -53,9 +51,9 @@ export const HubCard: React.FC<HubCardProps> = ({
 }) => {
   const { theme } = useTheme();
 
-  // Determine card height based on whether it has metrics
+  // Fixed height for all cards regardless of content
   const hasMetric = metric !== undefined;
-  const cardHeight = hasMetric ? '220px' : '180px';
+  const cardHeight = '220px';
 
   const handleClick = React.useCallback(() => {
     if (!isDisabled && !isLoading && onPress) {

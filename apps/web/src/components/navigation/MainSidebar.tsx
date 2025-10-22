@@ -12,6 +12,11 @@ import { env } from '@/lib/env';
 /**
  * Main Sidebar Navigation
  * Unified sidebar for all protected pages using core navigation config
+ *
+ * Responsive behavior:
+ * - Mobile (<768px): Hidden by default, drawer with overlay
+ * - Tablet (768px-1024px): Collapsed by default
+ * - Desktop (>1024px): Full width by default
  */
 export function MainSidebar() {
   const pathname = usePathname();
@@ -20,7 +25,38 @@ export function MainSidebar() {
   const { logout } = useAuthActions();
 
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // Handle responsive behavior on mount and resize
+  React.useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width >= 1024) {
+        // Desktop: expand by default
+        setIsCollapsed(false);
+        setIsMobileMenuOpen(false);
+      } else if (width >= 768) {
+        // Tablet: collapse by default
+        setIsCollapsed(true);
+        setIsMobileMenuOpen(false);
+      } else {
+        // Mobile: hide by default
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    // Set initial state
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Close mobile menu on route change
+  React.useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
 
   // Get filtered navigation based on account and platform
   const { sections } = useNavigation({
@@ -77,12 +113,35 @@ export function MainSidebar() {
   };
 
   return (
-    <aside
-      className={cn(
-        'bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 flex flex-col h-screen sticky top-0',
-        isCollapsed ? 'w-16' : 'w-64'
+    <>
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
       )}
-    >
+
+      {/* Mobile Menu Toggle Button - Only visible on mobile */}
+      <button
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg"
+        aria-label="Toggle menu"
+      >
+        <Icon name={isMobileMenuOpen ? "X" : "Menu"} size="md" />
+      </button>
+
+      <aside
+        className={cn(
+          'bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 flex flex-col h-screen sticky top-0 z-50',
+          // Desktop and Tablet behavior
+          'hidden md:flex',
+          isCollapsed ? 'md:w-16' : 'md:w-64',
+          // Mobile drawer behavior
+          isMobileMenuOpen && 'flex fixed inset-y-0 left-0 w-64'
+        )}
+      >
       {/* Header */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
         {!isCollapsed && (
@@ -95,9 +154,10 @@ export function MainSidebar() {
             </span>
           </Link>
         )}
+        {/* Desktop/Tablet toggle - hide on mobile */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className="hidden md:block p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           <Icon
@@ -108,6 +168,15 @@ export function MainSidebar() {
               isCollapsed ? 'rotate-180' : ''
             )}
           />
+        </button>
+
+        {/* Mobile close button */}
+        <button
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="md:hidden p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          aria-label="Close menu"
+        >
+          <Icon name="X" size="md" />
         </button>
       </div>
 
@@ -167,5 +236,6 @@ export function MainSidebar() {
         )}
       </div>
     </aside>
+    </>
   );
 }
