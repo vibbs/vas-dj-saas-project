@@ -9,23 +9,27 @@ import { Icon } from '@vas-dj-saas/ui';
 import { cn } from '@/lib/utils';
 import { env } from '@/lib/env';
 
+interface MainSidebarProps {
+  isMobileMenuOpen?: boolean;
+  onMobileMenuToggle?: (open: boolean) => void;
+}
+
 /**
  * Main Sidebar Navigation
  * Unified sidebar for all protected pages using core navigation config
  *
  * Responsive behavior:
- * - Mobile (<768px): Hidden by default, drawer with overlay
+ * - Mobile (<768px): Hidden by default, drawer with overlay (controlled by parent)
  * - Tablet (768px-1024px): Collapsed by default
  * - Desktop (>1024px): Full width by default
  */
-export function MainSidebar() {
+export function MainSidebar({ isMobileMenuOpen = false, onMobileMenuToggle }: MainSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const account = useAuthAccount();
   const { logout } = useAuthActions();
 
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Handle responsive behavior on mount and resize
@@ -35,14 +39,14 @@ export function MainSidebar() {
       if (width >= 1024) {
         // Desktop: expand by default
         setIsCollapsed(false);
-        setIsMobileMenuOpen(false);
+        onMobileMenuToggle?.(false);
       } else if (width >= 768) {
         // Tablet: collapse by default
         setIsCollapsed(true);
-        setIsMobileMenuOpen(false);
+        onMobileMenuToggle?.(false);
       } else {
         // Mobile: hide by default
-        setIsMobileMenuOpen(false);
+        onMobileMenuToggle?.(false);
       }
     };
 
@@ -51,12 +55,12 @@ export function MainSidebar() {
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [onMobileMenuToggle]);
 
   // Close mobile menu on route change
   React.useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [pathname]);
+    onMobileMenuToggle?.(false);
+  }, [pathname, onMobileMenuToggle]);
 
   // Get filtered navigation based on account and platform
   const { sections } = useNavigation({
@@ -118,19 +122,10 @@ export function MainSidebar() {
       {isMobileMenuOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
+          onClick={() => onMobileMenuToggle?.(false)}
           aria-hidden="true"
         />
       )}
-
-      {/* Mobile Menu Toggle Button - Only visible on mobile */}
-      <button
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg"
-        aria-label="Toggle menu"
-      >
-        <Icon name={isMobileMenuOpen ? "X" : "Menu"} size="md" />
-      </button>
 
       <aside
         className={cn(
@@ -172,7 +167,7 @@ export function MainSidebar() {
 
         {/* Mobile close button */}
         <button
-          onClick={() => setIsMobileMenuOpen(false)}
+          onClick={() => onMobileMenuToggle?.(false)}
           className="md:hidden p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           aria-label="Close menu"
         >

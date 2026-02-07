@@ -11,7 +11,11 @@ export type {
   AccountRole,
   AccountStatus,
   Organization,
+  OrganizationMembership,
+  OrganizationMembershipRole,
+  OrganizationMembershipStatus,
   Invite,
+  InviteRole,
   InviteStatus,
 } from './generated/api.schemas';
 
@@ -28,12 +32,16 @@ export type {
   PatchedAccountRequest,
   OrganizationRequest,
   PatchedOrganizationRequest,
+  PatchedMembershipUpdateRequest,
+  CreateInviteRequest,
+  CreateInviteRequestRole,
 } from './generated/api.schemas';
 
 // Re-export pagination types
 export type {
   PaginatedAccountList,
   PaginatedOrganizationList,
+  PaginatedOrganizationMembershipList,
   PaginatedInviteList,
 } from './generated/api.schemas';
 

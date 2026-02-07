@@ -1,57 +1,38 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { SecondarySidebar, Card, Heading, Text, Button, Table, Badge } from '@vas-dj-saas/ui';
+import { SecondarySidebar, Card, Heading, Text, Button, Table, Badge, Select, Spinner } from '@vas-dj-saas/ui';
 import type { TableColumn } from '@vas-dj-saas/ui';
+import type { OrganizationMembership, OrganizationMembershipRole, OrganizationMembershipStatus } from '@vas-dj-saas/api-client';
 import { navigationConfig } from '@vas-dj-saas/core';
 import { convertToSecondarySidebarConfig } from '@/utils/navigation-helpers';
 import { MemberDrawer } from '@/components/settings/organization/MemberDrawer';
+import { InviteMemberModal } from '@/components/settings/organization/InviteMemberModal';
+import { ConfirmationDialog } from '@/components/common/ConfirmationDialog';
+import { useMembers } from '@/hooks/useMembers';
+import { useInvitations } from '@/hooks/useInvitations';
 
-// Mock member data
-interface Member {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    status: 'active' | 'pending' | 'inactive';
-    joinedAt: string;
-}
-
-const mockMembers: Member[] = [
-    {
-        id: '1',
-        name: 'John Doe',
-        email: 'john@example.com',
-        role: 'Admin',
-        status: 'active',
-        joinedAt: '2024-01-15',
-    },
-    {
-        id: '2',
-        name: 'Jane Smith',
-        email: 'jane@example.com',
-        role: 'Member',
-        status: 'active',
-        joinedAt: '2024-02-20',
-    },
-    {
-        id: '3',
-        name: 'Bob Johnson',
-        email: 'bob@example.com',
-        role: 'Member',
-        status: 'pending',
-        joinedAt: '2024-03-10',
-    },
+const ROLE_OPTIONS = [
+    { value: 'member', label: 'Member' },
+    { value: 'admin', label: 'Admin' },
+    { value: 'owner', label: 'Owner' },
 ];
+
+const STATUS_BADGE_VARIANT: Record<OrganizationMembershipStatus, 'success' | 'warning' | 'secondary'> = {
+    active: 'success',
+    invited: 'warning',
+    suspended: 'secondary',
+};
 
 /**
  * Organization Members Page
  *
  * Detail page with:
  * - Secondary sidebar for in-section navigation
- * - Members table
+ * - Members table with real API data
  * - EntityDrawer for member details
+ * - Invite member modal
  *
  * URL: /settings/organization/members
  * Drawer: /settings/organization/members?selected=user123
@@ -62,6 +43,15 @@ export default function OrganizationMembersPage() {
     const searchParams = useSearchParams();
     const selectedMemberId = searchParams.get('selected');
 
+    // Data hooks
+    const { members, isLoading, error, updateRole, updateStatus, removeMember, refresh } = useMembers();
+    const { createInvite } = useInvitations();
+
+    // Modal states
+    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+    const [memberToRemove, setMemberToRemove] = useState<OrganizationMembership | null>(null);
+    const [memberToSuspend, setMemberToSuspend] = useState<OrganizationMembership | null>(null);
+
     // Get organization settings config
     const orgConfig = React.useMemo(() => {
         return navigationConfig.sections
@@ -70,7 +60,7 @@ export default function OrganizationMembersPage() {
     }, []);
 
     // Find selected member
-    const selectedMember = mockMembers.find(m => m.id === selectedMemberId);
+    const selectedMember = members.find(m => m.id === selectedMemberId);
 
     const handleNavigate = React.useCallback((href: string) => {
         router.push(href);
@@ -79,22 +69,64 @@ export default function OrganizationMembersPage() {
     /**
      * Handle row click - open drawer with shallow routing
      */
-    const handleRowClick = (member: Member) => {
+    const handleRowClick = (member: OrganizationMembership) => {
         const params = new URLSearchParams(searchParams.toString());
         params.set('selected', member.id);
         router.push(`${pathname}?${params.toString()}`, { scroll: false });
     };
 
+    /**
+     * Handle role change
+     */
+    const handleRoleChange = async (memberId: string, newRole: string) => {
+        await updateRole(memberId, newRole as OrganizationMembershipRole);
+    };
+
+    /**
+     * Handle remove member confirmation
+     */
+    const handleRemoveMember = async () => {
+        if (!memberToRemove) return false;
+        const success = await removeMember(memberToRemove.id);
+        if (success) {
+            // Close drawer if removed member was selected
+            if (selectedMemberId === memberToRemove.id) {
+                router.push(pathname, { scroll: false });
+            }
+        }
+        return success;
+    };
+
+    /**
+     * Handle suspend/reactivate member
+     */
+    const handleToggleSuspend = async () => {
+        if (!memberToSuspend) return false;
+        const newStatus: OrganizationMembershipStatus = memberToSuspend.status === 'suspended' ? 'active' : 'suspended';
+        return await updateStatus(memberToSuspend.id, newStatus);
+    };
+
+    /**
+     * Format date for display
+     */
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+        });
+    };
+
     // Table columns
-    const columns: TableColumn<Member>[] = [
+    const columns: TableColumn<OrganizationMembership>[] = [
         {
-            key: 'name',
+            key: 'userName',
             title: 'Name',
             sortable: true,
             render: (value) => <span>{String(value)}</span>,
         },
         {
-            key: 'email',
+            key: 'userEmail',
             title: 'Email',
             sortable: true,
             render: (value) => <span>{String(value)}</span>,
@@ -103,20 +135,23 @@ export default function OrganizationMembersPage() {
             key: 'role',
             title: 'Role',
             sortable: true,
-            render: (value) => <span>{String(value)}</span>,
+            render: (value, member) => (
+                <div onClick={(e) => e.stopPropagation()}>
+                    <Select
+                        options={ROLE_OPTIONS}
+                        value={member.role || 'member'}
+                        onChange={(newRole) => handleRoleChange(member.id, newRole as string)}
+                        size="sm"
+                    />
+                </div>
+            ),
         },
         {
             key: 'status',
             title: 'Status',
             render: (value, member) => (
-                <Badge
-                    variant={
-                        member.status === 'active' ? 'success' :
-                            member.status === 'pending' ? 'warning' :
-                                'secondary'
-                    }
-                >
-                    {member.status}
+                <Badge variant={STATUS_BADGE_VARIANT[member.status || 'active']}>
+                    {member.status || 'active'}
                 </Badge>
             ),
         },
@@ -124,7 +159,33 @@ export default function OrganizationMembersPage() {
             key: 'joinedAt',
             title: 'Joined',
             sortable: true,
-            render: (value) => <span>{String(value)}</span>,
+            render: (value) => <span>{formatDate(String(value))}</span>,
+        },
+        {
+            key: 'id',
+            title: 'Actions',
+            render: (value, member) => (
+                <div
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ display: 'flex', gap: '8px' }}
+                >
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setMemberToSuspend(member)}
+                    >
+                        {member.status === 'suspended' ? 'Reactivate' : 'Suspend'}
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setMemberToRemove(member)}
+                        style={{ color: '#dc2626' }}
+                    >
+                        Remove
+                    </Button>
+                </div>
+            ),
         },
     ];
 
@@ -162,34 +223,89 @@ export default function OrganizationMembersPage() {
                                     Manage your organization&apos;s members and their roles
                                 </Text>
                             </div>
-                            <Button variant="primary" size="md">
+                            <Button
+                                variant="primary"
+                                size="md"
+                                onClick={() => setIsInviteModalOpen(true)}
+                            >
                                 Invite Member
                             </Button>
                         </div>
 
-                        <Card>
-                            <Table
-                                data={mockMembers}
-                                columns={columns}
-                                onRowPress={handleRowClick}
-                                hoverable
-                            />
-                        </Card>
+                        {/* Error State */}
+                        {error && (
+                            <Card>
+                                <div style={{ padding: '24px', textAlign: 'center' }}>
+                                    <Text color="destructive">{error}</Text>
+                                    <Button
+                                        variant="secondary"
+                                        size="sm"
+                                        onClick={() => refresh()}
+                                        style={{ marginTop: '12px' }}
+                                    >
+                                        Retry
+                                    </Button>
+                                </div>
+                            </Card>
+                        )}
+
+                        {/* Loading State */}
+                        {isLoading && !error && (
+                            <Card>
+                                <div style={{ padding: '48px', display: 'flex', justifyContent: 'center' }}>
+                                    <Spinner size="lg" />
+                                </div>
+                            </Card>
+                        )}
+
+                        {/* Members Table */}
+                        {!isLoading && !error && (
+                            <Card>
+                                {members.length === 0 ? (
+                                    <div style={{ padding: '48px', textAlign: 'center' }}>
+                                        <Text color="muted">No members found</Text>
+                                        <Button
+                                            variant="primary"
+                                            size="sm"
+                                            onClick={() => setIsInviteModalOpen(true)}
+                                            style={{ marginTop: '16px' }}
+                                        >
+                                            Invite your first member
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <Table
+                                        data={members}
+                                        columns={columns}
+                                        onRowPress={handleRowClick}
+                                        hoverable
+                                    />
+                                )}
+                            </Card>
+                        )}
                     </div>
                 </div>
             </div>
 
             {/* Member Details Drawer */}
             <MemberDrawer
-                title={selectedMember ? selectedMember.name : 'Member Details'}
-                description={selectedMember?.email}
+                title={selectedMember ? selectedMember.userName : 'Member Details'}
+                description={selectedMember?.userEmail}
                 headerActions={
                     selectedMember && (
                         <>
-                            <Button variant="outline" size="sm">
-                                Edit
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setMemberToSuspend(selectedMember)}
+                            >
+                                {selectedMember.status === 'suspended' ? 'Reactivate' : 'Suspend'}
                             </Button>
-                            <Button variant="destructive" size="sm">
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => setMemberToRemove(selectedMember)}
+                            >
                                 Remove
                             </Button>
                         </>
@@ -205,32 +321,37 @@ export default function OrganizationMembersPage() {
                             <div className="space-y-3">
                                 <div>
                                     <Text color="muted" size="sm">Name</Text>
-                                    <Text>{selectedMember.name}</Text>
+                                    <Text>{selectedMember.userName}</Text>
                                 </div>
                                 <div>
                                     <Text color="muted" size="sm">Email</Text>
-                                    <Text>{selectedMember.email}</Text>
+                                    <Text>{selectedMember.userEmail}</Text>
                                 </div>
                                 <div>
                                     <Text color="muted" size="sm">Role</Text>
-                                    <Text>{selectedMember.role}</Text>
+                                    <Select
+                                        options={ROLE_OPTIONS}
+                                        value={selectedMember.role || 'member'}
+                                        onChange={(newRole) => handleRoleChange(selectedMember.id, newRole as string)}
+                                        size="sm"
+                                    />
                                 </div>
                                 <div>
                                     <Text color="muted" size="sm">Status</Text>
-                                    <Badge
-                                        variant={
-                                            selectedMember.status === 'active' ? 'success' :
-                                                selectedMember.status === 'pending' ? 'warning' :
-                                                    'secondary'
-                                        }
-                                    >
-                                        {selectedMember.status}
+                                    <Badge variant={STATUS_BADGE_VARIANT[selectedMember.status || 'active']}>
+                                        {selectedMember.status || 'active'}
                                     </Badge>
                                 </div>
                                 <div>
                                     <Text color="muted" size="sm">Joined</Text>
-                                    <Text>{selectedMember.joinedAt}</Text>
+                                    <Text>{formatDate(selectedMember.joinedAt)}</Text>
                                 </div>
+                                {selectedMember.invitedByEmail && (
+                                    <div>
+                                        <Text color="muted" size="sm">Invited By</Text>
+                                        <Text>{selectedMember.invitedByEmail}</Text>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -254,6 +375,39 @@ export default function OrganizationMembersPage() {
                     </div>
                 )}
             </MemberDrawer>
+
+            {/* Invite Member Modal */}
+            <InviteMemberModal
+                isOpen={isInviteModalOpen}
+                onClose={() => setIsInviteModalOpen(false)}
+                onSubmit={createInvite}
+            />
+
+            {/* Remove Member Confirmation */}
+            <ConfirmationDialog
+                isOpen={!!memberToRemove}
+                onClose={() => setMemberToRemove(null)}
+                onConfirm={handleRemoveMember}
+                title="Remove Member"
+                description={`Are you sure you want to remove ${memberToRemove?.userName} from the organization? They will lose access to all organization resources.`}
+                confirmText="Remove Member"
+                variant="danger"
+            />
+
+            {/* Suspend/Reactivate Member Confirmation */}
+            <ConfirmationDialog
+                isOpen={!!memberToSuspend}
+                onClose={() => setMemberToSuspend(null)}
+                onConfirm={handleToggleSuspend}
+                title={memberToSuspend?.status === 'suspended' ? 'Reactivate Member' : 'Suspend Member'}
+                description={
+                    memberToSuspend?.status === 'suspended'
+                        ? `Are you sure you want to reactivate ${memberToSuspend?.userName}? They will regain access to organization resources.`
+                        : `Are you sure you want to suspend ${memberToSuspend?.userName}? They will temporarily lose access to organization resources.`
+                }
+                confirmText={memberToSuspend?.status === 'suspended' ? 'Reactivate' : 'Suspend'}
+                variant={memberToSuspend?.status === 'suspended' ? 'info' : 'warning'}
+            />
         </>
     );
 }

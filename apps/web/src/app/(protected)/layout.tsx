@@ -8,7 +8,7 @@ import { AppBar } from '@vas-dj-saas/ui';
 import { navigationConfig } from '@vas-dj-saas/core';
 import { getPageMetadata } from '@/utils/navigation-helpers';
 import { useAuthGuard } from '@/hooks/useAuthGuard';
-import { Bell } from 'lucide-react';
+import { Bell, Menu } from 'lucide-react';
 
 /**
  * Protected Layout
@@ -22,10 +22,23 @@ export default function ProtectedLayout({
   const { isLoading, account } = useAuthGuard();
   const pathname = usePathname();
   const [isMounted, setIsMounted] = React.useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(false);
 
   // Prevent hydration mismatch by only rendering dynamic content after mount
   React.useEffect(() => {
     setIsMounted(true);
+  }, []);
+
+  // Detect mobile screen size
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   // Get page metadata from navigation config
@@ -50,7 +63,10 @@ export default function ProtectedLayout({
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Unified Sidebar Navigation */}
-      <MainSidebar />
+      <MainSidebar
+        isMobileMenuOpen={isMobileMenuOpen}
+        onMobileMenuToggle={setIsMobileMenuOpen}
+      />
 
       {/* Main Content with AppBar */}
       <main className="flex-1 overflow-y-auto flex flex-col">
@@ -58,8 +74,19 @@ export default function ProtectedLayout({
         {isMounted && (
           <AppBar
             title={pageMetadata?.title || 'My Application'}
-            subtitle={pageMetadata?.description}
+            subtitle={isMobile ? undefined : pageMetadata?.description}
             position="sticky"
+            leading={
+              isMobile ? (
+                <button
+                  onClick={() => setIsMobileMenuOpen(true)}
+                  className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors md:hidden"
+                  aria-label="Open menu"
+                >
+                  <Menu size={20} />
+                </button>
+              ) : undefined
+            }
             actions={[
               {
                 id: 'notifications',

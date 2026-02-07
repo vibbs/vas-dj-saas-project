@@ -304,7 +304,7 @@ export const navigationConfig: NavConfig = {
           },
         },
 
-        // Billing Settings - Standalone page
+        // Billing Settings - Hub with secondary sidebar
         {
           id: "settings-billing",
           label: "Billing",
@@ -312,12 +312,95 @@ export const navigationConfig: NavConfig = {
           href: "/settings/billing",
           description: "Subscription and payment settings",
           order: 4,
+          viewType: "hub",
           permission: {
             type: "custom",
             customCheck: (account) =>
               (account.canManageBilling ?? false) ||
               (account.isOrgCreator ?? false) ||
               (account.isAdmin ?? false),
+          },
+          hubConfig: {
+            title: "Billing & Subscription",
+            description: "Manage your subscription plan, payment methods, and billing history",
+            cards: [
+              {
+                id: "billing-subscription",
+                title: "Subscription",
+                description: "View and manage your current subscription plan",
+                icon: "Sparkles",
+                href: "/settings/billing/subscription",
+                metric: "Pro",
+                metricLabel: "Current Plan",
+                order: 1,
+              },
+              {
+                id: "billing-invoices",
+                title: "Invoices",
+                description: "View and download your billing history and invoices",
+                icon: "FileText",
+                href: "/settings/billing/invoices",
+                metric: 12,
+                metricLabel: "This Year",
+                order: 2,
+              },
+              {
+                id: "billing-payment-methods",
+                title: "Payment Methods",
+                description: "Manage credit cards and payment options",
+                icon: "CreditCard",
+                href: "/settings/billing/payment-methods",
+                metric: 2,
+                metricLabel: "Cards",
+                order: 3,
+              },
+            ],
+            quickActions: [
+              {
+                id: "upgrade-plan",
+                label: "Upgrade Plan",
+                icon: "Sparkles",
+                href: "/settings/billing/subscription?action=upgrade",
+                variant: "primary",
+                order: 1,
+              },
+              {
+                id: "add-payment-method",
+                label: "Add Payment Method",
+                icon: "Plus",
+                href: "/settings/billing/payment-methods?action=add",
+                variant: "outline",
+                order: 2,
+              },
+            ],
+          },
+          secondarySidebar: {
+            showOverviewLink: true,
+            overviewLabel: "Overview",
+            overviewHref: "/settings/billing",
+            items: [
+              {
+                id: "billing-nav-subscription",
+                label: "Subscription",
+                icon: "Sparkles",
+                href: "/settings/billing/subscription",
+                order: 1,
+              },
+              {
+                id: "billing-nav-invoices",
+                label: "Invoices",
+                icon: "FileText",
+                href: "/settings/billing/invoices",
+                order: 2,
+              },
+              {
+                id: "billing-nav-payment-methods",
+                label: "Payment Methods",
+                icon: "CreditCard",
+                href: "/settings/billing/payment-methods",
+                order: 3,
+              },
+            ],
           },
         },
 

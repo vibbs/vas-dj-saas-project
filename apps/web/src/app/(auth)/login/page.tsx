@@ -26,11 +26,18 @@ export default function LoginPage() {
   // Redirect authenticated users to dashboard
   const { isLoading: authLoading } = useAuthGuard({ requireUnauthenticated: true });
 
-  // Check for query params (e.g., registered=true)
+  // Check for query params (registered, verified, passwordReset)
   useEffect(() => {
     const registered = searchParams.get('registered');
-    if (registered === 'true') {
-      setInfoMessage('Registration successful! Please sign in with your credentials.');
+    const verified = searchParams.get('verified');
+    const passwordReset = searchParams.get('passwordReset');
+
+    if (verified === 'true') {
+      setInfoMessage('Your email has been verified! Please sign in to continue.');
+    } else if (passwordReset === 'true') {
+      setInfoMessage('Your password has been reset! Please sign in with your new password.');
+    } else if (registered === 'true') {
+      setInfoMessage('Registration successful! Please check your email to verify your account, then sign in.');
     }
   }, [searchParams]);
 
@@ -92,10 +99,7 @@ export default function LoginPage() {
         error={error}
         showRememberMe={true}
         showForgotPassword={true}
-        onForgotPassword={() => {
-          // TODO: Implement forgot password
-          alert('Forgot password functionality coming soon!');
-        }}
+        onForgotPassword={() => router.push('/forgot-password')}
         onSignUpClick={() => router.push('/register-organization')}
       />
 

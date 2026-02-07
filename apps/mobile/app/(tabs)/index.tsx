@@ -1,32 +1,46 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-// import { useAuth } from '@vas-dj-saas/auth';
-import { Button, Card, Text, Heading, useTheme } from '@vas-dj-saas/ui';
+import { useAuthStatus, useAuthAccount, useAuthActions } from '@vas-dj-saas/auth';
+import { Button, Card, Text, useTheme } from '@vas-dj-saas/ui';
 
 export default function DashboardScreen() {
   const router = useRouter();
   const { theme } = useTheme();
-  
-  // Temporarily disable auth to test infinite loop
-  const user = null;
-  const organization = null;
-  const isAuthenticated = false;
-  const isOnTrial = false;
-  const trialDaysRemaining = null;
-  const hasAdminRole = false;
-  const isEmailVerified = false;
+  const { logout } = useAuthActions();
 
-  // Temporarily disable auth redirect
-  // React.useEffect(() => {
-  //   if (!isAuthenticated) {
-  //     router.replace('/' as any);
-  //   }
-  // }, [isAuthenticated, router]);
+  // Auth state from the store
+  const authStatus = useAuthStatus();
+  const account = useAuthAccount();
+
+  // Track if we've already navigated to prevent multiple redirects
+  const hasNavigated = useRef(false);
+
+  // Derived state from account
+  const user = account;
+  const organization = account?.organization || null;
+  const isOnTrial = organization?.onTrial || false;
+  const trialDaysRemaining = organization?.trialEndsOn
+    ? Math.ceil((new Date(organization.trialEndsOn).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : null;
+  const hasAdminRole = account?.role === 'admin' || account?.role === 'owner';
+  const isEmailVerified = account?.isEmailVerified ?? false;
+
+  // Redirect to landing page if unauthenticated
+  // IMPORTANT: Only redirect after auth has been checked (not during 'idle' or 'authenticating')
+  useEffect(() => {
+    // Only proceed if we have a definitive unauthenticated status
+    // 'idle' means auth is still being checked (hydration in progress)
+    // 'authenticating' means login is in progress
+    if (authStatus === 'unauthenticated' && !hasNavigated.current) {
+      hasNavigated.current = true;
+      router.replace('/');
+    }
+  }, [authStatus, router]);
 
   const handleLogout = async () => {
-    // await logout();
-    router.replace('/' as any);
+    await logout();
+    router.replace('/');
   };
 
   const styles = React.useMemo(() => StyleSheet.create({
@@ -106,10 +120,22 @@ export default function DashboardScreen() {
     },
   }), [theme]);
 
-  if (!isAuthenticated || !user) {
+  // Show loading while auth is being hydrated or checked
+  // This prevents the infinite loop by not rendering the dashboard until auth is determined
+  if (authStatus === 'idle' || authStatus === 'authenticating') {
     return (
       <View style={[styles.container, styles.loading]}>
         <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  // If not authenticated, show loading while redirect happens
+  // The useEffect above handles the actual navigation
+  if (authStatus !== 'authenticated' || !user) {
+    return (
+      <View style={[styles.container, styles.loading]}>
+        <Text>Redirecting...</Text>
       </View>
     );
   }
@@ -129,7 +155,7 @@ export default function DashboardScreen() {
           <Card style={[styles.noticeCard, styles.emailNotice]}>
             <View style={styles.noticeText}>
               <Text style={styles.emailNoticeText}>
-                ⚠️ Please verify your email address to access all features.{' '}
+                Please verify your email address to access all features.{' '}
               </Text>
               <Button
                 variant="ghost"
@@ -147,7 +173,7 @@ export default function DashboardScreen() {
           <Card style={[styles.noticeCard, styles.trialNotice]}>
             <View style={styles.noticeText}>
               <Text style={styles.trialNoticeText}>
-                🎉 You&apos;re on a free trial! {trialDaysRemaining} days remaining.{' '}
+                You&apos;re on a free trial! {trialDaysRemaining} days remaining.{' '}
               </Text>
               <Button variant="ghost" size="sm">
                 Upgrade Now

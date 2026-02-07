@@ -119,6 +119,7 @@ export { AuthService } from './services/auth';
 export { UsersService } from './services/users';
 export { OrganizationsService } from './services/organizations';
 export { InvitesService } from './services/invites';
+export { MembersService } from './services/members';
 
 // === Pagination Utilities ===
 export {

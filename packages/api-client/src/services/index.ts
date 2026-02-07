@@ -6,3 +6,5 @@
 export { AuthService } from './auth';
 export { UsersService } from './users';
 export { OrganizationsService } from './organizations';
+export { InvitesService } from './invites';
+export { MembersService } from './members';

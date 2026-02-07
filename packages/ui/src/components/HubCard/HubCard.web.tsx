@@ -84,7 +84,8 @@ export const HubCard: React.FC<HubCardProps> = ({
       tabIndex={onPress && !isDisabled && !isLoading ? 0 : undefined}
       aria-disabled={isDisabled || isLoading}
     >
-      <Card style={{ height: '100%', ...style }}>
+      <Card style={{ height: '100%', ...style }}
+        className='5px'>
         <div
           style={{
             padding: `${theme.spacing.lg}px`,

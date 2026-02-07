@@ -1,23 +1,27 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useAuthStatus } from '@vas-dj-saas/auth';
 import { Button, Text, Card, useTheme } from '@vas-dj-saas/ui';
 
 export default function LandingScreen() {
   const router = useRouter();
   const { theme } = useTheme();
+  const authStatus = useAuthStatus();
 
-  // Disable auth check to test theme provider
-  // const [authChecked, setAuthChecked] = React.useState(false);
+  // Track if we've already navigated to prevent multiple redirects
+  const hasNavigated = useRef(false);
 
-  // React.useEffect(() => {
-  //   // Simple timeout to simulate auth check
-  //   const timer = setTimeout(() => {
-  //     setAuthChecked(true);
-  //   }, 100);
-  //   
-  //   return () => clearTimeout(timer);
-  // }, []);
+  // Redirect to dashboard if already authenticated
+  // IMPORTANT: Only redirect after auth has been definitively checked
+  useEffect(() => {
+    // Only proceed if we have a definitive authenticated status
+    // 'idle' means auth is still being checked (hydration in progress)
+    if (authStatus === 'authenticated' && !hasNavigated.current) {
+      hasNavigated.current = true;
+      router.replace('/(tabs)');
+    }
+  }, [authStatus, router]);
 
   const handleSignIn = () => {
     router.push('auth/login' as any);
@@ -35,6 +39,10 @@ export default function LandingScreen() {
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
+    },
+    loadingContainer: {
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     scrollContent: {
       flexGrow: 1,
@@ -107,14 +115,24 @@ export default function LandingScreen() {
     },
   });
 
-  // Disable loading state for testing
-  // if (!authChecked) {
-  //   return (
-  //     <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-  //       <Text>Loading...</Text>
-  //     </View>
-  //   );
-  // }
+  // Show loading while auth is being hydrated
+  // This prevents the infinite loop by not showing the landing page until auth is determined
+  if (authStatus === 'idle') {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  // If authenticated, show loading while redirect happens
+  if (authStatus === 'authenticated') {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <Text>Redirecting to dashboard...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

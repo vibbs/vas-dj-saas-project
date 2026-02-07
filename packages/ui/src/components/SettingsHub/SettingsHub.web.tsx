@@ -84,6 +84,7 @@ export const SettingsHub: React.FC<SettingsHubProps> = ({
         display: 'flex',
         flexDirection: 'column',
         gap: `${theme.spacing.xl}px`,
+        paddingBottom: `${theme.spacing.xl}px`,
         ...style,
       }}
       data-testid={testID}
@@ -127,18 +128,21 @@ export const SettingsHub: React.FC<SettingsHubProps> = ({
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))',
             gap: `${theme.spacing.lg}px`,
           }}
         >
-          {sortedCards.map((card) => (
-            <HubCard
-              key={card.id}
-              {...card}
-              isLoading={isLoading}
-              onPress={onNavigate ? () => onNavigate(card.href) : undefined}
-            />
-          ))}
+          {sortedCards.map((card) => {
+            const { onPress: _, ...cardProps } = card;
+            return (
+              <HubCard
+                key={card.id}
+                {...cardProps}
+                isLoading={isLoading}
+                onPress={onNavigate ? () => onNavigate(card.href) : undefined}
+              />
+            );
+          })}
         </div>
       </div>
 
@@ -166,7 +170,7 @@ export const SettingsHub: React.FC<SettingsHubProps> = ({
                 <Button
                   key={action.id}
                   variant={action.variant || 'outline'}
-                  onPress={onNavigate ? () => onNavigate(action.href || '#') : undefined}
+                  onClick={onNavigate ? () => onNavigate(action.href || '#') : undefined}
                   disabled={isLoading}
                 >
                   <Icon name={action.icon} size={16} />

@@ -165,6 +165,11 @@ apps/*/.next/
 # Claude Code local settings
 .claude/settings.local.json
 
+# Self-improving agent system
+# Note: learnings, rules, processes are tracked (team knowledge)
+# State is optional - uncomment below to keep it personal
+# .claude/state/
+
 # Temporary/scratch files  
 scrapbok.md
 
