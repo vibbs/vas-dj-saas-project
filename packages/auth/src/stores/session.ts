@@ -67,8 +67,8 @@ export const useAuth = create<AuthState>()(
                 });
                 return;
               }
-            } catch (error) {
-              console.warn('Token refresh failed:', error);
+            } catch {
+              // Token refresh failed silently
             }
 
             // Refresh failed, mark as unauthenticated
@@ -98,8 +98,7 @@ export const useAuth = create<AuthState>()(
             } else {
               throw new Error('Failed to fetch account');
             }
-          } catch (error) {
-            console.warn('Failed to fetch user account:', error);
+          } catch {
             // Token is invalid, clear it
             set({
               status: 'unauthenticated',
@@ -126,7 +125,6 @@ export const useAuth = create<AuthState>()(
             const loginData = (response.data as any).data;
 
             if (!loginData || !loginData.access || !loginData.user) {
-              console.error('Login response missing expected fields:', response);
               throw new Error('Invalid login response structure');
             }
 
@@ -140,7 +138,6 @@ export const useAuth = create<AuthState>()(
             throw new Error('Login failed: Unexpected status code');
           }
         } catch (error: any) {
-          console.error('Login error:', error);
           const errorMessage = error?.data?.detail ||
                               error?.message ||
                               'Login failed';
@@ -157,9 +154,8 @@ export const useAuth = create<AuthState>()(
           // Note: Backend logout requires refresh token, but we use httpOnly cookies
           // So we call logout with an empty string (the cookie will be sent automatically)
           await AuthService.logout({ refresh: '' });
-        } catch (error) {
+        } catch {
           // Continue with logout even if API call fails
-          console.warn('Logout API call failed:', error);
         } finally {
           set({
             accessToken: undefined,

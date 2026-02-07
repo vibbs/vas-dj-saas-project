@@ -53,7 +53,7 @@ export function Navigation() {
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="md:hidden p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary"
-            aria-expanded="false"
+            aria-expanded={isMenuOpen}
           >
             <span className="sr-only">Open main menu</span>
             <svg
@@ -74,7 +74,7 @@ export function Navigation() {
         {/* Mobile Navigation Menu */}
         <div className={cn(
           "md:hidden overflow-hidden transition-all duration-300 ease-in-out",
-          isMenuOpen ? "max-h-150 opacity-100" : "max-h-0 opacity-0"
+          isMenuOpen ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"
         )}>
           <div className="py-4 space-y-4 border-t border-border">
             {siteConfig.navigation.main.map((item) => (

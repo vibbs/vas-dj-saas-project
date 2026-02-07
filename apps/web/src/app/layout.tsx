@@ -1,8 +1,6 @@
-'use client';
-
+import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "@vas-dj-saas/ui";
-import { AuthProvider } from "@/providers/AuthProvider";
+import { Providers } from "./Providers";
 import { validateEnv } from "@/lib/env";
 
 import "./globals.css";
@@ -17,10 +15,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Validate environment on app initialization
-if (typeof window === 'undefined') {
-  validateEnv();
-}
+// Validate environment on app initialization (server-side only)
+validateEnv();
+
+export const metadata: Metadata = {
+  title: "VAS-DJ SaaS",
+  description: "Your next-generation SaaS platform",
+};
 
 export default function RootLayout({
   children,
@@ -29,18 +30,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <title>VAS-DJ SaaS</title>
-        <meta name="description" content="Your next-generation SaaS platform" />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-        </ThemeProvider>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

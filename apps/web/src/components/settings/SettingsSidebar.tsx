@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import type { Account } from '@vas-dj-saas/api-client';
 import { cn } from '@/lib/utils';
 
@@ -28,7 +28,18 @@ interface SettingsSidebarProps {
  */
 export function SettingsSidebar({ account }: SettingsSidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Check if a nav item is active (handles both path and query params)
+  const isItemActive = (href: string) => {
+    const [itemPath, itemQuery] = href.split('?');
+    if (pathname !== itemPath) return false;
+    if (!itemQuery) return true;
+    const params = new URLSearchParams(itemQuery);
+    const tab = params.get('tab');
+    return tab ? searchParams.get('tab') === tab : true;
+  };
 
   // Check if user has required role
   const hasAccess = (requiredRole?: 'admin' | 'orgAdmin') => {
@@ -50,9 +61,9 @@ export function SettingsSidebar({ account }: SettingsSidebarProps) {
     {
       title: 'Personal',
       items: [
-        { label: 'Profile', href: '/settings/profile', icon: '👤' },
-        { label: 'Security', href: '/settings/security', icon: '🔒' },
-        { label: 'Notifications', href: '/settings/notifications', icon: '🔔' },
+        { label: 'Profile', href: '/settings/personal?tab=profile', icon: '👤' },
+        { label: 'Security', href: '/settings/personal?tab=security', icon: '🔒' },
+        { label: 'Notifications', href: '/settings/personal?tab=notifications', icon: '🔔' },
       ],
     },
     {
@@ -133,7 +144,7 @@ export function SettingsSidebar({ account }: SettingsSidebarProps) {
             )}
             <ul className="space-y-1">
               {section.items.map((item) => {
-                const isActive = pathname === item.href;
+                const isActive = isItemActive(item.href);
                 return (
                   <li key={item.href}>
                     <Link

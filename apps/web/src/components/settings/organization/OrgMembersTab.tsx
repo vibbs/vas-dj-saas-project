@@ -16,32 +16,35 @@ interface Member {
     joinedAt: string;
 }
 
-const mockMembers: Member[] = [
-    {
-        id: '1',
-        name: 'John Doe',
-        email: 'john@example.com',
-        role: 'Admin',
-        status: 'active',
-        joinedAt: '2024-01-15',
-    },
-    {
-        id: '2',
-        name: 'Jane Smith',
-        email: 'jane@example.com',
-        role: 'Member',
-        status: 'active',
-        joinedAt: '2024-02-20',
-    },
-    {
-        id: '3',
-        name: 'Bob Johnson',
-        email: 'bob@example.com',
-        role: 'Member',
-        status: 'pending',
-        joinedAt: '2024-03-10',
-    },
-];
+// Mock data only available in development
+const mockMembers: Member[] = process.env.NODE_ENV === 'development'
+    ? [
+        {
+            id: '1',
+            name: 'John Doe',
+            email: 'john@example.com',
+            role: 'Admin',
+            status: 'active',
+            joinedAt: '2024-01-15',
+        },
+        {
+            id: '2',
+            name: 'Jane Smith',
+            email: 'jane@example.com',
+            role: 'Member',
+            status: 'active',
+            joinedAt: '2024-02-20',
+        },
+        {
+            id: '3',
+            name: 'Bob Johnson',
+            email: 'bob@example.com',
+            role: 'Member',
+            status: 'pending',
+            joinedAt: '2024-03-10',
+        },
+    ]
+    : [];
 
 /**
  * Organization Members Tab

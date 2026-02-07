@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation';
 
 /**
  * Settings Root Page
- * Redirects to profile settings (default)
+ * Redirects to personal settings (default)
  */
 export default function SettingsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/settings/profile');
+    router.replace('/settings/personal');
   }, [router]);
 
   return null;

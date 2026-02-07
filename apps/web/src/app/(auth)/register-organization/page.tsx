@@ -28,15 +28,6 @@ export default function RegisterOrganizationPage() {
     setSuccessMessage(null);
 
     try {
-      console.log('[Registration] Starting registration with data:', {
-        email: data.email,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phone: data.phone,
-        organizationName: data.organizationName,
-        preferredSubdomain: data.preferredSubdomain,
-      });
-
       // Call registration API
       const response = await AuthService.register({
         email: data.email,
@@ -48,8 +39,6 @@ export default function RegisterOrganizationPage() {
         organizationName: data.organizationName,
         preferredSubdomain: data.preferredSubdomain,
       });
-
-      console.log('[Registration] Response received:', response);
 
       if (response.status === 201 || response.status === 200) {
         setSuccessMessage(
@@ -64,8 +53,6 @@ export default function RegisterOrganizationPage() {
         throw new Error('Registration failed. Please try again.');
       }
     } catch (err: any) {
-      console.error('Registration error:', err);
-
       // Extract error message from API response
       const errorMessage =
         err?.data?.detail ||
