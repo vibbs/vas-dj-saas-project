@@ -67,6 +67,7 @@ export function ConfirmationDialog({
           border: `1px solid ${colors.border}`,
           borderRadius: '8px',
           marginBottom: '20px',
+          color: colors.text,
         }}
       >
         <p style={{ margin: 0, color: colors.text, fontSize: '14px', lineHeight: 1.5 }}>
