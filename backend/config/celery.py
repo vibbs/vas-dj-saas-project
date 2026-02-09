@@ -1,6 +1,6 @@
 import os
+
 import django
-from django.conf import settings
 from celery import Celery
 from decouple import config
 
@@ -23,3 +23,18 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()
+
+# Celery Beat schedule for periodic tasks
+from celery.schedules import crontab
+
+app.conf.beat_schedule = {
+    # Daily cleanup of expired organization deletions (runs at 2 AM)
+    "cleanup-expired-deletions": {
+        "task": "apps.organizations.tasks.cleanup_expired_deletions",
+        "schedule": crontab(hour=2, minute=0),
+        "options": {
+            "expires": 3600,  # Task expires after 1 hour if not picked up
+        },
+    },
+    # Add more periodic tasks here as needed
+}

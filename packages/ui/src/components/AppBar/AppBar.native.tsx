@@ -131,7 +131,7 @@ export const AppBar: React.FC<AppBarProps> = ({
                 color: theme.colors.destructiveForeground,
                 fontSize: theme.typography.fontSize.xs,
                 fontFamily: theme.typography.fontFamily,
-                fontWeight: theme.typography.fontWeight.medium,
+                fontWeight: theme.typography.fontWeight.medium as any,
                 lineHeight: 12,
               }}
             >
@@ -194,7 +194,7 @@ export const AppBar: React.FC<AppBarProps> = ({
                   <Text
                     style={{
                       fontSize: variant === 'prominent' ? theme.typography.fontSize.xl : theme.typography.fontSize.lg,
-                      fontWeight: theme.typography.fontWeight.medium,
+                      fontWeight: theme.typography.fontWeight.medium as any,
                       color: titleColor,
                       fontFamily: theme.typography.fontFamily,
                     }}

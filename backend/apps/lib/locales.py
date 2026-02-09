@@ -1,5 +1,5 @@
 """
-Locale configuration for the Django SaaS project.
+Locale configuration for the VAS-DJ SaaS project.
 
 This module defines the supported locales and language configurations
 used throughout the application.

@@ -1,24 +1,26 @@
 import logging
-from rest_framework import viewsets, permissions, status
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
-from drf_spectacular.types import OpenApiTypes
+
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from .models import EmailTemplate, EmailLog
-from .serializers import (
-    EmailTemplateSerializer,
-    EmailTemplateCreateSerializer,
-    EmailLogSerializer,
-    EmailLogDetailSerializer,
-    SendEmailSerializer,
-    EmailTemplatePreviewSerializer,
-)
-from .services import EmailService, TemplateNotFoundError, EmailServiceError
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
+from rest_framework import permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
+from .models import EmailLog, EmailTemplate
 from .renderers import TemplateRenderer
+from .serializers import (
+    EmailLogDetailSerializer,
+    EmailLogSerializer,
+    EmailTemplateCreateSerializer,
+    EmailTemplatePreviewSerializer,
+    EmailTemplateSerializer,
+    SendEmailSerializer,
+)
+from .services import EmailService, EmailServiceError, TemplateNotFoundError
 
 log = logging.getLogger(f"{settings.LOG_APP_PREFIX}.email_service.views")
 User = get_user_model()

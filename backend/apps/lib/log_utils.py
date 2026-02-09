@@ -1,7 +1,6 @@
 import logging
 from contextvars import ContextVar
 
-
 TRANSACTION_ID_KEY = "transaction_id"
 
 _transaction_id: ContextVar[str] = ContextVar(TRANSACTION_ID_KEY, default=None)

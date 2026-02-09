@@ -48,6 +48,9 @@ export type { SliderProps } from "./components/Slider";
 export { FormField } from "./components/FormField";
 export type { FormFieldProps } from "./components/FormField";
 
+export { Label } from "./components/Label";
+export type { LabelProps } from "./components/Label";
+
 export { Radio } from "./components/Radio";
 export type { RadioProps, RadioOption } from "./components/Radio";
 
@@ -76,6 +79,9 @@ export type { FileUploadProps } from "./components/FileUpload";
 export { Divider } from "./components/Divider";
 export type { DividerProps } from "./components/Divider";
 
+export { Separator } from "./components/Separator";
+export type { SeparatorProps } from "./components/Separator";
+
 export { Collapse } from "./components/Collapse";
 export type { CollapseProps } from "./components/Collapse";
 
@@ -85,53 +91,110 @@ export type { ScrollAreaProps } from "./components/ScrollArea";
 export { Dialog } from "./components/Dialog";
 export type { DialogProps } from "./components/Dialog";
 
+export { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/Tabs";
+export type {
+  TabsProps,
+  TabsListProps,
+  TabsTriggerProps,
+  TabsContentProps,
+} from "./components/Tabs";
+
+// Router Port Interface (Hexagonal Architecture)
+export type {
+  TabRouterPort,
+  RouterNavigationOptions,
+} from "./adapters/router-port";
+export { useTabRouter, useDrawerRouter } from "./adapters/router-port";
+
+// Framework-agnostic navigation components (require router adapter)
+export { ShallowTabs } from "./components/ShallowTabs";
+export type { ShallowTabsProps, ShallowTab } from "./components/ShallowTabs";
+
+export { EntityDrawer } from "./components/EntityDrawer";
+export type {
+  EntityDrawerProps,
+  DrawerSide,
+  DrawerSize,
+} from "./components/EntityDrawer";
+
+// Hub + Secondary Sidebar components
+export { SettingsHub } from "./components/SettingsHub";
+export type { SettingsHubProps } from "./components/SettingsHub";
+
+export { HubCard } from "./components/HubCard";
+export type { HubCardProps } from "./components/HubCard";
+
+export { SecondarySidebar } from "./components/SecondarySidebar";
+export type { SecondarySidebarProps } from "./components/SecondarySidebar";
+
 export { Table } from "./components/Table";
 export type { TableProps, TableColumn } from "./components/Table";
 
 export { Tag } from "./components/Tag";
 export type { TagProps } from "./components/Tag";
 
-export { ListItem } from "./components/ListItem";
-export type { ListItemProps } from "./components/ListItem";
-
 export { EmptyState } from "./components/EmptyState";
 export type { EmptyStateProps } from "./components/EmptyState";
 
 export { DateTimePicker } from "./components/DateTimePicker";
-export type { 
-  DateTimePickerProps, 
-  DateTimeMode, 
-  CalendarViewProps, 
+export type {
+  DateTimePickerProps,
+  DateTimeMode,
+  CalendarViewProps,
   TimeSelectorProps,
   DateRange,
   TimeValue,
   NativeDateTimePickerEvent,
   NativeDateTimePickerMode,
-  NativeDateTimePickerDisplay
+  NativeDateTimePickerDisplay,
 } from "./components/DateTimePicker";
 
 // Navigation components
 export { Pagination } from "./components/Pagination";
-export type { PaginationProps, PaginationItemProps } from "./components/Pagination";
+export type {
+  PaginationProps,
+  PaginationItemProps,
+} from "./components/Pagination";
 
-export { Breadcrumbs } from "./components/Breadcrumbs";
-export type { BreadcrumbsProps, BreadcrumbItem, BreadcrumbItemComponentProps } from "./components/Breadcrumbs";
+export { Breadcrumb } from "./components/Breadcrumb";
+export type {
+  BreadcrumbProps,
+  BreadcrumbItem,
+  BreadcrumbItemComponentProps,
+} from "./components/Breadcrumb";
 
 export { Stepper } from "./components/Stepper";
-export type { StepperProps, StepperStep, StepperStepComponentProps } from "./components/Stepper";
+export type {
+  StepperProps,
+  StepperStep,
+  StepperStepComponentProps,
+} from "./components/Stepper";
 
 export { Sidebar } from "./components/Sidebar";
-export type { SidebarProps, SidebarItem, SidebarItemComponentProps } from "./components/Sidebar";
+export type {
+  SidebarProps,
+  SidebarItem,
+  SidebarItemComponentProps,
+} from "./components/Sidebar";
 
 export { AppBar } from "./components/AppBar";
-export type { AppBarProps, AppBarAction, AppBarActionComponentProps } from "./components/AppBar";
+export type {
+  AppBarProps,
+  AppBarAction,
+  AppBarActionComponentProps,
+} from "./components/AppBar";
 
 // Media components
 export { Image } from "./components/Image";
-export type { ImageProps, ImageSource, ProcessedImageSource } from "./components/Image";
+export type {
+  ImageProps,
+  ImageSource,
+  ProcessedImageSource,
+} from "./components/Image";
 
 // Theme system exports
 export { ThemeProvider, useTheme } from "./theme/ThemeProvider";
+export { useStableTheme, useThemedStyles } from "./theme/useStableTheme";
 export { defaultTheme, darkTheme, themes } from "./theme/tokens";
 export type {
   Theme,
@@ -151,3 +214,16 @@ export {
   getThemeCssVar,
   cssVars,
 } from "./theme/cssVariables";
+
+// Auth components
+export { AuthLayout } from "./components/AuthLayout";
+export type {
+  AuthLayoutProps,
+  AuthHeaderProps,
+  AuthFooterProps,
+} from "./components/AuthLayout";
+
+// State management stores
+export * from "./stores/layout";
+export * from "./stores/toast";
+export * from "./stores/modal";

@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Theme, defaultTheme, themes, ThemeName } from './tokens';
-import { injectThemeCssVariables } from './cssVariables';
+import { Theme, themes, ThemeName } from './tokens';
 
 interface ThemeContextValue {
   theme: Theme;
@@ -9,75 +8,79 @@ interface ThemeContextValue {
   toggleTheme: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+// Create the context with a default value to avoid undefined issues
+const defaultTheme = themes.default;
+const defaultContextValue: ThemeContextValue = {
+  theme: defaultTheme,
+  themeName: 'default',
+  setTheme: () => {},
+  toggleTheme: () => {},
+};
+
+const ThemeContext = createContext<ThemeContextValue>(defaultContextValue);
 
 export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
+  return useContext(ThemeContext);
 };
 
 interface ThemeProviderProps {
   children: React.ReactNode;
   defaultTheme?: ThemeName;
-  theme?: Theme; // Allow direct theme object
+  theme?: Theme;
   enableSystem?: boolean;
   attribute?: string;
   value?: Record<ThemeName, string>;
-  injectCssVariables?: boolean; // Control CSS variable injection
+  injectCssVariables?: boolean;
 }
+
+/**
+ * Detect if system is in dark mode
+ */
+const getSystemTheme = (): ThemeName => {
+  if (typeof window === 'undefined') return 'default';
+
+  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  return isDark ? 'dark' : 'default';
+};
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
-  defaultTheme: defaultThemeName = 'default',
-  theme: directTheme,
+  defaultTheme: providedDefaultTheme,
   enableSystem = true,
-  attribute = 'data-theme',
-  value,
-  injectCssVariables = true,
 }) => {
-  const [themeName, setThemeName] = useState<ThemeName>(defaultThemeName);
-  const [theme, setTheme] = useState<Theme>(directTheme || themes[defaultThemeName]);
+  // Initialize theme based on system preference or provided default
+  const [themeName, setThemeName] = useState<ThemeName>(() => {
+    if (providedDefaultTheme) return providedDefaultTheme;
+    if (enableSystem) return getSystemTheme();
+    return 'default';
+  });
 
-  const handleSetTheme = (newThemeName: ThemeName) => {
-    const newTheme = themes[newThemeName];
-    setThemeName(newThemeName);
-    setTheme(newTheme);
-    
-    // Update document attribute and inject CSS variables
-    if (typeof document !== 'undefined') {
-      const themeValue = value?.[newThemeName] || newThemeName;
-      document.documentElement.setAttribute(attribute, themeValue);
-      
-      // Inject comprehensive CSS variables
-      if (injectCssVariables) {
-        injectThemeCssVariables(newTheme);
-      }
-    }
-  };
+  // Listen for system theme changes
+  useEffect(() => {
+    if (!enableSystem) return;
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      // Only auto-switch if user hasn't manually set a theme
+      setThemeName(e.matches ? 'dark' : 'default');
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, [enableSystem]);
 
   const toggleTheme = () => {
-    const newTheme = themeName === 'default' ? 'dark' : 'default';
-    handleSetTheme(newTheme);
+    setThemeName(current => current === 'dark' ? 'default' : 'dark');
   };
 
-  useEffect(() => {
-    if (directTheme) {
-      // If direct theme is provided, inject it without changing state
-      if (injectCssVariables && typeof document !== 'undefined') {
-        injectThemeCssVariables(directTheme);
-      }
-    } else {
-      handleSetTheme(themeName);
-    }
-  }, [directTheme]);
-
   const contextValue: ThemeContextValue = {
-    theme,
+    theme: themes[themeName],
     themeName,
-    setTheme: handleSetTheme,
+    setTheme: setThemeName,
     toggleTheme,
   };
 

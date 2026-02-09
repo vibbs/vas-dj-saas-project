@@ -1,14 +1,13 @@
-
-
 # We want to create a custom enum class which can used across the project
 from enum import Enum
+
 
 class CustomEnum(Enum):
     """
     Custom Enum class to provide additional functionality if needed.
     This can be extended with methods or properties that are common to all enums in the project.
     """
-    
+
     @classmethod
     def choices(cls):
         """
@@ -16,7 +15,6 @@ class CustomEnum(Enum):
         Each tuple contains the enum value and its name.
         """
         return [(tag.value, tag.value) for tag in cls]
-    
 
     def __str__(self):
         return self.value
@@ -25,9 +23,13 @@ class CustomEnum(Enum):
         if isinstance(other, str):
             return self.value == other
         return super().__eq__(other)
-    
+
     def check_value(self, value):
         """
         Check if the provided value is a valid choice for this enum.
         """
-        return value in [tag.value for tag in self]
+        return value in [tag.value for tag in self.__class__]
+
+    def __hash__(self):
+        """Make enum instances hashable for use in sets and as dict keys."""
+        return hash((self.__class__.__name__, self.value))

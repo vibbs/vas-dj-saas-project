@@ -1,11 +1,13 @@
 import logging
-from typing import Dict, Any, Optional, Union
-from datetime import datetime
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-from django.contrib.auth import get_user_model
+from typing import Any
+
 from celery import shared_task
-from .models import EmailTemplate, EmailLog, EmailStatus
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.core.mail import EmailMultiAlternatives
+from django.utils import timezone as django_timezone
+
+from .models import EmailLog, EmailStatus, EmailTemplate
 from .renderers import TemplateRenderer
 
 log = logging.getLogger(f"{settings.LOG_APP_PREFIX}.email_service.services")
@@ -33,6 +35,7 @@ class EmailService:
     def __init__(self, organization):
         self.organization = organization
         self.renderer = TemplateRenderer(organization)
+        log.debug(f"EmailService initialized with organization: {organization}")
 
     @classmethod
     def for_organization(cls, organization):
@@ -41,9 +44,9 @@ class EmailService:
 
     def send_email(
         self,
-        recipient: Union[str, User],
+        recipient: str | User,
         template_slug: str,
-        context: Optional[Dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
         send_async: bool = True,
         **kwargs,
     ) -> EmailLog:
@@ -78,17 +81,28 @@ class EmailService:
 
         # Check if template exists (either in DB or as default)
         if not self._template_exists(template_slug):
-            log.error(
-                f"Template '{template_slug}' not found for organization {self.organization.id}"
+            org_info = (
+                f"organization {self.organization.id}"
+                if self.organization
+                else "no organization"
             )
+            log.error(f"Template '{template_slug}' not found for {org_info}")
             raise TemplateNotFoundError(f"Template '{template_slug}' not found")
 
         # Render email content
         try:
+            log.debug(
+                f"Rendering email template '{template_slug}' with context keys: {list(context.keys())}"
+            )
             rendered_content = self.renderer.render_email(
                 template_slug, context, user=recipient_user
             )
-            log.debug(f"Email template '{template_slug}' rendered successfully")
+            log.debug(
+                f"Email template '{template_slug}' rendered successfully - Subject: '{rendered_content['subject'][:100]}...'"
+            )
+            log.debug(
+                f"HTML content length: {len(rendered_content.get('html_content', ''))}, Text content length: {len(rendered_content.get('text_content', ''))}"
+            )
         except Exception as e:
             log.error(f"Error rendering template '{template_slug}': {e}", exc_info=True)
             raise EmailServiceError(f"Template rendering failed: {e}")
@@ -157,22 +171,25 @@ class EmailService:
 
     def _template_exists(self, template_slug: str) -> bool:
         """Check if template exists in database or as default file"""
+        org_id = self.organization.id if self.organization else None
         log.debug(
-            f"Checking template existence: '{template_slug}' for organization {self.organization.id}"
+            f"Checking template existence: '{template_slug}' for organization {org_id}"
         )
 
-        # Check database first
-        db_template_exists = EmailTemplate.objects.filter(
-            organization=self.organization, slug=template_slug, is_active=True
-        ).exists()
+        # Check database first (skip if no organization)
+        db_template_exists = False
+        if self.organization:
+            db_template_exists = EmailTemplate.objects.filter(
+                organization=self.organization, slug=template_slug, is_active=True
+            ).exists()
 
         if db_template_exists:
             log.debug(f"Template '{template_slug}' found in database")
             return True
 
         # Check for default file template
-        from django.template.loader import get_template
         from django.template.exceptions import TemplateDoesNotExist
+        from django.template.loader import get_template
 
         try:
             get_template(f"email_service/{template_slug}.html")
@@ -188,19 +205,32 @@ class EmailService:
         self,
         template_slug: str,
         recipient_email: str,
-        recipient_user: Optional[User],
-        rendered_content: Dict[str, str],
-        context: Dict[str, Any],
+        recipient_user: User | None,
+        rendered_content: dict[str, str],
+        context: dict[str, Any],
     ) -> EmailLog:
         """Create email log entry"""
         # Get template reference if it exists
         template = None
-        try:
-            template = EmailTemplate.objects.get(
-                organization=self.organization, slug=template_slug, is_active=True
-            )
-        except EmailTemplate.DoesNotExist:
-            pass
+        if self.organization:
+            try:
+                template = EmailTemplate.objects.get(
+                    organization=self.organization, slug=template_slug, is_active=True
+                )
+            except EmailTemplate.DoesNotExist:
+                pass
+
+        # Filter context to remove non-serializable objects
+        serializable_context = {}
+        for key, value in context.items():
+            try:
+                import json
+
+                json.dumps(value)  # Test if serializable
+                serializable_context[key] = value
+            except (TypeError, ValueError):
+                # Skip non-serializable values like User objects
+                serializable_context[key] = str(value)
 
         return EmailLog.objects.create(
             organization=self.organization,
@@ -211,7 +241,7 @@ class EmailService:
             subject=rendered_content["subject"],
             html_content=rendered_content["html_content"],
             text_content=rendered_content["text_content"],
-            context_data=context,
+            context_data=serializable_context,
             status=EmailStatus.PENDING,
         )
 
@@ -248,7 +278,7 @@ class EmailService:
             if result:
                 # Update log as sent
                 email_log.status = EmailStatus.SENT
-                email_log.sent_at = datetime.now()
+                email_log.sent_at = django_timezone.now()
                 email_log.save(update_fields=["status", "sent_at", "updated_at"])
 
                 log.info(
@@ -379,6 +409,7 @@ def send_email_task(self, email_log_id: int):
 def cleanup_old_email_logs():
     """Celery task to cleanup old email logs (run periodically)"""
     from datetime import timedelta
+
     from django.utils import timezone
 
     log.info("Starting email logs cleanup task")
@@ -407,8 +438,9 @@ def send_email(organization, recipient, template_slug, context=None, **kwargs):
             context={'user_name': user.full_name}
         )
     """
+    org_id = organization.id if organization else None
     log.debug(
-        f"Convenience send_email called: org={organization.id}, template='{template_slug}', recipient='{recipient}'"
+        f"Convenience send_email called: org={org_id}, template='{template_slug}', recipient='{recipient}'"
     )
     service = EmailService.for_organization(organization)
     return service.send_email(recipient, template_slug, context, **kwargs)

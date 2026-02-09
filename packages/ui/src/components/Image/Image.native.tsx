@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Image as RNImage, ActivityIndicator, Text, ViewStyle, ImageStyle, Platform } from 'react-native';
-import { ImageProps } from './types';
+import { ImageProps, ImageSource } from './types';
 import { useTheme } from '../../theme/ThemeProvider';
 import { 
   processImageSource, 
@@ -154,6 +154,21 @@ export const Image: React.FC<ImageProps> = ({
     }
     
     if (fallback) {
+      // Handle fallback as ImageSource
+      if (typeof fallback === 'object' && 'uri' in fallback) {
+        const fallbackSource = processImageSource(fallback as ImageSource);
+        return (
+          <RNImage
+            source={fallbackSource}
+            style={[imageStyles, dimensionStyles]}
+            accessible={true}
+            accessibilityLabel={accessibilityLabel || alt || 'Fallback image'}
+            testID={testID ? `${testID}-fallback` : undefined}
+          />
+        );
+      }
+      
+      // Handle fallback as ReactNode
       return (
         <View 
           style={containerStyles}
@@ -161,7 +176,7 @@ export const Image: React.FC<ImageProps> = ({
           accessibilityLabel={accessibilityLabel || alt || 'Fallback content'}
           testID={testID ? `${testID}-fallback` : undefined}
         >
-          {fallback}
+          {fallback as React.ReactNode}
         </View>
       );
     }

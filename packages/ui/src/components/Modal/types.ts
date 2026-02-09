@@ -23,7 +23,7 @@ export interface ModalProps {
   // Accessibility props (WCAG 2.1 AA compliant)
   accessibilityLabel?: string;     // React Native: Accessible name
   accessibilityHint?: string;      // React Native: Additional context
-  accessibilityRole?: 'dialog' | 'alertdialog' | 'none'; // React Native: Element role
+  accessibilityRole?: 'none' | 'button'; // React Native: Element role
   'aria-label'?: string;           // Web: Accessible name
   'aria-describedby'?: string;     // Web: References to describing elements
   'aria-labelledby'?: string;      // Web: References to title element

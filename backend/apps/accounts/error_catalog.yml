@@ -1,0 +1,71 @@
+- slug: account-not-found
+  type: https://docs.yourapp.com/problems/account-not-found
+  title: Account not found
+  default_status: 404
+  i18n_key: account.not_found
+  description: The specified user account could not be found.
+  codes:
+    - VDJ-ACC-NOTFOUND-404
+
+- slug: account-already-exists
+  type: https://docs.yourapp.com/problems/account-already-exists
+  title: Account already exists
+  default_status: 409
+  i18n_key: account.already_exists
+  description: An account with this email address already exists.
+  codes:
+    - VDJ-ACC-EXISTS-409
+
+- slug: invalid-credentials
+  type: https://docs.yourapp.com/problems/invalid-credentials
+  title: Invalid credentials
+  default_status: 401
+  i18n_key: account.invalid_credentials
+  description: The email or password provided is incorrect.
+  codes:
+    - VDJ-ACC-CREDS-401
+
+- slug: account-inactive
+  type: https://docs.yourapp.com/problems/account-inactive
+  title: Account inactive
+  default_status: 403
+  i18n_key: account.inactive
+  description: This account has been deactivated.
+  codes:
+    - VDJ-ACC-INACTIVE-403
+
+- slug: email-not-verified
+  type: https://docs.yourapp.com/problems/email-not-verified
+  title: Email not verified
+  default_status: 403
+  i18n_key: account.email_not_verified
+  description: Email address must be verified before accessing this resource.
+  codes:
+    - VDJ-ACC-EMAIL-403
+
+- slug: password-reset-invalid
+  type: https://docs.yourapp.com/problems/password-reset-invalid
+  title: Password reset invalid
+  default_status: 400
+  i18n_key: account.password_reset_invalid
+  description: The password reset token is invalid or has expired.
+  codes:
+    - VDJ-ACC-RESET-400
+
+- slug: registration-disabled
+  type: https://docs.yourapp.com/problems/registration-disabled
+  title: Registration disabled
+  default_status: 403
+  i18n_key: account.registration_disabled
+  description: Account registration is currently disabled.
+  codes:
+    - VDJ-ACC-REG-403
+
+- slug: profile-update-failed
+  type: https://docs.yourapp.com/problems/profile-update-failed
+  title: Profile update failed
+  default_status: 400
+  i18n_key: account.profile_update_failed
+  description: Unable to update user profile due to validation errors.
+  codes:
+    - VDJ-ACC-PROFILE-400

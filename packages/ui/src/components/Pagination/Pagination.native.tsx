@@ -148,7 +148,7 @@ export const Pagination: React.FC<PaginationProps> = ({
 
   const baseTextStyles: TextStyle = {
     fontFamily: theme.typography.fontFamily,
-    fontWeight: theme.typography.fontWeight.medium,
+    fontWeight: theme.typography.fontWeight.medium as any,
     ...sizeTextStyles[size],
     ...variantTextStyles[variant],
   };
@@ -228,7 +228,7 @@ export const Pagination: React.FC<PaginationProps> = ({
       testID={testID}
       accessible={true}
       accessibilityLabel={accessibilityLabel || 'Pagination navigation'}
-      accessibilityRole="navigation"
+      accessibilityRole="none"
     >
       {/* First page button */}
       {showFirstLast && totalPages > maxVisiblePages && (

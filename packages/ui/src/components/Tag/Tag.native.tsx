@@ -127,7 +127,7 @@ export const Tag: React.FC<TagProps> = ({
   const textStyles: TextStyle = {
     fontFamily: theme.typography.fontFamily,
     fontSize: sizeStyles.fontSize,
-    fontWeight: theme.typography.fontWeight.medium,
+    fontWeight: theme.typography.fontWeight.medium as any,
     color: variantStyles.color,
     lineHeight: sizeStyles.fontSize * 1.2,
   };

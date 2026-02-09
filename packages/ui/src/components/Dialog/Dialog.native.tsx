@@ -30,7 +30,7 @@ export const Dialog: React.FC<DialogProps> = ({
   overlayStyle,
   testID,
   // Accessibility props
-  accessibilityRole = 'dialog' as const,
+  accessibilityRole = 'none' as const,
   accessibilityLabel,
   accessibilityHint,
   accessibilityViewIsModal = true,
@@ -175,7 +175,7 @@ export const Dialog: React.FC<DialogProps> = ({
   const titleStyles: TextStyle = {
     margin: 0,
     fontSize: theme.typography.fontSize.xl,
-    fontWeight: theme.typography.fontWeight.semibold,
+    fontWeight: theme.typography.fontWeight.semibold as any,
     color: theme.colors.foreground,
     marginBottom: description ? theme.spacing.xs : 0,
   };

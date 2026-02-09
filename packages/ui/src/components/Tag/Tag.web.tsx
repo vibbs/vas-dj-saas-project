@@ -125,7 +125,7 @@ export const Tag: React.FC<TagProps> = ({
 
   const handleClick = (e: React.MouseEvent) => {
     if (disabled) return;
-    onClick?.(e as any);
+    onClick?.();
   };
 
   const handleCloseClick = (e: React.MouseEvent) => {

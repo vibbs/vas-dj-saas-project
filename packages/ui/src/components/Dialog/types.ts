@@ -23,7 +23,7 @@ export interface DialogProps {
   'aria-describedby'?: string;         // Web: References description element
   'aria-modal'?: boolean;              // Web: Modal dialog indicator
   role?: string;                       // Web: Element role
-  accessibilityRole?: 'dialog' | 'alertdialog'; // React Native: Element role
+  accessibilityRole?: 'none' | 'button'; // React Native: Element role
   accessibilityLabel?: string;         // React Native: Accessible name
   accessibilityHint?: string;          // React Native: Additional context
   accessibilityViewIsModal?: boolean;  // React Native: Modal behavior

@@ -116,3 +116,7 @@ storybook:
 kill-storybook:
 	@echo "🔫 Killing Storybook on port 6006..."
 	@lsof -i :6006 | awk 'NR!=1 {print $2}' | xargs kill -9 || echo "❌ No Storybook process found"
+
+
+print-tree:
+	tree -L 3 -I 'node_modules|dist|storybook-static'

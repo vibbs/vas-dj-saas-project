@@ -17,8 +17,57 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `docker compose -f ./docker/docker-compose.yml run --rm web python manage.py <command>`
 - `docker compose -f ./docker/docker-compose.yml exec web python manage.py <command>` (if container is running)
 
+### Pre-Commit Hooks (Smart Auto-Fix)
+- `make pre-commit-setup` - **One-time setup**: Install all dependencies (black, isort, ruff)
+- `make pre-commit-install` - Install git hooks with auto-fix capabilities
+- `make pre-commit-check` - Run smart checks with auto-fix (formats code, creates migrations)
+- `make pre-commit-check-manual` - Run checks without auto-fix
+- `make pre-commit-run` - Run all hooks on all files
+- **If commit blocked**: See [TROUBLESHOOTING-GIT-HOOKS.md](docs/development/TROUBLESHOOTING-GIT-HOOKS.md) for quick fixes
+- **Detailed guide**: [PRE-COMMIT-GUIDE.md](docs/development/PRE-COMMIT-GUIDE.md)
+
+### Testing Framework
+This project uses pytest with comprehensive test coverage:
+
+#### Test Setup Commands
+- `make test-build` - Build test Docker containers with isolated test database
+- `make test-clean` - Clean up test containers and volumes
+
+#### Basic Test Commands
+- `make test` - Run all tests with pytest
+- `make test-verbose` - Run tests with verbose output
+- `make test-coverage` - Run tests with coverage report (saves to htmlcov/)
+- `make test-parallel` - Run tests in parallel for faster execution
+
+#### Test Categories (using pytest markers)
+- `make test-unit` - Unit tests only
+- `make test-integration` - Integration tests only  
+- `make test-api` - API endpoint tests only
+- `make test-models` - Model tests only
+- `make test-views` - View tests only
+- `make test-auth` - Authentication tests only
+- `make test-fast` - Fast tests only (excludes slow tests)
+- `make test-slow` - Slow/complex tests only
+
+#### Test by Django App
+- `make test-accounts` - Accounts app tests
+- `make test-organizations` - Organizations app tests
+- `make test-billing` - Billing app tests
+- `make test-email` - Email service tests
+- `make test-core` - Core app tests
+
+#### Test Infrastructure
+- **Test Database**: Isolated PostgreSQL instance with tmpfs for speed
+- **Factory Boy**: Test data factories for all models
+- **pytest-django**: Django integration with database fixtures
+- **pytest-cov**: Coverage reporting with HTML output
+- **pytest-xdist**: Parallel test execution
+- **freezegun**: Time mocking for deterministic tests
+- **Fixtures**: Comprehensive pytest fixtures in conftest.py files
+- **Markers**: Organized test categorization for selective running
+
 ### Testing and Development
-- Run tests: `docker compose -f ./docker/docker-compose.yml run --rm web python manage.py test`
+- Run tests: `make test` (uses pytest framework)
 - Create superuser: `docker compose -f ./docker/docker-compose.yml run --rm web python manage.py createsuperuser`
 - Django shell: `docker compose -f ./docker/docker-compose.yml run --rm web python manage.py shell`
 
@@ -88,11 +137,84 @@ This is a Django SaaS project with multi-tenancy support:
 
 ### Dependencies
 - Django 5.2+ with DRF for API development
-- django-tenants for multi-tenancy
+- django-cors-headers for CORS support
+- django-ratelimit for rate limiting
+- django-redis for caching
+- sentry-sdk for error tracking
 - Celery + Redis for background tasks
 - PostgreSQL with psycopg2-binary
 - drf-spectacular for OpenAPI/Swagger documentation
-- Poetry for dependency management
+- UV for ultra-fast package installation (10-100x faster than pip/poetry)
+- Poetry (migrated to UV for better performance)
+
+## Security & Production Readiness
+
+### Security Features Implemented
+1. **Environment Security**
+   - SECRET_KEY must be set via environment variable (no hardcoded secrets)
+   - DEBUG=False by default (secure by default)
+   - Comprehensive environment variable validation on startup
+   - CORS properly configured with django-cors-headers
+
+2. **Tenant Isolation**
+   - All ViewSets filter data by user's organization memberships
+   - Cross-tenant data leaks prevented via `get_queryset()` scoping
+   - `IsOrgMember` permission class for organization-scoped access
+   - Middleware validates organization membership on every request
+
+3. **Authentication Security**
+   - Timing attack protection using `hmac.compare_digest()` for token verification
+   - 512-bit (64-byte) tokens for email verification
+   - Rate limiting on all authentication endpoints
+   - Audit logging for all login attempts (success and failure)
+   - Social auth users properly created with `set_unusable_password()`
+
+4. **Audit Logging** (`apps/core/audit/`)
+   - Comprehensive audit trail for all security events
+   - Tracks: who, what, when, where for compliance (SOC 2, GDPR)
+   - Automatic logging of:
+     - Authentication events (login, logout, failures)
+     - Authorization failures (org access denied)
+     - Superuser access to all endpoints
+     - Permission changes and role updates
+   - Admin interface for viewing audit logs
+   - 6 database indexes for fast audit log queries
+
+5. **Production Infrastructure**
+   - **Sentry Integration**: Error tracking with Django, Celery, Redis integrations
+   - **Security Headers**: HTTPS enforcement, HSTS, secure cookies
+   - **Redis Caching**: Performance optimization with django-redis
+   - **Database Indexes**: 13 composite indexes for optimal performance
+   - **Connection Pooling**: Configured for production scalability
+
+6. **Performance Optimization**
+   - N+1 query prevention with `select_related()` and `prefetch_related()`
+   - Query annotations for computed fields (no per-row queries)
+   - Caching utilities in `apps/core/cache/`
+   - User permission caching with invalidation
+
+7. **Transaction Safety**
+   - `@transaction.atomic` on all multi-step operations (registration, org creation)
+   - Ensures data consistency: all-or-nothing semantics
+
+### Security Test Suite
+Located in `apps/core/tests/security/`:
+- **Tenant Isolation Tests**: Verifies cross-tenant data access prevention
+- **Authentication Tests**: Brute force, timing attacks, token security
+- **SQL Injection Tests**: Validates ORM protection
+- **CSRF Tests**: Documents CSRF behavior
+
+### Production Deployment Checklist
+1. ✅ Set `SECRET_KEY` environment variable
+2. ✅ Set `DEBUG=False` in production
+3. ✅ Configure `ALLOWED_HOSTS`
+4. ✅ Set up Sentry (`SENTRY_DSN`)
+5. ✅ Configure CORS origins for frontend
+6. ✅ Set up HTTPS with proper certificates
+7. ✅ Configure Redis for caching and rate limiting
+8. ✅ Set up database backups
+9. ✅ Review audit logs regularly
+10. ✅ Run security tests: `make test-security`
 
 ## API Documentation
 

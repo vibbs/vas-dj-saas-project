@@ -32,7 +32,7 @@ export const FormField: React.FC<FormFieldProps> = ({
 
   const labelStyles: TextStyle = {
     fontSize: theme.typography.fontSize.sm,
-    fontWeight: theme.typography.fontWeight.medium,
+    fontWeight: theme.typography.fontWeight.medium as any,
     fontFamily: theme.typography.fontFamily,
     color: disabled ? theme.colors.muted : theme.colors.foreground,
     lineHeight: theme.typography.fontSize.sm * 1.4,
@@ -59,12 +59,12 @@ export const FormField: React.FC<FormFieldProps> = ({
   // Clone children to pass accessibility props
   const enhancedChildren = React.Children.map(children, (child) => {
     if (React.isValidElement(child)) {
-      return React.cloneElement(child, {
+      return React.cloneElement(child as React.ReactElement<any>, {
         accessibilityLabel: accessibilityLabel || label,
         accessibilityHint: accessibilityHint || helpText,
         accessibilityInvalid: !!errorText,
         editable: !disabled,
-        ...child.props,
+        ...(child.props && typeof child.props === 'object' ? child.props : {}),
       });
     }
     return child;

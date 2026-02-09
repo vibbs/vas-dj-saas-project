@@ -1,0 +1,92 @@
+- slug: validation
+  type: https://docs.yourapp.com/problems/validation
+  title: Validation failed
+  default_status: 400
+  i18n_key: validation.failed
+  description: The request contains invalid data that failed validation checks.
+  codes:
+    - VDJ-GEN-VAL-422
+
+- slug: not-found
+  type: https://docs.yourapp.com/problems/not-found
+  title: Not Found
+  default_status: 404
+  i18n_key: errors.not_found
+  description: The requested resource was not found.
+  codes:
+    - VDJ-GEN-NOTFOUND-404
+
+- slug: permission-denied
+  type: https://docs.yourapp.com/problems/permission-denied
+  title: Permission Denied
+  default_status: 403
+  i18n_key: errors.permission_denied
+  description: You do not have permission to perform this action.
+  codes:
+    - VDJ-PERM-DENIED-403
+
+- slug: authentication-required
+  type: https://docs.yourapp.com/problems/authentication-required
+  title: Authentication Required
+  default_status: 401
+  i18n_key: errors.authentication_required
+  description: Authentication credentials were not provided or are invalid.
+  codes:
+    - VDJ-AUTH-LOGIN-401
+    - VDJ-AUTH-TOKEN-401
+    - VDJ-AUTH-EXPIRED-401
+    - VDJ-AUTH-INVALID-401
+
+- slug: rate-limit-exceeded
+  type: https://docs.yourapp.com/problems/rate-limit-exceeded
+  title: Rate Limit Exceeded
+  default_status: 429
+  i18n_key: errors.rate_limit_exceeded
+  description: Too many requests. Please try again later.
+  codes:
+    - VDJ-GEN-RATE-429
+
+- slug: internal
+  type: https://docs.yourapp.com/problems/internal
+  title: Internal Server Error
+  default_status: 500
+  i18n_key: errors.internal
+  description: An unexpected server error occurred.
+  codes:
+    - VDJ-GEN-ERR-500
+
+- slug: parse-error
+  type: https://docs.yourapp.com/problems/parse-error
+  title: Parse Error
+  default_status: 400
+  i18n_key: errors.parse_error
+  description: Malformed request data that could not be parsed.
+  codes:
+    - VDJ-GEN-BAD-400
+
+- slug: method-not-allowed
+  type: https://docs.yourapp.com/problems/method-not-allowed
+  title: Method Not Allowed
+  default_status: 405
+  i18n_key: errors.method_not_allowed
+  description: The HTTP method is not allowed for this endpoint.
+  codes:
+    - VDJ-GEN-BAD-405
+
+- slug: unsupported-media-type
+  type: https://docs.yourapp.com/problems/unsupported-media-type
+  title: Unsupported Media Type
+  default_status: 415
+  i18n_key: errors.unsupported_media_type
+  description: The media type of the request data is not supported.
+  codes:
+    - VDJ-GEN-BAD-415
+
+- slug: service-unavailable
+  type: https://docs.yourapp.com/problems/service-unavailable
+  title: Service Unavailable
+  default_status: 503
+  i18n_key: errors.service_unavailable
+  description: The service is temporarily unavailable.
+  codes:
+    - VDJ-GEN-UNAVAIL-503

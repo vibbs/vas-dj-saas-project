@@ -15,7 +15,7 @@ export const List: React.FC<ListProps> = ({
   // Accessibility props
   accessibilityLabel,
   accessibilityHint,
-  accessibilityRole = 'list' as const,
+  accessibilityRole = 'none' as const,
   // Filter out web-specific props
   className,
   'aria-label': ariaLabel,
@@ -57,13 +57,14 @@ export const List: React.FC<ListProps> = ({
   };
 
   // Create context for list items
-  const ListContext = React.createContext({
+  const ListContextType = {
     type,
     size,
     variant,
     marker,
     itemIndex: 0,
-  });
+  };
+  const ListContext = React.createContext(ListContextType);
 
   // Enhanced children to provide context
   const enhancedChildren = React.Children.map(children, (child, index) => {
@@ -101,7 +102,7 @@ export const ListItem: React.FC<ListItemProps> = ({
   // Accessibility props
   accessibilityLabel,
   accessibilityHint,
-  accessibilityRole = 'listitem' as const,
+  accessibilityRole = 'none' as const,
   // Filter out web-specific props
   className,
   'aria-label': ariaLabel,
@@ -111,14 +112,25 @@ export const ListItem: React.FC<ListItemProps> = ({
 }) => {
   const { theme } = useTheme();
 
-  // Try to get context (won't work if used outside List, but gracefully falls back)
-  const context = React.useContext(React.createContext({
-    type: 'unordered' as const,
-    size: 'base' as const,
-    variant: 'default' as const,
+  // Default context value matching List's context type
+  const defaultContext = {
+    type: 'unordered' as 'unordered' | 'ordered' | 'none',
+    size: 'base' as 'sm' | 'base' | 'lg', 
+    variant: 'default' as 'default' | 'compact' | 'spacious',
     marker: undefined as string | undefined,
     itemIndex: 1,
-  }));
+  };
+
+  // Try to get context (gracefully falls back to default)
+  let context = defaultContext;
+  try {
+    const listContext = React.useContext(React.createContext(defaultContext));
+    if (listContext) {
+      context = listContext;
+    }
+  } catch {
+    // Fallback to default if context not available
+  }
 
   // Define size styles
   const sizeStyles = {

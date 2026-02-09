@@ -1,4 +1,5 @@
 from datetime import timedelta
+
 from decouple import config
 
 
@@ -7,10 +8,18 @@ def get_jwt_settings(secret_key):
     JWT configuration settings for django-rest-framework-simplejwt
     """
     return {
-        "ACCESS_TOKEN_LIFETIME": timedelta(minutes=config("JWT_ACCESS_TOKEN_LIFETIME_MINUTES", default=60, cast=int)),
-        "REFRESH_TOKEN_LIFETIME": timedelta(days=config("JWT_REFRESH_TOKEN_LIFETIME_DAYS", default=7, cast=int)),
-        "ROTATE_REFRESH_TOKENS": config("JWT_ROTATE_REFRESH_TOKENS", default=True, cast=bool),
-        "BLACKLIST_AFTER_ROTATION": config("JWT_BLACKLIST_AFTER_ROTATION", default=True, cast=bool),
+        "ACCESS_TOKEN_LIFETIME": timedelta(
+            minutes=config("JWT_ACCESS_TOKEN_LIFETIME_MINUTES", default=60, cast=int)
+        ),
+        "REFRESH_TOKEN_LIFETIME": timedelta(
+            days=config("JWT_REFRESH_TOKEN_LIFETIME_DAYS", default=7, cast=int)
+        ),
+        "ROTATE_REFRESH_TOKENS": config(
+            "JWT_ROTATE_REFRESH_TOKENS", default=True, cast=bool
+        ),
+        "BLACKLIST_AFTER_ROTATION": config(
+            "JWT_BLACKLIST_AFTER_ROTATION", default=True, cast=bool
+        ),
         "UPDATE_LAST_LOGIN": config("JWT_UPDATE_LAST_LOGIN", default=True, cast=bool),
         "ALGORITHM": config("JWT_ALGORITHM", default="HS256"),
         "SIGNING_KEY": secret_key,

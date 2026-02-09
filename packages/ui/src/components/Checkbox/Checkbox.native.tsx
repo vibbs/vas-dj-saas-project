@@ -65,7 +65,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   const labelStyles: TextStyle = {
     flex: 1,
     fontSize: theme.typography.fontSize.sm,
-    fontWeight: theme.typography.fontWeight.medium,
+    fontWeight: theme.typography.fontWeight.medium as any,
     color: hasError ? theme.colors.destructive : theme.colors.foreground,
     fontFamily: theme.typography.fontFamily,
     lineHeight: theme.typography.fontSize.sm * 1.5,

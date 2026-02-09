@@ -78,7 +78,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     backgroundColor: currentVariant.backgroundColor,
     borderRightWidth: variant !== 'minimal' ? 1 : 0,
     borderRightColor: currentVariant.borderColor,
-    borderRadius: variant === 'floating' ? currentVariant.borderRadius : 0,
+    borderRadius: variant === 'floating' ? (currentVariant as any).borderRadius || 0 : 0,
     flex: 1,
   };
 
@@ -131,7 +131,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       color: theme.colors.primaryForeground,
       fontSize: theme.typography.fontSize.xs,
       fontFamily: theme.typography.fontFamily,
-      fontWeight: theme.typography.fontWeight.medium,
+      fontWeight: theme.typography.fontWeight.medium as any,
     };
 
     return (
@@ -199,7 +199,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       testID={testID}
       accessible={true}
       accessibilityLabel={accessibilityLabel || 'Sidebar navigation'}
-      accessibilityRole="navigation"
+      accessibilityRole="none"
     >
       {/* Header */}
       {header && (

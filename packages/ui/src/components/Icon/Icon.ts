@@ -1,17 +1,10 @@
-// Platform-aware Icon export
-// Automatically selects the correct implementation based on platform
+// Icon export for web builds
+// For web builds, always use the web implementation
 
-import { createPlatformComponent } from '../../utils/platform';
-
-// Import both implementations
 import { Icon as WebIcon } from './Icon.web';
-import { Icon as NativeIcon } from './Icon.native';
 
-// Export the platform-aware Icon component
-export const Icon = createPlatformComponent(
-  NativeIcon,
-  WebIcon
-);
+// Export the web Icon component
+export const Icon = WebIcon;
 
 // Re-export types
 export type { IconProps } from './types';

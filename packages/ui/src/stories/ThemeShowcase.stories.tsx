@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { ThemeProvider } from '../theme/ThemeProvider';
-import { themes, type ThemeName } from '../theme/tokens';
+import { themes, type ThemeName } from '../theme/vasdj_themes';
 import { Button } from '../components/Button/Button';
 import { Badge } from '../components/Badge/Badge';
 import { Card } from '../components/Card/Card';
@@ -11,11 +11,11 @@ import { Progress } from '../components/Progress/Progress';
 // Create a showcase component
 const ThemeShowcase: React.FC<{ themeName: ThemeName }> = ({ themeName }) => {
   const theme = themes[themeName];
-  
+
   return (
     <ThemeProvider theme={theme}>
-      <div style={{ 
-        padding: '24px', 
+      <div style={{
+        padding: '24px',
         borderRadius: '12px',
         backgroundColor: theme.colors.background,
         color: theme.colors.foreground,
@@ -27,16 +27,16 @@ const ThemeShowcase: React.FC<{ themeName: ThemeName }> = ({ themeName }) => {
       }}>
         {/* Theme Header */}
         <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-          <h3 style={{ 
-            margin: '0 0 8px 0', 
+          <h3 style={{
+            margin: '0 0 8px 0',
             color: theme.colors.primary,
             fontSize: '18px',
             fontWeight: '600'
           }}>
             {theme.name} Theme
           </h3>
-          <div style={{ 
-            fontSize: '12px', 
+          <div style={{
+            fontSize: '12px',
             color: theme.colors.mutedForeground,
             fontFamily: 'monospace',
             backgroundColor: theme.colors.muted,
@@ -84,17 +84,17 @@ const ThemeShowcase: React.FC<{ themeName: ThemeName }> = ({ themeName }) => {
 
         {/* Toast Section */}
         <div style={{ position: 'relative', height: '60px' }}>
-          <Toast 
-            variant="success" 
-            title="Theme Applied" 
+          <Toast
+            variant="success"
+            title="Theme Applied"
             description={`${theme.name} theme is now active`}
             duration={0}
-            style={{ 
-              position: 'relative', 
-              top: 0, 
-              left: 0, 
-              right: 'auto', 
-              bottom: 'auto', 
+            style={{
+              position: 'relative',
+              top: 0,
+              left: 0,
+              right: 'auto',
+              bottom: 'auto',
               transform: 'none',
               maxWidth: '100%'
             }}
@@ -150,9 +150,9 @@ const [currentTheme, setCurrentTheme] = useState('default');
 
 return (
   <ThemeProvider theme={themes[currentTheme]}>
-    <button onClick={() => setCurrentTheme('dark')}>
+    <Button onClick={() => setCurrentTheme('dark')}>
       Switch to Dark Theme
-    </button>
+    </Button>
     <YourComponents />
   </ThemeProvider>
 );
@@ -172,8 +172,8 @@ export const AllThemes: Story = {
   name: '🎨 All Themes Overview',
   render: () => (
     <div style={{ padding: '24px', backgroundColor: '#f8f9fa' }}>
-      <div style={{ 
-        textAlign: 'center', 
+      <div style={{
+        textAlign: 'center',
         marginBottom: '32px',
         padding: '24px',
         backgroundColor: 'white',
@@ -198,10 +198,10 @@ export const AllThemes: Story = {
           💡 <strong>Tip:</strong> Use the 🎨 Theme selector in the toolbar to switch themes globally
         </div>
       </div>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
         gap: '24px',
         maxWidth: '1400px',
         margin: '0 auto'
@@ -210,9 +210,9 @@ export const AllThemes: Story = {
           <ThemeShowcase key={themeName} themeName={themeName} />
         ))}
       </div>
-      
-      <div style={{ 
-        textAlign: 'center', 
+
+      <div style={{
+        textAlign: 'center',
         marginTop: '48px',
         padding: '24px',
         backgroundColor: 'white',
@@ -253,38 +253,38 @@ export const AllThemes: Story = {
 
 // Individual theme stories for detailed view
 export const DefaultTheme: Story = {
-  name: '🌟 Default Theme',
-  render: () => <ThemeShowcase themeName="default" />,
+  name: '🌟 Lumen Theme',
+  render: () => <ThemeShowcase themeName="lumen" />,
 };
 
 export const DarkTheme: Story = {
-  name: '🌙 Dark Theme', 
-  render: () => <ThemeShowcase themeName="dark" />,
+  name: '🌙 Obsidian Theme',
+  render: () => <ThemeShowcase themeName="obsidian" />,
 };
 
 export const BlueTheme: Story = {
-  name: '🔵 Blue Theme',
-  render: () => <ThemeShowcase themeName="blue" />,
+  name: '🔵 Aurora Theme',
+  render: () => <ThemeShowcase themeName="aurora" />,
 };
 
 export const GreenTheme: Story = {
-  name: '🟢 Green Theme',
-  render: () => <ThemeShowcase themeName="green" />,
+  name: '🟢 Verdent Theme',
+  render: () => <ThemeShowcase themeName="verdant" />,
 };
 
 export const PurpleTheme: Story = {
-  name: '🟣 Purple Theme', 
-  render: () => <ThemeShowcase themeName="purple" />,
+  name: '🟣 Velvet Theme',
+  render: () => <ThemeShowcase themeName="velvet" />,
 };
 
 export const RoseTheme: Story = {
-  name: '🌹 Rose Theme',
-  render: () => <ThemeShowcase themeName="rose" />,
+  name: '🌹 Blush Theme',
+  render: () => <ThemeShowcase themeName="blush" />,
 };
 
 export const OrangeTheme: Story = {
-  name: '🟠 Orange Theme',
-  render: () => <ThemeShowcase themeName="orange" />,
+  name: '🟠 Solar Theme',
+  render: () => <ThemeShowcase themeName="solar" />,
 };
 
 // Interactive theme comparison
@@ -292,8 +292,8 @@ export const ThemeComparison: Story = {
   name: '⚖️ Theme Comparison',
   render: () => (
     <div style={{ padding: '24px', backgroundColor: '#f8f9fa' }}>
-      <div style={{ 
-        textAlign: 'center', 
+      <div style={{
+        textAlign: 'center',
         marginBottom: '32px',
         padding: '24px',
         backgroundColor: 'white',
@@ -306,16 +306,16 @@ export const ThemeComparison: Story = {
           Compare different themes side by side to see how they affect the same components
         </p>
       </div>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
         gap: '24px',
         maxWidth: '1000px',
         margin: '0 auto'
       }}>
-        <ThemeShowcase themeName="default" />
-        <ThemeShowcase themeName="dark" />
+        <ThemeShowcase themeName="lumen" />
+        <ThemeShowcase themeName="obsidian" />
       </div>
     </div>
   ),

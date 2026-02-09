@@ -1,20 +1,22 @@
 # accounts/models.py
 
+import secrets
+from datetime import timedelta
+
+from django.conf import settings
 from django.contrib.auth.models import (
     AbstractBaseUser,
-    PermissionsMixin,
     BaseUserManager,
+    PermissionsMixin,
 )
 from django.db import models
 from django.utils import timezone
-from django.conf import settings
-from apps.accounts.enums import UserRoleTypes, GenderTypes, UserStatusTypes
 
+from apps.accounts.enums import GenderTypes, UserRoleTypes, UserStatusTypes
 from apps.core.models import BaseFields
 
 
 class AccountManager(BaseUserManager):
-
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError("Email must be provided")
@@ -50,6 +52,13 @@ class AccountAuthProvider(BaseFields, models.Model):
 
     class Meta:
         unique_together = ("provider", "provider_user_id")  # ensures no dupes
+        indexes = [
+            models.Index(fields=["user", "provider"], name="authprov_user_prov_idx"),
+            models.Index(
+                fields=["provider", "provider_user_id"], name="authprov_prov_uid_idx"
+            ),
+            models.Index(fields=["email"], name="authprov_email_idx"),
+        ]
 
     def __str__(self):
         return f"{self.provider} ({self.email})"
@@ -84,7 +93,6 @@ class Account(BaseFields, AbstractBaseUser, PermissionsMixin):
 
     # Metadata
     date_joined = models.DateTimeField(default=timezone.now)
-    is_active = models.BooleanField(default=True)
     status = models.CharField(
         max_length=10,
         choices=UserStatusTypes.choices(),
@@ -100,13 +108,21 @@ class Account(BaseFields, AbstractBaseUser, PermissionsMixin):
     can_manage_billing = models.BooleanField(default=False)
     can_delete_org = models.BooleanField(default=False)
 
+    # Email verification fields
+    email_verification_token = models.CharField(max_length=100, blank=True, null=True)
+    email_verification_token_expires = models.DateTimeField(blank=True, null=True)
+
+    # Password reset fields
+    password_reset_token = models.CharField(max_length=100, blank=True, null=True)
+    password_reset_token_expires = models.DateTimeField(blank=True, null=True)
+
     objects = AccountManager()
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["first_name", "last_name"]
 
     def __str__(self):
-        return f"{self.email} ({self.organization.name})"
+        return f"{self.email}"
 
     @property
     def is_admin(self):
@@ -123,30 +139,339 @@ class Account(BaseFields, AbstractBaseUser, PermissionsMixin):
     @property
     def abbreviated_name(self):
         # Return the first letter of the first name and the last name
-        first = str(self.first_name) if self.first_name else ""
-        last = str(self.last_name) if self.last_name else ""
+        first = str(self.first_name).strip() if self.first_name else ""
+        last = str(self.last_name).strip() if self.last_name else ""
+
         if first and last:
             return f"{first[0].upper()}{last[0].upper()}"
-        return str(self.email)[0].upper() if self.email else "UKN"
+        elif first:
+            return first[0].upper()
+        elif last:
+            return last[0].upper()
+        else:
+            return str(self.email)[0].upper() if self.email else "UKN"
 
-    # @property
-    # def organization(self):
-    #     """Get the organization this user belongs to"""
-    #     from django.db import connection
-    #     from apps.organization.models import Organization
+    def generate_email_verification_token(self):
+        """Generate a cryptographically secure email verification token (512 bits)."""
+        self.email_verification_token = secrets.token_urlsafe(64)  # 64 bytes = 512 bits
+        self.email_verification_token_expires = timezone.now() + timedelta(hours=24)
+        self.save(
+            update_fields=[
+                "email_verification_token",
+                "email_verification_token_expires",
+            ]
+        )
+        return self.email_verification_token
 
-    #     # The tenant schema name corresponds to the organization
-    #     schema_name = connection.schema_name
-    #     return Organization.objects.get(schema_name=schema_name)
+    def verify_email(self, token):
+        """
+        Verify email using the provided token.
+        Uses constant-time comparison to prevent timing attacks.
+        """
+        import hmac
 
-    # @property
-    # def is_founder(self):
-    #     """Check if this user is the organization founder"""
-    #     org = self.organization
-    #     return org.created_by_id == self.id if org.created_by else False
+        if (
+            not self.email_verification_token
+            or not self.email_verification_token_expires
+        ):
+            return False
+
+        # Use constant-time comparison to prevent timing attacks
+        if not hmac.compare_digest(str(self.email_verification_token), str(token)):
+            return False
+
+        # Check expiration
+        if timezone.now() > self.email_verification_token_expires:
+            return False
+
+        # Mark email as verified and clear token
+        self.is_email_verified = True
+        self.status = UserStatusTypes.ACTIVE.value
+        self.email_verification_token = None
+        self.email_verification_token_expires = None
+        self.save(
+            update_fields=[
+                "is_email_verified",
+                "status",
+                "email_verification_token",
+                "email_verification_token_expires",
+            ]
+        )
+        return True
+
+    def send_verification_email(self):
+        """Send email verification email to the user."""
+        if self.is_email_verified:
+            return False
+
+        # Generate verification token
+        token = self.generate_email_verification_token()
+
+        # Import here to avoid circular imports
+        from apps.email_service.services import send_email
+
+        # Send verification email
+        primary_org = self.get_primary_organization()
+        verification_url = f"{getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')}/verify-email?token={token}"
+
+        context = {
+            "user": self,
+            "verification_token": token,
+            "verification_url": verification_url,
+            "organization": primary_org
+            or {"name": "VAS-DJ Platform"},  # Fallback for users without org
+            "subject": "Verify Your Email Address - VAS-DJ",
+        }
+
+        try:
+            send_email(
+                organization=primary_org,  # This can be None for users without org
+                recipient=self,
+                template_slug="email_verification",
+                context=context,
+            )
+            return True
+        except Exception as e:
+            # Log the specific error for debugging
+            import logging
+
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to send verification email to {self.email}: {str(e)}")
+
+            # Log the traceback for better debugging
+            import traceback
+
+            logger.error(f"Traceback: {traceback.format_exc()}")
+
+            # If it's an email template issue, we could fall back to a simple email
+            # For now, we'll return False and let the calling code handle it
+            return False
+
+    def generate_password_reset_token(self):
+        """Generate a cryptographically secure password reset token (512 bits)."""
+        self.password_reset_token = secrets.token_urlsafe(64)  # 64 bytes = 512 bits
+        self.password_reset_token_expires = timezone.now() + timedelta(
+            hours=1
+        )  # 1 hour expiry
+        self.save(
+            update_fields=["password_reset_token", "password_reset_token_expires"]
+        )
+        return self.password_reset_token
+
+    def verify_password_reset_token(self, token):
+        """
+        Verify password reset token.
+        Uses constant-time comparison to prevent timing attacks.
+
+        Returns:
+            bool: True if token is valid and not expired, False otherwise
+        """
+        import hmac
+
+        if not self.password_reset_token or not self.password_reset_token_expires:
+            return False
+
+        # Use constant-time comparison to prevent timing attacks
+        if not hmac.compare_digest(str(self.password_reset_token), str(token)):
+            return False
+
+        # Check expiration (1 hour)
+        if timezone.now() > self.password_reset_token_expires:
+            return False
+
+        return True
+
+    def reset_password(self, token, new_password):
+        """
+        Reset password using a valid reset token.
+
+        Args:
+            token: Password reset token
+            new_password: New password to set
+
+        Returns:
+            bool: True if password was reset successfully, False otherwise
+        """
+        if not self.verify_password_reset_token(token):
+            return False
+
+        # Set new password (will be hashed automatically)
+        self.set_password(new_password)
+
+        # Clear reset token
+        self.password_reset_token = None
+        self.password_reset_token_expires = None
+
+        self.save(
+            update_fields=[
+                "password",
+                "password_reset_token",
+                "password_reset_token_expires",
+            ]
+        )
+        return True
+
+    def send_password_reset_email(self):
+        """Send password reset email to the user."""
+        # Generate reset token
+        token = self.generate_password_reset_token()
+
+        # Import here to avoid circular imports
+        from apps.email_service.services import send_email
+
+        # Send password reset email
+        primary_org = self.get_primary_organization()
+        reset_url = f"{getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')}/reset-password?token={token}"
+
+        context = {
+            "user": self,
+            "reset_token": token,
+            "reset_url": reset_url,
+            "organization": primary_org or {"name": "VAS-DJ Platform"},
+            "subject": "Reset Your Password - VAS-DJ",
+        }
+
+        try:
+            send_email(
+                organization=primary_org,
+                recipient=self,
+                template_slug="password_reset",
+                context=context,
+            )
+            return True
+        except Exception as e:
+            import logging
+            import traceback
+
+            logger = logging.getLogger(__name__)
+            logger.error(
+                f"Failed to send password reset email to {self.email}: {str(e)}"
+            )
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            return False
+
+    # Membership-based methods
+    def get_memberships(self):
+        """Get all organization memberships for this user."""
+        return self.organization_memberships.all()
+
+    def get_active_memberships(self):
+        """Get all active organization memberships for this user."""
+        return self.organization_memberships.filter(status="active")
+
+    def get_primary_organization(self):
+        """Get the primary organization for this user (for backward compatibility)."""
+        # If user has direct organization (legacy), return it
+        if self.organization:
+            return self.organization
+
+        # Otherwise, get the first active membership's organization
+        membership = self.get_active_memberships().first()
+        return membership.organization if membership else None
+
+    def get_organizations(self):
+        """Get all organizations this user is a member of."""
+        return [m.organization for m in self.get_active_memberships()]
+
+    def has_membership_in(self, organization):
+        """Check if user has any membership in the given organization."""
+        return self.organization_memberships.filter(organization=organization).exists()
+
+    def has_active_membership_in(self, organization):
+        """Check if user has active membership in the given organization."""
+        return self.organization_memberships.filter(
+            organization=organization, status="active"
+        ).exists()
+
+    def get_membership_in(self, organization):
+        """Get membership in the given organization, if any."""
+        return self.organization_memberships.filter(organization=organization).first()
+
+    def is_owner_of(self, organization):
+        """Check if user is owner of the given organization."""
+        membership = self.get_membership_in(organization)
+        return membership and membership.is_owner()
+
+    def is_admin_of(self, organization):
+        """Check if user is admin or owner of the given organization."""
+        membership = self.get_membership_in(organization)
+        return membership and membership.is_admin()
+
+    def can_manage_members_in(self, organization):
+        """Check if user can manage members in the given organization."""
+        membership = self.get_membership_in(organization)
+        return membership and membership.can_manage_members()
+
+    def can_manage_billing_in(self, organization):
+        """Check if user can manage billing in the given organization."""
+        membership = self.get_membership_in(organization)
+        return membership and membership.can_manage_billing()
+
+    def create_default_organization(self, name=None):
+        """Create a default organization for this user (for trial users)."""
+        from django.utils.text import slugify
+
+        from apps.organizations.models import Organization, OrganizationMembership
+
+        if not name:
+            name = f"{self.full_name or self.email}'s Organization"
+
+        # Generate unique slug
+        base_slug = slugify(name)[:40]  # Limit length
+        slug = base_slug
+        counter = 1
+        while Organization.objects.filter(slug=slug).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+
+        # Create organization
+        organization = Organization.objects.create(
+            name=name,
+            slug=slug,
+            creator_email=self.email,
+            creator_name=self.full_name,
+            created_by=self,
+            plan="free_trial",
+            on_trial=True,
+            sub_domain=slug,  # Use same as slug for now
+        )
+
+        # Create owner membership
+        membership = OrganizationMembership.objects.create(
+            organization=organization, user=self, role="owner", status="active"
+        )
+
+        return organization, membership
+
+    # Legacy compatibility property (deprecated)
+    @property
+    def is_founder(self):
+        """Check if this user is founder of their primary organization (deprecated)."""
+        org = self.get_primary_organization()
+        return (
+            org and org.created_by_id == self.id
+            if org and hasattr(org, "created_by")
+            else False
+        )
 
     class Meta:
         verbose_name = "Account"
         verbose_name_plural = "Accounts"
         ordering = ["-date_joined"]
-        unique_together = [["organization", "email"]]
+        # Removed unique_together constraint - users can exist across multiple orgs
+        indexes = [
+            models.Index(fields=["email"], name="account_email_idx"),
+            models.Index(
+                fields=["email_verification_token"], name="account_verify_token_idx"
+            ),
+            models.Index(
+                fields=["password_reset_token"], name="account_pwd_reset_token_idx"
+            ),
+            models.Index(
+                fields=["status", "is_active"], name="account_status_active_idx"
+            ),
+            models.Index(
+                fields=["is_email_verified"], name="account_email_verified_idx"
+            ),
+            models.Index(fields=["date_joined"], name="account_date_joined_idx"),
+        ]

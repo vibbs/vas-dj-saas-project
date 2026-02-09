@@ -2,68 +2,159 @@
 4xx Client Error exceptions for standardized error handling.
 """
 
-from rest_framework import status
+from ..codes import APIResponseCodes
 from .base import BaseHttpException
 
 
 class BadRequestException(BaseHttpException):
     """400 Bad Request - The request could not be understood by the server."""
-    status_code = status.HTTP_400_BAD_REQUEST
-    default_detail = "Bad request"
-    default_code = "bad_request"
+
+    def __init__(self, detail: str | None = None, **kwargs):
+        super().__init__(
+            type="https://docs.yourapp.com/problems/bad-request",
+            title="Bad request",
+            status=400,
+            detail=detail or "The request could not be understood by the server.",
+            code=kwargs.get("code", APIResponseCodes.GEN_BAD_400),
+            i18n_key=kwargs.get("i18n_key", "errors.bad_request"),
+            meta={k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]},
+        )
 
 
 class UnauthorizedException(BaseHttpException):
     """401 Unauthorized - Authentication is required and has failed or not been provided."""
-    status_code = status.HTTP_401_UNAUTHORIZED
-    default_detail = "Authentication credentials were not provided or are invalid"
-    default_code = "unauthorized"
+
+    def __init__(self, detail: str | None = None, **kwargs):
+        super().__init__(
+            type="https://docs.yourapp.com/problems/unauthorized",
+            title="Authentication required",
+            status=401,
+            detail=detail
+            or "Authentication credentials were not provided or are invalid.",
+            code=kwargs.get("code", APIResponseCodes.GEN_UNAUTH_401),
+            i18n_key=kwargs.get("i18n_key", "errors.unauthorized"),
+            meta={k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]},
+        )
 
 
 class ForbiddenException(BaseHttpException):
     """403 Forbidden - The server understood the request but refuses to authorize it."""
-    status_code = status.HTTP_403_FORBIDDEN
-    default_detail = "You do not have permission to perform this action"
-    default_code = "forbidden"
+
+    def __init__(self, detail: str | None = None, **kwargs):
+        super().__init__(
+            type="https://docs.yourapp.com/problems/forbidden",
+            title="Forbidden",
+            status=403,
+            detail=detail or "You do not have permission to perform this action.",
+            code=kwargs.get("code", APIResponseCodes.GEN_FORBID_403),
+            i18n_key=kwargs.get("i18n_key", "errors.forbidden"),
+            meta={k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]},
+        )
 
 
 class NotFoundException(BaseHttpException):
     """404 Not Found - The requested resource could not be found."""
-    status_code = status.HTTP_404_NOT_FOUND
-    default_detail = "The requested resource was not found"
-    default_code = "not_found"
+
+    def __init__(self, detail: str | None = None, **kwargs):
+        super().__init__(
+            type="https://docs.yourapp.com/problems/not-found",
+            title="Not found",
+            status=404,
+            detail=detail or "The requested resource was not found.",
+            code=kwargs.get("code", APIResponseCodes.GEN_NOTFOUND_404),
+            i18n_key=kwargs.get("i18n_key", "errors.not_found"),
+            meta={k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]},
+        )
 
 
 class MethodNotAllowedException(BaseHttpException):
     """405 Method Not Allowed - The request method is not supported for the requested resource."""
-    status_code = status.HTTP_405_METHOD_NOT_ALLOWED
-    default_detail = "Method not allowed"
-    default_code = "method_not_allowed"
+
+    def __init__(self, detail: str | None = None, **kwargs):
+        super().__init__(
+            type="https://docs.yourapp.com/problems/method-not-allowed",
+            title="Method not allowed",
+            status=405,
+            detail=detail or "The request method is not supported for this resource.",
+            code=kwargs.get("code", "VDJ-GEN-METHOD-405"),
+            i18n_key=kwargs.get("i18n_key", "errors.method_not_allowed"),
+            meta={k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]},
+        )
 
 
 class ConflictException(BaseHttpException):
     """409 Conflict - The request could not be completed due to a conflict with the current state."""
-    status_code = status.HTTP_409_CONFLICT
-    default_detail = "The request conflicts with the current state of the resource"
-    default_code = "conflict"
+
+    def __init__(self, detail: str | None = None, **kwargs):
+        super().__init__(
+            type="https://docs.yourapp.com/problems/conflict",
+            title="Conflict",
+            status=409,
+            detail=detail
+            or "The request conflicts with the current state of the resource.",
+            code=kwargs.get("code", APIResponseCodes.GEN_CONFLICT_409),
+            i18n_key=kwargs.get("i18n_key", "errors.conflict"),
+            meta={k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]},
+        )
 
 
 class ValidationException(BaseHttpException):
-    """422 Unprocessable Entity - The request was well-formed but contains semantic errors."""
-    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
-    default_detail = "The request contains invalid data"
-    default_code = "validation_error"
+    """400 Bad Request - The request contains invalid data (used for field validation errors)."""
+
+    def __init__(self, detail: str | None = None, **kwargs):
+        # Extract issues from kwargs and ensure they're at root level
+        issues = kwargs.pop("issues", [])
+
+        # Extract meta separately, excluding handled keys
+        meta = {
+            k: v for k, v in kwargs.items() if k not in ["code", "i18n_key", "instance"]
+        }
+
+        super().__init__(
+            type="https://docs.yourapp.com/problems/validation-error",
+            title="Validation error",
+            status=400,
+            detail=detail or "The request contains invalid data.",
+            code=kwargs.get("code", APIResponseCodes.GEN_VAL_422),
+            i18n_key=kwargs.get("i18n_key", "errors.validation"),
+            instance=kwargs.get("instance"),
+            issues=issues,
+            meta=meta,
+        )
 
 
 class UnprocessableEntityException(BaseHttpException):
     """422 Unprocessable Entity - The request was well-formed but was unable to be followed."""
-    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
-    default_detail = "The request was well-formed but contains semantic errors"
-    default_code = "unprocessable_entity"
+
+    def __init__(self, detail: str | None = None, **kwargs):
+        super().__init__(
+            type="https://docs.yourapp.com/problems/unprocessable-entity",
+            title="Unprocessable entity",
+            status=422,
+            detail=detail
+            or "The request was well-formed but contains semantic errors.",
+            code=kwargs.get("code", APIResponseCodes.GEN_VAL_422),
+            i18n_key=kwargs.get("i18n_key", "errors.unprocessable_entity"),
+            meta={k: v for k, v in kwargs.items() if k not in ["code", "i18n_key"]},
+        )
 
 
 class RateLimitException(BaseHttpException):
     """429 Too Many Requests - The user has sent too many requests in a given amount of time."""
-    status_code = status.HTTP_429_TOO_MANY_REQUESTS
-    default_detail = "Rate limit exceeded. Please try again later"
-    default_code = "rate_limit_exceeded"
+
+    def __init__(self, detail: str | None = None, **kwargs):
+        self.reset_time = kwargs.get("reset_time")
+        self.limit = kwargs.get("limit")
+        super().__init__(
+            type="https://docs.yourapp.com/problems/rate-limit-exceeded",
+            title="Rate limit exceeded",
+            status=429,
+            detail=detail or "Rate limit exceeded. Please try again later.",
+            code=kwargs.get("code", APIResponseCodes.GEN_RATE_429),
+            i18n_key=kwargs.get("i18n_key", "errors.rate_limit_exceeded"),
+            meta={
+                k: v
+                for k, v in kwargs.items()
+                if k not in ["code", "i18n_key", "reset_time", "limit"]
+            },
+        )

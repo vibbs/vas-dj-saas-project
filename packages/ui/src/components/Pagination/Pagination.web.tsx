@@ -129,7 +129,7 @@ export const Pagination: React.FC<PaginationProps> = ({
     transition: 'all 0.2s ease-in-out',
     borderRadius: theme.borders.radius.sm,
     textDecoration: 'none',
-    userSelect: 'none',
+    userSelect: 'none' as const,
     ...sizeStyles[size],
     ...variantStyles[variant],
   };

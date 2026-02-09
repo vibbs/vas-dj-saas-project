@@ -28,9 +28,24 @@ export const Icon: React.FC<IconProps> = ({
   title,
   onClick,
   style,
-  ...props
+  ...restProps
 }) => {
   const { theme } = useTheme();
+
+  // Filter out React Native SVG props that cause type conflicts  
+  const {
+    // React Native SVG transform props
+    origin, transform, translateX, translateY, scaleX, scaleY, scale,
+    rotation, skewX, skewY, 
+    // React Native SVG other props
+    strokeDasharray, x, y,
+    // React Native event handlers  
+    onTouchStart, onTouchMove, onTouchEnd, onTouchCancel,
+    onPointerDown, onPointerUp, onPointerMove, onPointerCancel,
+    onPress,
+    // Keep the rest for web
+    ...webCompatibleProps
+  } = restProps;
 
   // Define size mapping
   const sizeMap = {
@@ -97,7 +112,7 @@ export const Icon: React.FC<IconProps> = ({
             }
           }}
           tabIndex={onClick ? 0 : -1}
-          {...props}
+          {...(webCompatibleProps as any)}
         />
       );
     }
@@ -119,7 +134,6 @@ export const Icon: React.FC<IconProps> = ({
       aria-label={ariaLabel || accessibilityLabel || alt}
       aria-describedby={ariaDescribedBy}
       aria-hidden={ariaHidden}
-      title={title}
       // Event handlers
       onClick={onClick}
       // Keyboard navigation support
@@ -130,8 +144,9 @@ export const Icon: React.FC<IconProps> = ({
         }
       }}
       tabIndex={onClick ? 0 : -1}
-      {...props}
+      {...(webCompatibleProps as any)}
     >
+      {title && <title>{title}</title>}
       {children || (
         <circle cx="12" cy="12" r="10" />
       )}

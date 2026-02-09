@@ -97,7 +97,7 @@ export const Link: React.FC<LinkProps> = ({
   const hoverStyles = !disabled ? {
     '&:hover': {
       opacity: 0.8,
-      ...underlineStyles[underline]['&:hover'],
+      ...(underlineStyles[underline] as any)['&:hover'] || {},
     },
     '&:focus': {
       outline: `2px solid ${theme.colors.primary}`,
@@ -115,7 +115,7 @@ export const Link: React.FC<LinkProps> = ({
       e.preventDefault();
       return;
     }
-    onClick?.(e as any);
+    onClick?.();
   };
 
   // If no href provided, render as button for interactive behavior

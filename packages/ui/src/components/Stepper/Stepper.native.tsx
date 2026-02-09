@@ -98,7 +98,7 @@ export const Stepper: React.FC<StepperProps> = ({
       stepText: {
         color,
         fontSize: currentSize.fontSize,
-        fontWeight: theme.typography.fontWeight.medium,
+        fontWeight: theme.typography.fontWeight.medium as any,
         fontFamily: theme.typography.fontFamily,
       } as TextStyle,
       label: {

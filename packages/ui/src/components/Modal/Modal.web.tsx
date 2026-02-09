@@ -281,25 +281,27 @@ export const Modal: React.FC<ModalProps> = ({
       onClick={handleBackdropClick}
       data-testid={testID}
     >
-      <Card
+      <div
         ref={modalRef}
-        {...variantStyles.cardProps}
-        style={{
-          ...modalStyles,
-          ...variantStyles.cardProps?.style,
-        }}
-        className={className}
-        // Accessibility attributes (WCAG 2.1 AA compliant)
+        // Web-specific accessibility attributes
         role={role}
         aria-modal={ariaModal}
         aria-label={ariaLabel || accessibilityLabel}
         aria-describedby={ariaDescribedBy}
         aria-labelledby={ariaLabelledBy}
         tabIndex={-1}
-        onClick={(e) => e.stopPropagation()}
-        loading={loading}
-        {...props}
+        onClick={() => {}}
+        style={{ display: 'contents' }}
       >
+        <Card
+          {...variantStyles.cardProps}
+          style={{
+            ...modalStyles,
+            ...variantStyles.cardProps?.style,
+          }}
+          className={className}
+          loading={loading}
+        >
         {showCloseButton && (
           <Button
             variant="secondary"
@@ -332,6 +334,7 @@ export const Modal: React.FC<ModalProps> = ({
           {children}
         </div>
       </Card>
+      </div>
     </div>
   );
 

@@ -52,7 +52,7 @@ export const Input: React.FC<InputProps> = ({
 
   const labelStyles: TextStyle = {
     fontSize: theme.typography.fontSize.sm,
-    fontWeight: theme.typography.fontWeight.medium,
+    fontWeight: theme.typography.fontWeight.medium as any,
     color: hasError ? theme.colors.destructive : theme.colors.foreground,
     fontFamily: theme.typography.fontFamily,
     marginBottom: theme.spacing.xs,
@@ -60,19 +60,18 @@ export const Input: React.FC<InputProps> = ({
 
   const inputStyles: ViewStyle = {
     borderWidth: 1,
-    borderColor: hasError ? theme.colors.destructive : theme.colors.border,
-    borderRadius: theme.borders.radius.md,
-    backgroundColor: disabled ? theme.colors.muted : theme.colors.background,
-    paddingVertical: theme.spacing.sm,
-    paddingHorizontal: theme.spacing.md,
+    borderColor: hasError ? '#ef4444' : '#d1d5db',
+    borderRadius: 8,
+    backgroundColor: disabled ? '#f3f4f6' : '#ffffff',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     opacity: disabled ? 0.5 : 1,
     minHeight: multiline ? 80 : 44, // Ensure minimum touch target
   };
 
   const inputTextStyles: TextStyle = {
-    fontSize: theme.typography.fontSize.base,
-    fontFamily: theme.typography.fontFamily,
-    color: disabled ? theme.colors.mutedForeground : theme.colors.foreground,
+    fontSize: 16,
+    color: disabled ? '#6b7280' : '#111827',
     textAlignVertical: multiline ? 'top' : 'center',
     ...inputStyle,
   };

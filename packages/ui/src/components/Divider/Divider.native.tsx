@@ -38,7 +38,7 @@ export const Divider: React.FC<DividerProps> = ({
   };
 
   const baseStyles: ViewStyle = orientation === 'horizontal' ? {
-    width: length,
+    width: length as any,
     height: thickness,
     borderTopWidth: thickness,
     borderTopColor: borderColor,
@@ -47,7 +47,7 @@ export const Divider: React.FC<DividerProps> = ({
     marginBottom: margin,
   } : {
     width: thickness,
-    height: length,
+    height: length as any,
     borderLeftWidth: thickness,
     borderLeftColor: borderColor,
     borderStyle: getBorderStyle(),

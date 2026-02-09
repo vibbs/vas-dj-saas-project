@@ -109,7 +109,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   const textStyles: TextStyle = {
     fontSize: actualSize * 0.4, // Font size relative to avatar size
     fontFamily: theme.typography.fontFamily,
-    fontWeight: theme.typography.fontWeight.medium,
+    fontWeight: theme.typography.fontWeight.medium as any,
     color: textColor || '#ffffff',
     textAlign: 'center',
   };

@@ -90,7 +90,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
   const titleStyles: TextStyle = {
     fontSize: sizeStyles.titleSize,
-    fontWeight: theme.typography.fontWeight.semibold,
+    fontWeight: theme.typography.fontWeight.semibold as any,
     color: theme.colors.foreground,
     fontFamily: theme.typography.fontFamily,
     textAlign: 'center',

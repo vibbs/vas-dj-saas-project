@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker compose:*)",
+      "Bash(chmod:*)",
+      "Bash(make check-system:*)",
+      "Bash(python:*)",
+      "Bash(mkdir:*)",
+      "Bash(find:*)",
+      "Bash(mv:*)",
+      "Bash(make:*)",
+      "Bash(rm:*)",
+      "Bash(poetry lock:*)",
+      "Bash(grep:*)",
+      "Bash(python3:*)",
+      "Bash(cat:*)",
+      "Read(//Users/vibbsdod/Desktop/workspace/vibe-projects/vas-dj-saas-project/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

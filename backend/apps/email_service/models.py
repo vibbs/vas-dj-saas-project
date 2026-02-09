@@ -1,6 +1,8 @@
 import logging
-from django.db import models
+
 from django.conf import settings
+from django.db import models
+
 from apps.core.models import BaseFields
 
 log = logging.getLogger(f"{settings.LOG_APP_PREFIX}.email_service.models")

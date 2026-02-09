@@ -14,7 +14,7 @@ export const Heading: React.FC<HeadingProps> = ({
   // Accessibility props
   accessibilityLabel,
   accessibilityHint,
-  accessibilityRole = 'header' as const,
+  accessibilityRole = 'text' as const,
   // Filter out web-specific props
   className,
   'aria-label': ariaLabel,

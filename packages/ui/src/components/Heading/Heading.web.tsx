@@ -77,21 +77,21 @@ export const Heading: React.FC<HeadingProps> = ({
     ...colorStyles[color],
   };
 
-  const HeadingElement = `h${level}` as keyof JSX.IntrinsicElements;
+  const headingTag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 
-  return (
-    <HeadingElement
-      style={{...baseStyles, ...style}}
-      className={className}
-      data-testid={testID}
+  return React.createElement(
+    headingTag,
+    {
+      style: {...baseStyles, ...style},
+      className,
+      'data-testid': testID,
       // Accessibility attributes (WCAG 2.1 AA compliant)
-      aria-label={ariaLabel || accessibilityLabel}
-      aria-level={ariaLevel || level}
-      role={role}
-      id={id}
-      {...props}
-    >
-      {children}
-    </HeadingElement>
+      'aria-label': ariaLabel || accessibilityLabel,
+      'aria-level': ariaLevel || level,
+      role,
+      id,
+      ...props,
+    },
+    children
   );
 };

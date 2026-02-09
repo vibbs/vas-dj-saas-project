@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { DialogProps } from './types';
 import { useTheme } from '../../theme/ThemeProvider';
+import { Button } from '../Button';
 
 export const Dialog: React.FC<DialogProps> = ({
   children,
@@ -220,23 +221,6 @@ export const Dialog: React.FC<DialogProps> = ({
     ...contentStyle,
   };
 
-  const closeButtonStyles: React.CSSProperties = {
-    position: 'absolute',
-    top: theme.spacing.md,
-    right: theme.spacing.md,
-    background: 'none',
-    border: 'none',
-    fontSize: '24px',
-    cursor: 'pointer',
-    color: theme.colors.mutedForeground,
-    padding: theme.spacing.xs,
-    borderRadius: theme.borders.radius.sm,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '32px',
-    height: '32px',
-  };
 
   const titleId = `dialog-title-${Date.now()}`;
   const descriptionId = `dialog-description-${Date.now()}`;
@@ -263,14 +247,24 @@ export const Dialog: React.FC<DialogProps> = ({
         {...props}
       >
         {showCloseButton && (
-          <button
-            style={closeButtonStyles}
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onClose}
             aria-label="Close dialog"
-            data-testid={testID ? `${testID}-close` : undefined}
+            testID={testID ? `${testID}-close` : undefined}
+            style={{
+              position: 'absolute',
+              top: theme.spacing.md,
+              right: theme.spacing.md,
+              padding: theme.spacing.xs,
+              width: '32px',
+              height: '32px',
+              minWidth: '32px',
+            }}
           >
             ×
-          </button>
+          </Button>
         )}
 
         {(title || description) && (

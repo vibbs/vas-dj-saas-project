@@ -1,7 +1,9 @@
 import logging
-from rest_framework import serializers
+
 from django.conf import settings
-from .models import EmailTemplate, EmailLog, EmailTemplateCategory, EmailStatus
+from rest_framework import serializers
+
+from .models import EmailLog, EmailTemplate
 
 log = logging.getLogger(f"{settings.LOG_APP_PREFIX}.email_service.serializers")
 
@@ -299,8 +301,8 @@ class SendEmailSerializer(serializers.Serializer):
             return value
 
         # Check if default template file exists
-        from django.template.loader import get_template
         from django.template.exceptions import TemplateDoesNotExist
+        from django.template.loader import get_template
 
         try:
             get_template(f"email_service/{value}.html")

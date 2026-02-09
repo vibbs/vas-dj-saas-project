@@ -418,7 +418,7 @@ export const NestedNavigation: Story = {
             <NativeSidebar
               items={nestedItems}
               width={280}
-              header={<Text style={{ fontWeight: '600', fontSize: 16 }}>Admin Panel</Text>}
+              header={<span style={{ fontWeight: '600', fontSize: 16 }}>Admin Panel</span>}
             />
             <div style={{ width: '200px', padding: '16px', backgroundColor: '#f8f9fa', fontSize: '12px' }}>
               Main content with nested sidebar navigation
@@ -509,7 +509,7 @@ export const CollapsedState: Story = {
                 collapsed={false}
                 width={200}
                 style={{ height: 300 }}
-                header={<Text style={{ fontSize: 14, fontWeight: '600' }}>Menu</Text>}
+                header={<span style={{ fontSize: 14, fontWeight: '600' }}>Menu</span>}
               />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
@@ -519,7 +519,7 @@ export const CollapsedState: Story = {
                 collapsed={true}
                 collapsedWidth={60}
                 style={{ height: 300 }}
-                header={<Text style={{ fontSize: 14, fontWeight: '600' }}>Menu</Text>}
+                header={<span style={{ fontSize: 14, fontWeight: '600' }}>Menu</span>}
               />
             </div>
           </div>

@@ -1,151 +1,226 @@
 """
-Global exception handler for consistent error responses.
+RFC 7807 compliant global exception handler for consistent error responses.
+
+This module provides a centralized exception handler that converts all exceptions
+into RFC 7807 "Problem Details for HTTP APIs" format.
 """
 
 import logging
-from typing import Optional, Dict, Any
+
+from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from django.core.exceptions import PermissionDenied, ValidationError as DjangoValidationError
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import exception_handler as drf_exception_handler
 from rest_framework.exceptions import (
-    ValidationError,
-    PermissionDenied as DRFPermissionDenied,
     AuthenticationFailed,
+    MethodNotAllowed,
     NotAuthenticated,
     NotFound,
-    MethodNotAllowed,
     ParseError,
-    UnsupportedMediaType,
     Throttled,
+    UnsupportedMediaType,
+    ValidationError,
 )
+from rest_framework.exceptions import PermissionDenied as DRFPermissionDenied
+from rest_framework.response import Response
+from rest_framework.views import exception_handler as drf_exception_handler
 
-from .base import BaseHttpException
+from ..codes import APIResponseCodes
+from .base import BaseHttpException, flatten_validation_errors
 
 logger = logging.getLogger(__name__)
 
 
-def custom_exception_handler(exc, context):
+def rfc7807_exception_handler(exc, context):
     """
-    Custom exception handler that provides consistent error responses.
-    
+    RFC 7807 compliant exception handler that provides consistent error responses.
+
     Args:
         exc: The exception that was raised
         context: Context information about where the exception occurred
-        
+
     Returns:
-        Response: Formatted error response
+        Response: RFC 7807 formatted error response
     """
-    # Get the standard DRF response first
-    response = drf_exception_handler(exc, context)
-    
-    # Handle our custom exceptions
-    if isinstance(exc, BaseHttpException):
-        return Response(
-            data=exc.get_error_response_data(),
-            status=exc.status_code
+    try:
+        request = context.get("request")
+
+        # Handle our custom RFC 7807 exceptions first
+        if isinstance(exc, BaseHttpException):
+            return Response(exc.to_dict(request), status=exc.status_code)
+
+        # Handle DRF ValidationError specially to preserve field-level details
+        if isinstance(exc, ValidationError):
+            error = BaseHttpException(
+                type="https://docs.yourapp.com/problems/validation",
+                title="Validation failed",
+                detail="The request contains invalid data.",
+                status=400,
+                code=APIResponseCodes.GEN_VAL_422,
+                i18n_key="validation.failed",
+                issues=flatten_validation_errors(exc.detail),
+            )
+            return Response(error.to_dict(request), status=error.status_code)
+
+        # Handle Django core exceptions
+        if isinstance(exc, Http404):
+            error = BaseHttpException(
+                type="https://docs.yourapp.com/problems/not-found",
+                title="Not Found",
+                detail="The requested resource was not found.",
+                status=404,
+                code=APIResponseCodes.GEN_NOTFOUND_404,
+                i18n_key="errors.not_found",
+            )
+            return Response(error.to_dict(request), status=error.status_code)
+
+        if isinstance(exc, PermissionDenied):
+            error = BaseHttpException(
+                type="https://docs.yourapp.com/problems/permission-denied",
+                title="Permission Denied",
+                detail="You do not have permission to perform this action.",
+                status=403,
+                code=APIResponseCodes.PERM_DENIED_403,
+                i18n_key="errors.permission_denied",
+            )
+            return Response(error.to_dict(request), status=error.status_code)
+
+        # Handle DRF exceptions
+        response = drf_exception_handler(exc, context)
+        if response is not None:
+            error = _convert_drf_exception_to_rfc7807(exc, response)
+            return Response(error.to_dict(request), status=error.status_code)
+
+        # Handle unexpected exceptions
+        logger.exception(
+            "Unhandled exception occurred", exc_info=exc, extra={"context": context}
         )
-    
-    # Handle Django built-in exceptions
-    if isinstance(exc, Http404):
-        error_data = {
-            "error": "The requested resource was not found",
-            "code": "not_found",
-            "status_code": status.HTTP_404_NOT_FOUND,
-        }
-        return Response(data=error_data, status=status.HTTP_404_NOT_FOUND)
-    
-    if isinstance(exc, PermissionDenied):
-        error_data = {
-            "error": "You do not have permission to perform this action",
-            "code": "permission_denied",
-            "status_code": status.HTTP_403_FORBIDDEN,
-        }
-        return Response(data=error_data, status=status.HTTP_403_FORBIDDEN)
-    
-    # Handle DRF exceptions with custom formatting
-    if response is not None:
-        error_data = format_drf_error_response(exc, response)
-        return Response(data=error_data, status=response.status_code)
-    
-    # Handle unexpected exceptions
-    logger.exception("Unhandled exception occurred", exc_info=exc, extra={"context": context})
-    
-    error_data = {
-        "error": "An internal server error occurred",
-        "code": "internal_server_error",
-        "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
-    }
-    
-    return Response(data=error_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        error = BaseHttpException(
+            type="https://docs.yourapp.com/problems/internal",
+            title="Internal Server Error",
+            detail="An unexpected server error occurred.",
+            status=500,
+            code=APIResponseCodes.GEN_ERR_500,
+            i18n_key="errors.internal",
+        )
+
+        return Response(error.to_dict(request), status=error.status_code)
+
+    except Exception as handler_exc:
+        # Last resort fallback: if even our exception handler fails
+        logger.critical(
+            "Exception handler itself failed",
+            exc_info=handler_exc,
+            extra={"original_exception": str(exc), "context": context},
+        )
+
+        # Return a minimal but valid RFC 7807 response
+        return Response(
+            {
+                "type": "https://docs.yourapp.com/problems/critical",
+                "title": "Critical Server Error",
+                "status": 500,
+                "code": "VDJ-GEN-CRITICAL-500",
+                "i18n_key": "errors.critical",
+                "detail": "A critical server error occurred. Please try again later.",
+            },
+            status=500,
+        )
 
 
-def format_drf_error_response(exc, response) -> Dict[str, Any]:
+def _convert_drf_exception_to_rfc7807(exc, response) -> BaseHttpException:
     """
-    Format DRF exception responses to match our standard format.
-    
+    Convert DRF exceptions to RFC 7807 format.
+
     Args:
         exc: The DRF exception
         response: The DRF response
-        
+
     Returns:
-        Dict containing formatted error data
+        BaseHttpException: RFC 7807 compliant exception
     """
-    error_data = {
-        "status_code": response.status_code,
-    }
-    
-    # Handle specific DRF exceptions
-    if isinstance(exc, ValidationError):
-        error_data.update({
-            "error": "The request contains invalid data",
-            "code": "validation_error",
-            "field_errors": response.data,
-        })
-    elif isinstance(exc, (NotAuthenticated, AuthenticationFailed)):
-        error_data.update({
-            "error": "Authentication credentials were not provided or are invalid",
-            "code": "unauthorized",
-        })
+    status_code = response.status_code
+
+    # Map specific DRF exceptions to RFC 7807 format
+    if isinstance(exc, (NotAuthenticated, AuthenticationFailed)):
+        return BaseHttpException(
+            type="https://docs.yourapp.com/problems/authentication-required",
+            title="Authentication Required",
+            detail="Authentication credentials were not provided or are invalid.",
+            status=401,
+            code=APIResponseCodes.AUTH_LOGIN_401,
+            i18n_key="errors.authentication_required",
+        )
+
     elif isinstance(exc, DRFPermissionDenied):
-        error_data.update({
-            "error": "You do not have permission to perform this action",
-            "code": "permission_denied",
-        })
+        return BaseHttpException(
+            type="https://docs.yourapp.com/problems/permission-denied",
+            title="Permission Denied",
+            detail="You do not have permission to perform this action.",
+            status=403,
+            code=APIResponseCodes.PERM_DENIED_403,
+            i18n_key="errors.permission_denied",
+        )
+
     elif isinstance(exc, NotFound):
-        error_data.update({
-            "error": "The requested resource was not found",
-            "code": "not_found",
-        })
+        return BaseHttpException(
+            type="https://docs.yourapp.com/problems/not-found",
+            title="Not Found",
+            detail="The requested resource was not found.",
+            status=404,
+            code=APIResponseCodes.GEN_NOTFOUND_404,
+            i18n_key="errors.not_found",
+        )
+
     elif isinstance(exc, MethodNotAllowed):
-        error_data.update({
-            "error": "Method not allowed",
-            "code": "method_not_allowed",
-            "allowed_methods": getattr(exc, 'allowed_methods', []),
-        })
+        return BaseHttpException(
+            type="https://docs.yourapp.com/problems/method-not-allowed",
+            title="Method Not Allowed",
+            detail=str(exc.default_detail),
+            status=405,
+            code=f"{APIResponseCodes.GEN_BAD_400.value.replace('400', '405')}",
+            i18n_key="errors.method_not_allowed",
+            meta={"allowed_methods": getattr(exc, "allowed_methods", [])},
+        )
+
     elif isinstance(exc, ParseError):
-        error_data.update({
-            "error": "Malformed request data",
-            "code": "parse_error",
-        })
+        return BaseHttpException(
+            type="https://docs.yourapp.com/problems/parse-error",
+            title="Parse Error",
+            detail="Malformed request data.",
+            status=400,
+            code=APIResponseCodes.GEN_BAD_400,
+            i18n_key="errors.parse_error",
+        )
+
     elif isinstance(exc, UnsupportedMediaType):
-        error_data.update({
-            "error": "Unsupported media type",
-            "code": "unsupported_media_type",
-        })
+        return BaseHttpException(
+            type="https://docs.yourapp.com/problems/unsupported-media-type",
+            title="Unsupported Media Type",
+            detail="The media type of the request data is not supported.",
+            status=415,
+            code=f"{APIResponseCodes.GEN_BAD_400.value.replace('400', '415')}",
+            i18n_key="errors.unsupported_media_type",
+        )
+
     elif isinstance(exc, Throttled):
-        error_data.update({
-            "error": "Rate limit exceeded. Please try again later",
-            "code": "rate_limit_exceeded",
-            "retry_after": getattr(exc, 'wait', None),
-        })
+        return BaseHttpException(
+            type="https://docs.yourapp.com/problems/rate-limit-exceeded",
+            title="Rate Limit Exceeded",
+            detail="Too many requests. Please try again later.",
+            status=429,
+            code=APIResponseCodes.GEN_RATE_429,
+            i18n_key="errors.rate_limit_exceeded",
+            meta={"retry_after": getattr(exc, "wait", None)},
+        )
+
     else:
-        # Generic error message for other DRF exceptions
-        error_message = str(response.data.get('detail', 'An error occurred'))
-        error_data.update({
-            "error": error_message,
-            "code": "api_error",
-        })
-    
-    return error_data
+        # Generic error for other DRF exceptions
+        error_message = str(response.data.get("detail", "An error occurred"))
+        return BaseHttpException(
+            type=f"https://docs.yourapp.com/problems/http-{status_code}",
+            title=error_message,
+            detail=None,
+            status=status_code,
+            code=f"{APIResponseCodes.PROJECT_PREFIX}-GEN-ERR-{status_code}",
+            i18n_key="errors.generic",
+        )

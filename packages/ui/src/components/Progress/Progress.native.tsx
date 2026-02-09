@@ -18,6 +18,14 @@ export const Progress: React.FC<ProgressProps> = ({
   accessibilityLabel,
   accessibilityHint,
   accessibilityRole = 'none',
+  // Filter out web-specific props
+  className,
+  'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
+  'aria-valuemin': ariaValuemin,
+  'aria-valuemax': ariaValuemax,
+  'aria-valuenow': ariaValuenow,
+  role,
   ...props
 }) => {
   const { theme } = useTheme();
@@ -97,7 +105,7 @@ export const Progress: React.FC<ProgressProps> = ({
 
     const labelStyle: TextStyle = {
       fontSize: config.fontSize,
-      fontWeight: theme.typography.fontWeight.medium,
+      fontWeight: theme.typography.fontWeight.medium as any,
       color: theme.colors.foreground,
       fontFamily: theme.typography.fontFamily,
     };
@@ -160,7 +168,7 @@ export const Progress: React.FC<ProgressProps> = ({
 
   const labelStyle: TextStyle = {
     fontSize: config.fontSize,
-    fontWeight: theme.typography.fontWeight.medium,
+    fontWeight: theme.typography.fontWeight.medium as any,
     color: theme.colors.foreground,
     textAlign: 'center',
     fontFamily: theme.typography.fontFamily,

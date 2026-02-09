@@ -87,7 +87,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 
   const getTextLineStyles = (lineIndex: number): ViewStyle => {
     // Vary the width of text lines for more realistic appearance
-    let lineWidthPercent: string | number = '100%';
+    let lineWidthPercent: string = '100%';
     if (lines > 1) {
       if (lineIndex === lines - 1) {
         lineWidthPercent = '60%'; // Last line is shorter
@@ -98,7 +98,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 
     return {
       ...getBaseStyles(),
-      width: lineWidthPercent,
+      width: lineWidthPercent as any, // Cast to fix DimensionValue type issue
       height: 16,
       marginBottom: lineIndex < lines - 1 ? theme.spacing.xs : 0,
     };

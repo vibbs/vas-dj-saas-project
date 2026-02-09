@@ -1,6 +1,10 @@
-from django.urls import path, include
+from django.urls import include, path
+
+from apps.core.views import capabilities_view
 
 urlpatterns = [
+    # Core/Platform endpoints
+    path("capabilities/", capabilities_view, name="capabilities"),
     # JWT Authentication URLs
     path("auth/", include("apps.accounts.urls.auth")),
     # DRF Authentication URLs (for browsable API)
@@ -13,4 +17,6 @@ urlpatterns = [
     path("billing/", include("apps.billing.urls.api_v1")),
     # Email Service API endpoints
     path("email_service/", include("apps.email_service.urls.api_v1")),
+    # Feature Flags API endpoints
+    path("feature-flags/", include("apps.feature_flags.urls.api_v1")),
 ]

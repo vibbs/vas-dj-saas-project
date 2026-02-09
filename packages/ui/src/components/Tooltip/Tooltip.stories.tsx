@@ -312,26 +312,26 @@ export const AllPlacements: Story = {
       }}>
         {/* Top placements */}
         <Tooltip content="Top start placement" placement="top-start">
-          <Button variant="primary" size="small">
+          <Button variant="primary" size="sm">
             Top Start
           </Button>
         </Tooltip>
         
         <Tooltip content="Top center placement" placement="top">
-          <Button variant="primary" size="small">
+          <Button variant="primary" size="sm">
             Top
           </Button>
         </Tooltip>
         
         <Tooltip content="Top end placement" placement="top-end">
-          <Button variant="primary" size="small">
+          <Button variant="primary" size="sm">
             Top End
           </Button>
         </Tooltip>
 
         {/* Side placements */}
         <Tooltip content="Left placement" placement="left">
-          <Button variant="secondary" size="small">
+          <Button variant="secondary" size="sm">
             Left
           </Button>
         </Tooltip>
@@ -348,26 +348,26 @@ export const AllPlacements: Story = {
         </div>
         
         <Tooltip content="Right placement" placement="right">
-          <Button variant="secondary" size="small">
+          <Button variant="secondary" size="sm">
             Right
           </Button>
         </Tooltip>
 
         {/* Bottom placements */}
         <Tooltip content="Bottom start placement" placement="bottom-start">
-          <Button variant="secondary" size="small">
+          <Button variant="secondary" size="sm">
             Bottom Start
           </Button>
         </Tooltip>
         
         <Tooltip content="Bottom center placement" placement="bottom">
-          <Button variant="secondary" size="small">
+          <Button variant="secondary" size="sm">
             Bottom
           </Button>
         </Tooltip>
         
         <Tooltip content="Bottom end placement" placement="bottom-end">
-          <Button variant="secondary" size="small">
+          <Button variant="secondary" size="sm">
             Bottom End
           </Button>
         </Tooltip>

@@ -66,7 +66,7 @@ export const ListItem: React.FC<ListItemProps> = ({
 
   const titleStyles: TextStyle = {
     fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.medium,
+    fontWeight: theme.typography.fontWeight.medium as any,
     color: theme.colors.foreground,
     fontFamily: theme.typography.fontFamily,
     lineHeight: theme.typography.fontSize.base * 1.5,

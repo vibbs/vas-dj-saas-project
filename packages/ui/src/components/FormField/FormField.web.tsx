@@ -61,13 +61,13 @@ export const FormField: React.FC<FormFieldProps> = ({
   // Clone children to pass accessibility props
   const enhancedChildren = React.Children.map(children, (child) => {
     if (React.isValidElement(child)) {
-      return React.cloneElement(child, {
+      return React.cloneElement(child as React.ReactElement<any>, {
         id: fieldId,
         'aria-describedby': describedBy,
         'aria-invalid': !!errorText,
         'aria-required': required,
         disabled,
-        ...child.props,
+        ...(child.props && typeof child.props === 'object' ? child.props : {}),
       });
     }
     return child;

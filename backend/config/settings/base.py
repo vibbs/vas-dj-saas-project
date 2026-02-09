@@ -10,10 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-import dj_database_url
+import os
 from pathlib import Path
-from decouple import config, Csv
-from apps.lib.locales import LOCALES, LANGUAGE_CODE_DEFAULT, LOCALE_PATHS_RELATIVE
+
+import dj_database_url
+from decouple import Csv, config
+
+from apps.lib.locales import LANGUAGE_CODE_DEFAULT, LOCALE_PATHS_RELATIVE, LOCALES
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,17 +32,39 @@ APP_ENV = config("APP_ENV", default="dev")
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-vedw$*as9s=(=_(vv)8&a94(u8k_s-f%17m9204l*)+f3k3+yk"
+SECRET_KEY = config("SECRET_KEY", default=None)
+if not SECRET_KEY:
+    raise ValueError(
+        "SECRET_KEY environment variable must be set. "
+        "Generate one with: python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'"
+    )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="", cast=Csv())
 
+# CSRF Configuration - Required for Django 4.0+ cross-origin POST requests
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS",
+    default="http://localhost:3000,http://localhost:3001",
+    cast=lambda v: [s.strip() for s in v.split(",") if s.strip()],
+)
 
 # Application definition
 
-INSTALLED_APPS = [
+# Try to import unfold, add it to INSTALLED_APPS if available
+INSTALLED_APPS = []
+try:
+    import unfold  # noqa: F401
+
+    INSTALLED_APPS.append(
+        "unfold"
+    )  # Modern admin theme - must be before django.contrib.admin
+except ImportError:
+    pass
+
+INSTALLED_APPS += [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -47,8 +72,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # Third party apps
+    "corsheaders",  # CORS support for API
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "djangorestframework_camel_case",
     # Local apps
@@ -57,10 +84,22 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.billing",
     "apps.email_service",
+    "apps.feature_flags",
 ]
+
+# Observability: Conditionally add django_prometheus
+# This app provides additional metrics and monitoring capabilities
+try:
+    from apps.core.observability.config import ObservabilityConfig
+
+    if ObservabilityConfig.is_metrics_enabled():
+        INSTALLED_APPS.append("django_prometheus")
+except ImportError:
+    pass
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # CORS - must be before CommonMiddleware
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -71,8 +110,20 @@ MIDDLEWARE = [
     # Custom middleware
     "apps.core.middleware.RequestTimingMiddleware",
     "apps.core.middleware.TransactionIDMiddleware",
-    "apps.organizations.middleware.TenantMiddleware",
+    "apps.core.middleware.rate_limiting.RateLimitMiddleware",  # Rate limiting
+    "apps.organizations.middleware.tenant.TenantMiddleware",
 ]
+
+# Observability: Conditionally add metrics middleware
+# This middleware collects Prometheus metrics for HTTP requests
+try:
+    from apps.core.observability.config import ObservabilityConfig
+
+    if ObservabilityConfig.is_metrics_enabled():
+        # Add metrics middleware near the end (after authentication)
+        MIDDLEWARE.append("apps.core.middleware.metrics.MetricsMiddleware")
+except ImportError:
+    pass
 
 ROOT_URLCONF = "config.urls"
 
@@ -145,7 +196,13 @@ LOCALE_PATHS = [BASE_DIR / path for path in LOCALE_PATHS_RELATIVE]
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Additional locations of static files
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -166,22 +223,99 @@ CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
 
+# Celery Beat Schedule - Periodic Tasks
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    "cleanup-unverified-accounts": {
+        "task": "apps.accounts.tasks.cleanup_unverified_accounts",
+        "schedule": crontab(hour=2, minute=0),  # Daily at 2:00 AM
+        "options": {
+            "expires": 3600,  # Task expires after 1 hour if not picked up
+        },
+    },
+}
+
 # Email configuration
+# Email Configuration
+# For development, use MailHog SMTP server
 EMAIL_BACKEND = config(
-    "EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"
+    "EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend"
 )
-EMAIL_HOST = config("EMAIL_HOST", default="localhost")
-EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
-EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
-EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
-EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
-DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@example.com")
+EMAIL_HOST = config("EMAIL_HOST", default="mailhog")  # MailHog container name
+EMAIL_PORT = config("EMAIL_PORT", default=1025, cast=int)  # MailHog SMTP port
+EMAIL_USE_TLS = config(
+    "EMAIL_USE_TLS", default=False, cast=bool
+)  # MailHog doesn't use TLS
+EMAIL_USE_SSL = config("EMAIL_USE_SSL", default=False, cast=bool)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")  # MailHog doesn't require auth
+EMAIL_HOST_PASSWORD = config(
+    "EMAIL_HOST_PASSWORD", default=""
+)  # MailHog doesn't require auth
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@vas-dj.com")
 SUPPORT_EMAIL = config("SUPPORT_EMAIL", default="support@example.com")
 SITE_URL = config("SITE_URL", default="http://localhost:8000")
 
 # Application configuration
 APP_PREFIX = "saas"
 LOG_LEVEL = config("LOG_LEVEL", default="INFO").upper()
+
+# RFC 7807 and API response configuration
+PROJECT_CODE_PREFIX = "VDJ"
+
+# Rate Limiting Configuration
+RATE_LIMITING = {
+    "ENABLED": config("RATE_LIMITING_ENABLED", default=True, cast=bool),
+    "REDIS_URL": config("RATE_LIMITING_REDIS_URL", default="redis://redis:6379/1"),
+    "DEFAULT_LIMITS": {
+        "PER_IP": config(
+            "RATE_LIMITING_DEFAULT_IP_LIMIT", default="1000/hour"
+        ),  # Global IP limit
+        "PER_USER": config(
+            "RATE_LIMITING_DEFAULT_USER_LIMIT", default="2000/hour"
+        ),  # Per authenticated user
+    },
+    "ENDPOINT_LIMITS": {
+        # Authentication endpoints
+        "register": {
+            "PER_IP": config("RATE_LIMITING_REGISTER_IP_LIMIT", default="20/hour"),
+        },
+        "login": {
+            "PER_IP": config("RATE_LIMITING_LOGIN_IP_LIMIT", default="50/hour"),
+        },
+        "resend_verification_email": {
+            "PER_IP": config("RATE_LIMITING_RESEND_IP_LIMIT", default="10/hour"),
+            "PER_USER": config("RATE_LIMITING_RESEND_USER_LIMIT", default="5/hour"),
+        },
+        "resend_verification_by_email": {
+            "PER_IP": config(
+                "RATE_LIMITING_RESEND_BY_EMAIL_IP_LIMIT", default="10/hour"
+            ),
+            "PER_EMAIL": config(
+                "RATE_LIMITING_RESEND_BY_EMAIL_EMAIL_LIMIT", default="3/hour"
+            ),
+        },
+        # Password reset endpoints
+        "password_reset": {
+            "PER_IP": config(
+                "RATE_LIMITING_PASSWORD_RESET_IP_LIMIT", default="10/hour"
+            ),
+            "PER_EMAIL": config(
+                "RATE_LIMITING_PASSWORD_RESET_EMAIL_LIMIT", default="3/hour"
+            ),
+        },
+    },
+    "EXCLUDED_PATHS": [
+        "/admin/",
+        "/api/schema/",
+        "/api/docs/",
+        "/api/redoc/",
+        "/health/",
+        "/ping/",
+        "/static/",
+        "/media/",
+    ],
+}
 
 
 # Custom user model
@@ -192,7 +326,8 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+        # SessionAuthentication removed to prevent CSRF conflicts with stateless JWT API
+        # Django admin uses its own session auth and doesn't rely on DRF authentication
         "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
@@ -207,14 +342,14 @@ REST_FRAMEWORK = {
         "djangorestframework_camel_case.parser.CamelCaseFormParser",
         "djangorestframework_camel_case.parser.CamelCaseMultiPartParser",
     ),
-    "DEFAULT_PAGINATION_CLASS": "apps.core.middleware.CustomPaginationClass",
+    "DEFAULT_PAGINATION_CLASS": "apps.core.pagination.StandardPagination",
     "PAGE_SIZE": 20,
-    "EXCEPTION_HANDLER": "apps.core.exceptions.handler.custom_exception_handler",
+    "EXCEPTION_HANDLER": "apps.core.exceptions.handler.rfc7807_exception_handler",
 }
 
 # drf-spectacular settings
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Django SaaS API",
+    "TITLE": "VAS-DJ SaaS API",
     "DESCRIPTION": "A comprehensive SaaS backend API built with Django and Django REST Framework",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
@@ -224,8 +359,9 @@ SPECTACULAR_SETTINGS = {
     "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
     "SERVE_AUTHENTICATION": None,
     "POSTPROCESSING_HOOKS": [
-        "apps.core.schema_hooks.wrap_responses_in_data",
-        "apps.core.schema_hooks.add_common_error_responses",
+        "apps.core.schema_hooks.add_schema_components",
+        "apps.core.schema_hooks.wrap_responses_in_success_envelope",
+        "apps.core.schema_hooks.add_rfc7807_error_responses",
         "drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields",
     ],
     "ENUM_NAME_OVERRIDES": {
@@ -235,4 +371,101 @@ SPECTACULAR_SETTINGS = {
 
 # JWT Configuration
 from apps.core.jwt_config import get_jwt_settings
+
 SIMPLE_JWT = get_jwt_settings(SECRET_KEY)
+
+# Frontend URL for email verification links
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+
+# CORS Configuration
+CORS_ALLOWED_ORIGINS = config(
+    "CORS_ALLOWED_ORIGINS",
+    default="http://localhost:3000,http://localhost:3001",
+    cast=lambda v: [s.strip() for s in v.split(",") if s.strip()],
+)
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+    "x-org-slug",  # Custom header for tenant resolution
+    "x-org-id",  # Custom header for organization ID
+    "x-request-id",  # Custom header for request tracking
+]
+
+# CSRF Cookie Configuration
+# Note: For cross-origin requests, CSRF protection is handled via CSRF_TRUSTED_ORIGINS
+# SameSite=Lax works for both same-origin (admin) and allows CORS for API requests
+CSRF_COOKIE_SAMESITE = (
+    "Lax"  # Lax allows cookies in top-level navigation and same-origin requests
+)
+CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
+CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read CSRF token for API requests
+SESSION_COOKIE_SAMESITE = "Lax"  # Lax for session cookies
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+
+# Cache Configuration (Development uses in-memory, Production uses Redis)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "default-cache",
+        "TIMEOUT": 300,  # 5 minutes default
+        "OPTIONS": {"MAX_ENTRIES": 1000},
+    }
+}
+
+# Cache key prefix
+CACHE_KEY_PREFIX = "vasdj"
+
+# Observability Configuration
+# All observability features are disabled by default to minimize infrastructure costs
+# Set OBSERVABILITY_ENABLED=true in environment to enable metrics and tracing
+OBSERVABILITY_ENABLED = config("OBSERVABILITY_ENABLED", default=False, cast=bool)
+METRICS_ENABLED = config("METRICS_ENABLED", default=False, cast=bool)
+TRACING_ENABLED = config("TRACING_ENABLED", default=False, cast=bool)
+DETAILED_METRICS_ENABLED = config("DETAILED_METRICS_ENABLED", default=False, cast=bool)
+METRICS_SAMPLE_RATE = config("METRICS_SAMPLE_RATE", default=1.0, cast=float)
+TRACING_SAMPLE_RATE = config("TRACING_SAMPLE_RATE", default=0.01, cast=float)
+
+# Global Mode Configuration
+# When enabled, the application operates in single-tenant mode with a shared platform scope
+# All users operate under a single implicit organization (the "platform")
+# This removes organization creation, switching, and management friction
+# Can be reversed to multi-tenant mode later with minimal rework
+GLOBAL_MODE_ENABLED = config("GLOBAL_MODE_ENABLED", default=False, cast=bool)
+
+# The slug of the canonical organization used as the global scope
+# This organization is created automatically via bootstrap command
+GLOBAL_SCOPE_ORG_SLUG = config("GLOBAL_SCOPE_ORG_SLUG", default="platform")
+
+# Optional: Custom name for the global organization
+GLOBAL_SCOPE_ORG_NAME = config("GLOBAL_SCOPE_ORG_NAME", default="Platform")
+
+# Initialize OpenTelemetry instrumentation if observability is enabled
+if OBSERVABILITY_ENABLED:
+    try:
+        import logging
+
+        from apps.core.observability.instrumentation import initialize_instrumentation
+
+        logger = logging.getLogger(__name__)
+        if initialize_instrumentation():
+            logger.info("OpenTelemetry instrumentation initialized")
+    except Exception as e:
+        import logging
+
+        logging.getLogger(__name__).warning(f"Failed to initialize observability: {e}")

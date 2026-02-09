@@ -1,0 +1,17 @@
+VAS-DJ - Verify Your Email Address
+
+Hi {{ user.first_name|default:user.email }},
+
+Thank you for signing up for VAS-DJ! To get started, please verify your email address by clicking the link below:
+
+{{ verification_url }}
+
+IMPORTANT: This verification link will expire in 24 hours for security reasons.
+
+Once your email is verified, you'll have full access to your account and can start exploring all the features we have to offer.
+
+If you didn't create this account, you can safely ignore this email.
+
+Best regards,
+The VAS-DJ Team
+{{ organization.name }}

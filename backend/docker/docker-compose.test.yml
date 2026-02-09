@@ -1,0 +1,48 @@
+services:
+  web:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile
+    command: pytest --maxfail=5 --cov=apps --cov-report=term-missing --cov-report=html
+    volumes:
+      - ..:/app
+    depends_on:
+      - test_db
+      - redis
+      - mailhog
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.test
+      - DB_NAME=test_saas_db
+      - DB_USER=test_saas_user
+      - DB_PASSWORD=test_saas_password
+      - DB_HOST=test_db
+      - DB_PORT=5432
+    env_file:
+      - ../.env.test
+    networks:
+      - test-saas-network
+
+  test_db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: test_saas_db
+      POSTGRES_USER: test_saas_user
+      POSTGRES_PASSWORD: test_saas_password
+    tmpfs:
+      - /var/lib/postgresql/data
+    networks:
+      - test-saas-network
+
+  redis:
+    image: redis:latest
+    networks:
+      - test-saas-network
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    networks:
+      - test-saas-network
+
+networks:
+  test-saas-network:
+    driver: bridge

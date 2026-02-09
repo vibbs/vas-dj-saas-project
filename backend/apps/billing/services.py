@@ -1,21 +1,16 @@
 import logging
+
 from django.conf import settings
-
-try:
-    import stripe
-
-    stripe.api_key = getattr(settings, "STRIPE_SECRET_KEY", "")
-except ImportError:
-    stripe = None
+from django.db import transaction
 from django.utils import timezone
-from typing import Optional, Dict, Any
-from .models import Plan, Subscription, Invoice, SubscriptionStatus, InvoiceStatus
+
+from .models import Invoice, Plan, Subscription, SubscriptionStatus
+from .providers.factory import PaymentProviderFactory
 
 log = logging.getLogger(f"{settings.LOG_APP_PREFIX}.billing.services")
 
 
 class StripeService:
-
     @staticmethod
     def create_customer(account, organization=None):
         customer_data = {
@@ -192,6 +187,324 @@ class StripeService:
 
 
 class BillingService:
+    """
+    Platform-agnostic billing service that uses PaymentProviderFactory.
+    Handles subscription lifecycle, feature access, and database synchronization.
+    """
+
+    def __init__(self, provider_name: str | None = None):
+        """Initialize billing service with a payment provider."""
+        self.provider = PaymentProviderFactory.get_provider(provider_name)
+
+    # ==================== Customer Management ====================
+
+    def create_customer(self, account, organization=None):
+        """Create a customer in the payment provider."""
+        try:
+            customer_data = self.provider.create_customer(
+                email=account.email,
+                name=account.get_full_name(),
+                metadata={
+                    "account_id": str(account.id),
+                    "organization_id": str(organization.id) if organization else "",
+                },
+            )
+            log.info(
+                f"Customer created in {self.provider.provider_name}: {customer_data.external_id}"
+            )
+            return customer_data
+        except Exception as e:
+            log.error(f"Customer creation failed: {str(e)}")
+            raise
+
+    def get_or_create_customer(self, account, organization=None):
+        """Get existing customer or create a new one."""
+        try:
+            # Try to find existing customer by email
+            customer = self.provider.get_customer_by_email(account.email)
+            if customer:
+                return customer
+
+            # Create new customer
+            return self.create_customer(account, organization)
+        except Exception as e:
+            log.error(f"Get or create customer failed: {str(e)}")
+            raise
+
+    # ==================== Checkout & Subscription Creation ====================
+
+    @transaction.atomic
+    def create_checkout_session(
+        self, plan: Plan, account, success_url: str, cancel_url: str, organization=None
+    ):
+        """Create a checkout session for subscription purchase."""
+        try:
+            # Get or create customer
+            customer = self.get_or_create_customer(account, organization)
+
+            # Create checkout session
+            session_data = self.provider.create_checkout_session(
+                customer_id=customer.external_id,
+                price_id=plan.external_price_id,
+                success_url=success_url,
+                cancel_url=cancel_url,
+                trial_period_days=plan.trial_period_days,
+                metadata={
+                    "plan_id": str(plan.id),
+                    "account_id": str(account.id),
+                    "organization_id": str(organization.id) if organization else "",
+                },
+            )
+
+            log.info(
+                f"Checkout session created: {session_data.session_id} for plan {plan.name}"
+            )
+            return session_data
+
+        except Exception as e:
+            log.error(f"Checkout session creation failed: {str(e)}")
+            raise
+
+    @transaction.atomic
+    def create_subscription_from_checkout(self, checkout_session_data: dict):
+        """
+        Create local subscription from successful checkout.
+        Accepts normalized checkout session data from provider webhook.
+        """
+        from django.contrib.auth import get_user_model
+
+        from apps.organizations.models import Organization
+
+        Account = get_user_model()
+
+        try:
+            metadata = checkout_session_data.get("metadata", {})
+            account = Account.objects.get(id=metadata["account_id"])
+            plan = Plan.objects.get(id=metadata["plan_id"])
+
+            organization = None
+            if metadata.get("organization_id"):
+                organization = Organization.objects.get(id=metadata["organization_id"])
+
+            # Get subscription data from provider
+            subscription_id = checkout_session_data.get("subscription_id")
+            if not subscription_id:
+                raise ValueError("No subscription ID in checkout session data")
+
+            subscription_data = self.provider.retrieve_subscription(subscription_id)
+
+            # Create local subscription record
+            subscription = Subscription.objects.create(
+                account=account,
+                organization=organization or account.organizations.first(),
+                plan=plan,
+                provider=self.provider.provider_name,
+                external_subscription_id=subscription_data.external_id,
+                external_customer_id=subscription_data.external_customer_id,
+                status=subscription_data.status,
+                current_period_start=subscription_data.current_period_start,
+                current_period_end=subscription_data.current_period_end,
+                cancel_at_period_end=subscription_data.cancel_at_period_end,
+                trial_start=subscription_data.trial_start,
+                trial_end=subscription_data.trial_end,
+                metadata=metadata,
+            )
+
+            log.info(
+                f"Subscription created from checkout: {subscription.id} for {account.email}"
+            )
+            return subscription
+
+        except Exception as e:
+            log.error(f"Subscription creation from checkout failed: {str(e)}")
+            raise
+
+    # ==================== Subscription Lifecycle ====================
+
+    @transaction.atomic
+    def cancel_subscription(
+        self, subscription: Subscription, at_period_end: bool = True
+    ):
+        """Cancel a subscription."""
+        try:
+            # Cancel in payment provider
+            subscription_data = self.provider.cancel_subscription(
+                subscription.external_subscription_id, at_period_end=at_period_end
+            )
+
+            # Update local record
+            subscription.cancel_at_period_end = at_period_end
+            if not at_period_end:
+                subscription.status = SubscriptionStatus.CANCELED
+                subscription.canceled_at = timezone.now()
+            subscription.save()
+
+            log.info(
+                f"Subscription canceled: {subscription.id} (at_period_end={at_period_end})"
+            )
+            return subscription_data
+
+        except Exception as e:
+            log.error(f"Subscription cancellation failed: {str(e)}")
+            raise
+
+    @transaction.atomic
+    def reactivate_subscription(self, subscription: Subscription):
+        """Reactivate a canceled subscription."""
+        try:
+            # Reactivate in payment provider
+            subscription_data = self.provider.reactivate_subscription(
+                subscription.external_subscription_id
+            )
+
+            # Update local record
+            subscription.cancel_at_period_end = False
+            subscription.canceled_at = None
+            subscription.save()
+
+            log.info(f"Subscription reactivated: {subscription.id}")
+            return subscription_data
+
+        except Exception as e:
+            log.error(f"Subscription reactivation failed: {str(e)}")
+            raise
+
+    @transaction.atomic
+    def update_subscription_plan(self, subscription: Subscription, new_plan: Plan):
+        """Update subscription to a new plan."""
+        try:
+            # Update in payment provider
+            subscription_data = self.provider.update_subscription(
+                subscription.external_subscription_id,
+                new_price_id=new_plan.external_price_id,
+                proration_behavior="always_invoice",  # Can be configurable
+            )
+
+            # Update local record
+            subscription.plan = new_plan
+            subscription.current_period_start = subscription_data.current_period_start
+            subscription.current_period_end = subscription_data.current_period_end
+            subscription.save()
+
+            log.info(
+                f"Subscription plan updated: {subscription.id} to plan {new_plan.name}"
+            )
+            return subscription_data
+
+        except Exception as e:
+            log.error(f"Subscription plan update failed: {str(e)}")
+            raise
+
+    # ==================== Synchronization ====================
+
+    @transaction.atomic
+    def sync_subscription_from_provider(self, external_subscription_id: str):
+        """Sync subscription data from payment provider to local database."""
+        try:
+            # Get subscription from local database
+            subscription = Subscription.objects.get(
+                external_subscription_id=external_subscription_id
+            )
+
+            # Retrieve from provider
+            subscription_data = self.provider.retrieve_subscription(
+                external_subscription_id
+            )
+
+            # Update local record
+            subscription.status = subscription_data.status
+            subscription.current_period_start = subscription_data.current_period_start
+            subscription.current_period_end = subscription_data.current_period_end
+            subscription.cancel_at_period_end = subscription_data.cancel_at_period_end
+            subscription.trial_start = subscription_data.trial_start
+            subscription.trial_end = subscription_data.trial_end
+            subscription.canceled_at = subscription_data.canceled_at
+            subscription.save()
+
+            log.info(f"Subscription synced: {subscription.id}")
+            return subscription
+
+        except Subscription.DoesNotExist:
+            log.warning(
+                f"Subscription not found for external ID: {external_subscription_id}"
+            )
+            return None
+        except Exception as e:
+            log.error(f"Subscription sync failed: {str(e)}")
+            raise
+
+    @transaction.atomic
+    def sync_invoice_from_provider(self, external_invoice_id: str):
+        """Sync invoice data from payment provider to local database."""
+        try:
+            # Get invoice from local database
+            invoice = Invoice.objects.get(external_invoice_id=external_invoice_id)
+
+            # Retrieve from provider
+            invoice_data = self.provider.retrieve_invoice(external_invoice_id)
+
+            # Update local record
+            invoice.status = invoice_data.status
+            invoice.subtotal = invoice_data.subtotal
+            invoice.tax = invoice_data.tax
+            invoice.total = invoice_data.total
+            invoice.due_date = invoice_data.due_date
+            invoice.paid_at = invoice_data.paid_at
+            invoice.hosted_invoice_url = invoice_data.hosted_invoice_url or ""
+            invoice.invoice_pdf_url = invoice_data.invoice_pdf_url or ""
+            invoice.save()
+
+            log.info(f"Invoice synced: {invoice.id}")
+            return invoice
+
+        except Invoice.DoesNotExist:
+            log.warning(f"Invoice not found for external ID: {external_invoice_id}")
+            return None
+        except Exception as e:
+            log.error(f"Invoice sync failed: {str(e)}")
+            raise
+
+    @transaction.atomic
+    def create_invoice_from_provider_data(self, invoice_data):
+        """Create a new invoice from provider data."""
+        try:
+            # Find the subscription
+            subscription = Subscription.objects.get(
+                external_subscription_id=invoice_data.get("subscription_id")
+            )
+
+            invoice = Invoice.objects.create(
+                subscription=subscription,
+                provider=self.provider.provider_name,
+                external_invoice_id=invoice_data.external_id,
+                external_payment_intent_id=invoice_data.payment_intent_id,
+                number=invoice_data.number,
+                status=invoice_data.status,
+                subtotal=invoice_data.subtotal,
+                tax=invoice_data.tax,
+                total=invoice_data.total,
+                currency=invoice_data.currency,
+                period_start=invoice_data.period_start,
+                period_end=invoice_data.period_end,
+                due_date=invoice_data.due_date,
+                paid_at=invoice_data.paid_at,
+                hosted_invoice_url=invoice_data.hosted_invoice_url or "",
+                invoice_pdf_url=invoice_data.invoice_pdf_url or "",
+            )
+
+            log.info(f"Invoice created: {invoice.id} ({invoice.number})")
+            return invoice
+
+        except Subscription.DoesNotExist:
+            log.error(
+                f"Subscription not found for invoice: {invoice_data.get('subscription_id')}"
+            )
+            return None
+        except Exception as e:
+            log.error(f"Invoice creation failed: {str(e)}")
+            raise
+
+    # ==================== Feature Access & Limits ====================
 
     @staticmethod
     def get_active_subscription(account, organization=None):
@@ -242,52 +555,3 @@ class BillingService:
             return False
 
         return timezone.now() <= subscription.grace_period_end
-
-    @staticmethod
-    def create_subscription_from_checkout(checkout_session):
-        """Create local subscription from successful Stripe checkout."""
-        from django.contrib.auth import get_user_model
-        from apps.organizations.models import Organization
-
-        Account = get_user_model()
-
-        metadata = checkout_session.metadata
-        account = Account.objects.get(id=metadata["account_id"])
-        plan = Plan.objects.get(id=metadata["plan_id"])
-
-        organization = None
-        if metadata.get("organization_id"):
-            organization = Organization.objects.get(id=metadata["organization_id"])
-
-        stripe_subscription = stripe.Subscription.retrieve(
-            checkout_session.subscription
-        )
-
-        subscription = Subscription.objects.create(
-            account=account,
-            organization=organization or account.organizations.first(),
-            plan=plan,
-            stripe_subscription_id=stripe_subscription.id,
-            stripe_customer_id=stripe_subscription.customer,
-            status=stripe_subscription.status,
-            current_period_start=timezone.datetime.fromtimestamp(
-                stripe_subscription.current_period_start, tz=timezone.utc
-            ),
-            current_period_end=timezone.datetime.fromtimestamp(
-                stripe_subscription.current_period_end, tz=timezone.utc
-            ),
-            cancel_at_period_end=stripe_subscription.cancel_at_period_end,
-            metadata=metadata,
-        )
-
-        if stripe_subscription.trial_start:
-            subscription.trial_start = timezone.datetime.fromtimestamp(
-                stripe_subscription.trial_start, tz=timezone.utc
-            )
-        if stripe_subscription.trial_end:
-            subscription.trial_end = timezone.datetime.fromtimestamp(
-                stripe_subscription.trial_end, tz=timezone.utc
-            )
-
-        subscription.save()
-        return subscription

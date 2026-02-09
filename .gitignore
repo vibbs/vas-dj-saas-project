@@ -99,6 +99,9 @@ ENV.sh
 # mkdocs documentation
 /site
 
+# API Response Code System - Generated Content
+backend/_generated/
+
 # mypy
 .mypy_cache/
 .dmypy.json
@@ -162,6 +165,11 @@ apps/*/.next/
 # Claude Code local settings
 .claude/settings.local.json
 
+# Self-improving agent system
+# Note: learnings, rules, processes are tracked (team knowledge)
+# State is optional - uncomment below to keep it personal
+# .claude/state/
+
 # Temporary/scratch files  
 scrapbok.md
 
@@ -188,3 +196,8 @@ lerna-debug.log*
 
 # Storybook build outputs
 storybook-static/
+
+# Blog content scratchpad
+blog_posts/
+
+ai-playground/

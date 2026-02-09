@@ -109,9 +109,7 @@ export const Textarea: React.FC<TextareaProps> = ({
 
   const baseStyles = {
     width: '100%',
-    minHeight: sizeConfig.minHeight,
     fontFamily: theme.typography.fontFamily,
-    fontSize: sizeConfig.fontSize,
     lineHeight: 1.5,
     color: theme.colors.foreground,
     resize: resize,

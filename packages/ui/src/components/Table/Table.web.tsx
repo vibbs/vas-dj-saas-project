@@ -32,8 +32,10 @@ export const Table: React.FC<TableProps> = ({
   accessibilityRole,
   accessibilityLabel,
   accessibilityHint,
-  ...props
+  ...restProps
 }) => {
+  // Filter out any React Native event handlers that shouldn't be passed to DOM
+  const { onPress, onLongPress, ...props } = restProps as any;
   const { theme } = useTheme();
 
   const getSizeStyles = () => {

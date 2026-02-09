@@ -1,0 +1,35 @@
+{
+  "name": "@vas-dj-saas/core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Core business logic and shared utilities for VAS-DJ SaaS",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./navigation": {
+      "types": "./dist/navigation/index.d.ts",
+      "default": "./dist/navigation/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "@vas-dj-saas/api-client": "workspace:*",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@vas-dj-saas/api-client": "workspace:*",
+    "react": "19.0.0",
+    "typescript": "5.8.3"
+  }
+}

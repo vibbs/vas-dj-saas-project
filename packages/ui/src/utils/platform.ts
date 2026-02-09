@@ -1,5 +1,18 @@
 // Platform detection utilities for cross-platform components
-import { Platform } from 'react-native';
+
+// Detect platform dynamically
+const detectPlatform = () => {
+  // Check if we're in a React Native environment
+  try {
+    const Platform = require('react-native').Platform;
+    return Platform.OS;
+  } catch {
+    // We're in a web environment
+    return 'web';
+  }
+};
+
+const currentPlatform = detectPlatform();
 
 /**
  * Platform detection utilities
@@ -8,33 +21,33 @@ export const PlatformUtils = {
   /**
    * Check if running on native mobile platforms (iOS/Android)
    */
-  isNative: () => Platform.OS === 'ios' || Platform.OS === 'android',
+  isNative: () => currentPlatform === 'ios' || currentPlatform === 'android',
 
   /**
    * Check if running on web platform (including react-native-web)
    */
-  isWeb: () => Platform.OS === 'web',
+  isWeb: () => currentPlatform === 'web',
 
   /**
    * Check if running on iOS
    */
-  isIOS: () => Platform.OS === 'ios',
+  isIOS: () => currentPlatform === 'ios',
 
   /**
    * Check if running on Android
    */
-  isAndroid: () => Platform.OS === 'android',
+  isAndroid: () => currentPlatform === 'android',
 
   /**
    * Get the current platform OS
    */
-  getOS: () => Platform.OS,
+  getOS: () => currentPlatform,
 
   /**
    * Check if running with react-native-web in a browser environment
    */
   isReactNativeWeb: () => {
-    return Platform.OS === 'web' && typeof window !== 'undefined';
+    return typeof window !== 'undefined';
   },
 
   /**
@@ -44,7 +57,7 @@ export const PlatformUtils = {
    * @returns The appropriate implementation based on current platform
    */
   select: <T>(nativeImplementation: T, webImplementation: T): T => {
-    return PlatformUtils.isNative() ? nativeImplementation : webImplementation;
+    return PlatformUtils.isWeb() ? webImplementation : nativeImplementation;
   },
 
   /**
@@ -57,13 +70,13 @@ export const PlatformUtils = {
     ios?: () => void;
     android?: () => void;
   }) => {
-    if (options.ios && PlatformUtils.isIOS()) {
+    if (PlatformUtils.isIOS() && options.ios) {
       options.ios();
-    } else if (options.android && PlatformUtils.isAndroid()) {
+    } else if (PlatformUtils.isAndroid() && options.android) {
       options.android();
-    } else if (options.native && PlatformUtils.isNative()) {
+    } else if (PlatformUtils.isNative() && options.native) {
       options.native();
-    } else if (options.web && PlatformUtils.isWeb()) {
+    } else if (PlatformUtils.isWeb() && options.web) {
       options.web();
     }
   },
