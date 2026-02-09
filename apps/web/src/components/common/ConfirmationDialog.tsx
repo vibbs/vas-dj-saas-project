@@ -69,7 +69,7 @@ export function ConfirmationDialog({
           marginBottom: '20px',
         }}
       >
-        <p style={{ margin: 0, color: 'inherit', fontSize: '14px', lineHeight: 1.5 }}>
+        <p style={{ margin: 0, color: colors.text, fontSize: '14px', lineHeight: 1.5 }}>
           {description}
         </p>
       </div>
