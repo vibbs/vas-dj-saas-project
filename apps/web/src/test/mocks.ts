@@ -8,9 +8,11 @@ export const mockOrganization: Organization = {
   slug: 'test-org',
   description: 'A test organization',
   logo: null,
-  subdomain: 'test',
+  subDomain: 'test',
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
+  memberCount: 5,
+  subscriptionStatus: 'active',
 };
 
 export const mockOrganizations: Organization[] = [mockOrganization];
@@ -57,6 +59,11 @@ export const mockInvite: Invite = {
   expiresAt: '2024-02-01T00:00:00Z',
   createdAt: '2024-01-15T00:00:00Z',
   updatedAt: '2024-01-15T00:00:00Z',
+  acceptUrl: 'https://app.example.com/invite/accept?token=abc123',
+  isValid: true,
+  isExpired: false,
+  acceptedAt: null,
+  acceptedBy: null,
 };
 
 export const mockInvites: Invite[] = [mockInvite];

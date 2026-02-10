@@ -40,7 +40,7 @@ export default function RegisterOrganizationPage() {
         preferredSubdomain: data.preferredSubdomain,
       });
 
-      if (response.status === 201 || response.status === 200) {
+      if ((response as { status: number }).status === 201 || (response as { status: number }).status === 200) {
         setSuccessMessage(
           'Registration successful! Please check your email to verify your account.'
         );

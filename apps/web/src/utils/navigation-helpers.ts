@@ -1,4 +1,3 @@
-import type { HubConfig, QuickAction, SecondarySidebarConfig, SecondaryNavItem } from '@vas-dj-saas/ui';
 import type {
   HubConfig as CoreHubConfig,
   SecondarySidebarConfig as CoreSecondarySidebarConfig,
@@ -7,6 +6,48 @@ import type {
   NavSection
 } from '@vas-dj-saas/core';
 import type { HubCardProps } from '@vas-dj-saas/ui';
+
+// Define types locally since they're not exported from UI package
+interface QuickAction {
+  id: string;
+  label: string;
+  icon: string;
+  href?: string;
+  onClick?: string;
+  variant?: "primary" | "secondary" | "outline" | "ghost";
+  order?: number;
+}
+
+interface SummaryMetric {
+  label: string;
+  value: string | number;
+  icon?: string;
+}
+
+interface HubConfig {
+  title: string;
+  description?: string;
+  cards: HubCardProps[];
+  quickActions?: QuickAction[];
+  summaryMetrics?: SummaryMetric[];
+}
+
+interface SecondaryNavItem {
+  id: string;
+  label: string;
+  icon?: string;
+  href: string;
+  badge?: string | number;
+  order?: number;
+  children?: SecondaryNavItem[];
+}
+
+interface SecondarySidebarConfig {
+  items: SecondaryNavItem[];
+  showOverviewLink?: boolean;
+  overviewLabel?: string;
+  overviewHref?: string;
+}
 
 /**
  * Convert core navigation hub config to UI component hub config

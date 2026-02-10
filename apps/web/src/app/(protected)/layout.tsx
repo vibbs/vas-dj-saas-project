@@ -4,11 +4,12 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import { MainSidebar } from '@/components/navigation/MainSidebar';
 import { FloatingBreadcrumb } from '@/components/navigation/FloatingBreadcrumb';
+import { NotificationCenter } from '@/components/notifications';
 import { AppBar } from '@vas-dj-saas/ui';
 import { navigationConfig } from '@vas-dj-saas/core';
 import { getPageMetadata } from '@/utils/navigation-helpers';
 import { useAuthGuard } from '@/hooks/useAuthGuard';
-import { Bell, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 
 /**
  * Protected Layout
@@ -87,20 +88,7 @@ export default function ProtectedLayout({
                 </button>
               ) : undefined
             }
-            actions={[
-              {
-                id: 'notifications',
-                icon: <Bell size={20} />,
-                label: 'Notifications',
-                badge: 3,
-              },
-            ]}
-            onActionClick={(action) => {
-              if (action.id === 'notifications') {
-                // Handle notifications click
-                console.log('Notifications clicked');
-              }
-            }}
+            trailing={<NotificationCenter />}
           />
         )}
 

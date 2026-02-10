@@ -17,6 +17,13 @@ export type {
   Invite,
   InviteRole,
   InviteStatus,
+  // Billing types
+  Plan,
+  PlanInterval,
+  Subscription,
+  SubscriptionStatus,
+  Invoice,
+  InvoiceStatus,
 } from './generated/api.schemas';
 
 // Re-export request/response types
@@ -43,6 +50,18 @@ export type {
   PaginatedOrganizationList,
   PaginatedOrganizationMembershipList,
   PaginatedInviteList,
+  PaginatedPlanList,
+  PaginatedSubscriptionList,
+  PaginatedInvoiceList,
+} from './generated/api.schemas';
+
+// Re-export billing request types
+export type {
+  SubscriptionRequest,
+  SubscriptionRequestStatus,
+  V1BillingPlansListParams,
+  V1BillingSubscriptionsListParams,
+  V1BillingInvoicesListParams,
 } from './generated/api.schemas';
 
 // Re-export error types
@@ -66,3 +85,30 @@ export type {
 // Re-export error class
 export { ApiError, formatApiError } from './core/errors';
 export type { ProblemDetails } from './core/errors';
+
+// Re-export dashboard types
+export type {
+  DashboardStat,
+  DashboardStats,
+  ActivityType,
+  Activity,
+  RecentActivityResponse,
+  RoleBreakdown,
+  RecentMember,
+  TeamOverview,
+  UsageDataPoint,
+  UsageMetrics,
+} from './services/dashboard';
+
+// Re-export API Keys types
+export type {
+  ApiKey,
+  ApiKeyScope,
+  ApiKeyStatus,
+  ApiKeyExpiration,
+  CreateApiKeyRequest,
+  CreateApiKeyResponse,
+  ApiKeyUsage,
+  ApiKeyListParams,
+  ApiKeyListResponse,
+} from './services/apiKeys';

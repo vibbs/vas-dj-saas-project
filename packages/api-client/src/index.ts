@@ -120,6 +120,21 @@ export { UsersService } from './services/users';
 export { OrganizationsService } from './services/organizations';
 export { InvitesService } from './services/invites';
 export { MembersService } from './services/members';
+export { BillingService } from './services/billing';
+export { DashboardService } from './services/dashboard';
+export { NotificationsService } from './services/notifications';
+export { ApiKeysService } from './services/apiKeys';
+
+// Re-export notification types
+export type {
+  Notification,
+  NotificationType,
+  NotificationCategory,
+  NotificationPreferences,
+  NotificationChannels,
+  PaginatedNotifications,
+  GetNotificationsParams,
+} from './services/notifications';
 
 // === Pagination Utilities ===
 export {
