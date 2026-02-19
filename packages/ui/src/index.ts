@@ -200,11 +200,62 @@ export type {
   Theme,
   ThemeName,
   ColorTokens,
+  GradientTokens,
   SpacingTokens,
   TypographyTokens,
   BorderTokens,
   ShadowTokens,
+  AnimationTokens,
 } from "./theme/tokens";
+
+// Animation system exports
+export {
+  // Spring configs
+  springConfig,
+  easingConfig,
+  // Fade variants
+  fadeIn,
+  fadeInUp,
+  fadeInDown,
+  fadeInLeft,
+  fadeInRight,
+  // Scale variants
+  scaleIn,
+  scaleInBounce,
+  popIn,
+  // Slide variants
+  slideUp,
+  slideDown,
+  slideLeft,
+  slideRight,
+  // Stagger variants
+  staggerContainer,
+  staggerContainerFast,
+  staggerItem,
+  staggerItemScale,
+  // Modal variants
+  modalBackdrop,
+  modalContent,
+  drawerLeft,
+  drawerRight,
+  bottomSheet,
+  // Toast variants
+  toastSlideIn,
+  toastSlideUp,
+  // Button/Interactive variants
+  buttonTap,
+  buttonHover,
+  cardHover,
+  // Loading variants
+  shimmer,
+  pulse,
+  spin,
+  // Collapse
+  collapse,
+  // Utilities
+  createTransition,
+  createStaggerConfig,
+} from "./animations";
 
 // CSS Variables utilities
 export {

@@ -258,33 +258,33 @@ export const DefaultTheme: Story = {
 };
 
 export const DarkTheme: Story = {
-  name: '🌙 Obsidian Theme',
-  render: () => <ThemeShowcase themeName="obsidian" />,
+  name: '🌙 Lumen Dark Theme',
+  render: () => <ThemeShowcase themeName="lumenDark" />,
 };
 
 export const BlueTheme: Story = {
-  name: '🔵 Aurora Theme',
-  render: () => <ThemeShowcase themeName="aurora" />,
+  name: '🔵 Ocean Theme',
+  render: () => <ThemeShowcase themeName="ocean" />,
 };
 
 export const GreenTheme: Story = {
-  name: '🟢 Verdent Theme',
+  name: '🟢 Verdant Theme',
   render: () => <ThemeShowcase themeName="verdant" />,
 };
 
 export const PurpleTheme: Story = {
-  name: '🟣 Velvet Theme',
-  render: () => <ThemeShowcase themeName="velvet" />,
+  name: '🟣 Amethyst Theme',
+  render: () => <ThemeShowcase themeName="amethyst" />,
 };
 
 export const RoseTheme: Story = {
-  name: '🌹 Blush Theme',
-  render: () => <ThemeShowcase themeName="blush" />,
+  name: '🌹 Rose Theme',
+  render: () => <ThemeShowcase themeName="rose" />,
 };
 
 export const OrangeTheme: Story = {
-  name: '🟠 Solar Theme',
-  render: () => <ThemeShowcase themeName="solar" />,
+  name: '🟠 Ember Theme',
+  render: () => <ThemeShowcase themeName="ember" />,
 };
 
 // Interactive theme comparison
@@ -315,7 +315,7 @@ export const ThemeComparison: Story = {
         margin: '0 auto'
       }}>
         <ThemeShowcase themeName="lumen" />
-        <ThemeShowcase themeName="obsidian" />
+        <ThemeShowcase themeName="lumenDark" />
       </div>
     </div>
   ),
