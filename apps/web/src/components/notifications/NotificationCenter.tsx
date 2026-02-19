@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { Bell, BellRing, Check, Settings, Inbox, X } from 'lucide-react';
 import { Badge, Spinner } from '@vas-dj-saas/ui';
@@ -16,7 +17,9 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [panelPosition, setPanelPosition] = useState({ top: 0, right: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -42,13 +45,15 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Close panel when clicking outside
+  // Close panel when clicking outside (check both container and panel since panel is in portal)
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
+      const target = event.target as Node;
+      const isOutsideContainer = containerRef.current && !containerRef.current.contains(target);
+      const isOutsidePanel = panelRef.current && !panelRef.current.contains(target);
+
+      // Close only if click is outside both the button container and the panel
+      if (isOutsideContainer && isOutsidePanel) {
         setIsOpen(false);
       }
     }
@@ -83,6 +88,17 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
     }
   }, [isMobile, isOpen]);
 
+  // Calculate panel position when opening (desktop only)
+  useEffect(() => {
+    if (isOpen && !isMobile && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setPanelPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
+  }, [isOpen, isMobile]);
+
   const handleToggle = () => {
     setIsOpen(!isOpen);
   };
@@ -106,6 +122,7 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
     <div ref={containerRef} className={`relative ${className || ''}`}>
       {/* Bell button */}
       <button
+        ref={buttonRef}
         onClick={handleToggle}
         className={`
           relative p-2 rounded-md transition-colors
@@ -137,29 +154,27 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
         )}
       </button>
 
-      {/* Notification panel */}
-      {isOpen && (
+      {/* Notification panel - rendered via portal to escape stacking context */}
+      {isOpen && typeof document !== 'undefined' && createPortal(
         <>
-          {/* Mobile overlay */}
-          {isMobile && (
-            <div
-              className="fixed inset-0 bg-black/50 z-40"
-              onClick={() => setIsOpen(false)}
-            />
-          )}
+          {/* Overlay for click outside */}
+          <div
+            className="fixed inset-0 z-[9998]"
+            onClick={() => setIsOpen(false)}
+            style={{ backgroundColor: isMobile ? 'rgba(0,0,0,0.5)' : 'transparent' }}
+          />
 
           {/* Panel */}
           <div
             ref={panelRef}
             className={`
-              ${isMobile
-                ? 'fixed inset-x-0 bottom-0 top-16 z-50 rounded-t-2xl'
-                : 'absolute right-0 top-full mt-2 w-96 rounded-xl z-50'
-              }
+              fixed z-[9999]
+              ${isMobile ? 'inset-x-0 bottom-0 top-16 rounded-t-2xl' : 'w-96 rounded-xl'}
               bg-white dark:bg-gray-800
               shadow-xl border border-gray-200 dark:border-gray-700
               flex flex-col overflow-hidden
             `}
+            style={isMobile ? undefined : { top: panelPosition.top, right: panelPosition.right }}
             role="dialog"
             aria-label="Notifications"
           >
@@ -280,7 +295,8 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
               </button>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   );

@@ -97,9 +97,7 @@ export function useDashboard(): UseDashboardResult {
    * Currently uses mock data - replace with API call when ready
    */
   const fetchStats = useCallback(async (useCache = true) => {
-    if (!organizationId) return;
-
-    // Check cache first
+    // Check cache first (works even without organizationId for mock data)
     if (useCache && isCacheValid(cache.stats)) {
       setStats(cache.stats.data);
       setIsStatsLoading(false);
@@ -135,14 +133,13 @@ export function useDashboard(): UseDashboardResult {
         setIsStatsLoading(false);
       }
     }
-  }, [organizationId]);
+  }, []);
 
   /**
    * Fetch recent activities
    */
   const fetchActivities = useCallback(async (useCache = true) => {
-    if (!organizationId) return;
-
+    // Check cache first (works even without organizationId for mock data)
     if (useCache && isCacheValid(cache.activities)) {
       setActivities(cache.activities.data);
       setIsActivitiesLoading(false);
@@ -175,14 +172,13 @@ export function useDashboard(): UseDashboardResult {
         setIsActivitiesLoading(false);
       }
     }
-  }, [organizationId]);
+  }, []);
 
   /**
    * Fetch team overview
    */
   const fetchTeamOverview = useCallback(async (useCache = true) => {
-    if (!organizationId) return;
-
+    // Check cache first (works even without organizationId for mock data)
     if (useCache && isCacheValid(cache.teamOverview)) {
       setTeamOverview(cache.teamOverview.data);
       setIsTeamLoading(false);
@@ -215,14 +211,13 @@ export function useDashboard(): UseDashboardResult {
         setIsTeamLoading(false);
       }
     }
-  }, [organizationId]);
+  }, []);
 
   /**
    * Fetch usage metrics
    */
   const fetchUsageMetrics = useCallback(async (useCache = true) => {
-    if (!organizationId) return;
-
+    // Check cache first (works even without organizationId for mock data)
     if (useCache && isCacheValid(cache.usageMetrics)) {
       setUsageMetrics(cache.usageMetrics.data);
       setIsUsageLoading(false);
@@ -255,7 +250,7 @@ export function useDashboard(): UseDashboardResult {
         setIsUsageLoading(false);
       }
     }
-  }, [organizationId]);
+  }, []);
 
   /**
    * Refresh all dashboard data

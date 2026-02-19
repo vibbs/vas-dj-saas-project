@@ -93,10 +93,9 @@ export const OnboardingService = {
     action: OnboardingAction,
     metadata?: Record<string, unknown>
   ) => {
-    const body: V1FeatureFlagsOnboardingActionCreateBody = {
-      action,
-      metadata,
-    };
+    const body: V1FeatureFlagsOnboardingActionCreateBody = metadata
+      ? { action, metadata }
+      : { action };
     const response = await v1FeatureFlagsOnboardingActionCreate(body);
     return response;
   },

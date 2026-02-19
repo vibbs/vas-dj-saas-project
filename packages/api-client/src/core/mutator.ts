@@ -39,8 +39,7 @@ export const customFetch = async <T>(
 
   // Add JWT Authorization header from auth provider (if configured)
   // Access the private config to get auth provider
-  // @ts-expect-error - Accessing private config property for auth
-  const authConfig = defaultClient['config']?.auth;
+  const authConfig = (defaultClient as any)['config']?.auth;
   if (authConfig && typeof authConfig.getAccessToken === 'function') {
     const token = authConfig.getAccessToken();
     if (token && token.trim() !== '') {
@@ -60,8 +59,34 @@ export const customFetch = async <T>(
     credentials: "include",
   });
 
-  // Parse response
-  const data = await response.json();
+  // Parse response based on content type
+  const contentType = response.headers.get("Content-Type") || "";
+  let data: unknown;
+
+  if (contentType.includes("application/json")) {
+    try {
+      data = await response.json();
+    } catch {
+      // JSON parsing failed, return empty object
+      data = {};
+    }
+  } else {
+    // Non-JSON response (likely HTML error page)
+    const text = await response.text();
+
+    // If response is not OK and not JSON, create an error object
+    if (!response.ok) {
+      data = {
+        error: true,
+        message: `Request failed with status ${response.status}`,
+        status: response.status,
+        details: text.substring(0, 200), // Include first 200 chars for debugging
+      };
+    } else {
+      // Successful non-JSON response
+      data = { text };
+    }
+  }
 
   // Return in the format expected by generated code: { data, status, headers }
   return {
