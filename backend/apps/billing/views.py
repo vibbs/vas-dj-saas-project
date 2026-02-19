@@ -74,12 +74,11 @@ class SubscriptionViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        """Get subscriptions for the current user and organization."""
-        queryset = Subscription.objects.filter(account=self.request.user)
+        """Get subscriptions for the current organization."""
         organization = getattr(self.request, "org", None)
         if organization:
-            queryset = queryset.filter(organization=organization)
-        return queryset
+            return Subscription.objects.filter(organization=organization)
+        return Subscription.objects.none()
 
     @action(detail=False, methods=["post"])
     def create_checkout_session(self, request):
@@ -176,10 +175,10 @@ class SubscriptionViewSet(viewsets.ReadOnlyModelViewSet):
             request.user, organization
         )
 
-        # Get recent invoices for this user and organization
-        invoice_queryset = Invoice.objects.filter(account=request.user)
+        # Get recent invoices for this organization
+        invoice_queryset = Invoice.objects.none()
         if organization:
-            invoice_queryset = invoice_queryset.filter(organization=organization)
+            invoice_queryset = Invoice.objects.filter(organization=organization)
         recent_invoices = invoice_queryset[:5]
 
         # Example usage stats - customize based on your features
@@ -234,9 +233,8 @@ class InvoiceViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        """Get invoices for the current user and organization."""
-        queryset = Invoice.objects.filter(account=self.request.user)
+        """Get invoices for the current organization."""
         organization = getattr(self.request, "org", None)
         if organization:
-            queryset = queryset.filter(organization=organization)
-        return queryset
+            return Invoice.objects.filter(organization=organization)
+        return Invoice.objects.none()

@@ -40,15 +40,9 @@ interface ApiKeyUsage {
   topEndpoints: { endpoint: string; method: string; calls: number }[];
 }
 
-// Service stub - will be replaced with actual import after api-client rebuild
-const ApiKeysService = {
-  list: async (_orgId: string, _params?: any) => ({ data: { results: [] }, status: 200 }),
-  create: async (_orgId: string, _data: any) => ({ data: {} as CreateApiKeyResponse, status: 201 }),
-  revoke: async (_orgId: string, _keyId: string) => ({ data: {} as ApiKey, status: 200 }),
-  regenerate: async (_orgId: string, _keyId: string) => ({ data: {} as CreateApiKeyResponse, status: 200 }),
-  getUsage: async (_orgId: string, _keyId: string) => ({ data: {} as ApiKeyUsage, status: 200 }),
-  getOrganizationUsage: async (_orgId: string) => ({ data: {} as ApiKeyUsage, status: 200 }),
-};
+// Use real API service from api-client package
+import { ApiKeysService as RealApiKeysService } from '@vas-dj-saas/api-client';
+const ApiKeysService = RealApiKeysService;
 import { useOrganization } from './useOrganization';
 import {
   mockApiKeys,
@@ -59,7 +53,7 @@ import {
 } from '@/test/mockApiKeys';
 
 // Flag to use mock data during development
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA = false; // Backend API keys app is now available
 
 interface UseApiKeysResult {
   apiKeys: ApiKey[];

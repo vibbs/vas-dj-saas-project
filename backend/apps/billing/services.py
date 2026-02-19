@@ -294,9 +294,10 @@ class BillingService:
             subscription_data = self.provider.retrieve_subscription(subscription_id)
 
             # Create local subscription record
+            if not organization:
+                organization = account.organizations.first()
             subscription = Subscription.objects.create(
-                account=account,
-                organization=organization or account.organizations.first(),
+                organization=organization,
                 plan=plan,
                 provider=self.provider.provider_name,
                 external_subscription_id=subscription_data.external_id,
@@ -508,16 +509,13 @@ class BillingService:
 
     @staticmethod
     def get_active_subscription(account, organization=None):
-        """Get the active subscription for an account within an organization."""
-        queryset = Subscription.objects.filter(
-            account=account,
+        """Get the active subscription for an organization."""
+        if not organization:
+            return None
+        return Subscription.objects.filter(
+            organization=organization,
             status__in=[SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIALING],
-        )
-
-        if organization:
-            queryset = queryset.filter(organization=organization)
-
-        return queryset.first()
+        ).first()
 
     @staticmethod
     def has_active_subscription(account, organization=None):

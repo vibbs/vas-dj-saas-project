@@ -21,7 +21,7 @@ import { defaultNotificationPreferences } from '@/test/mockNotifications';
 type NotificationCategory = keyof NotificationPreferences;
 
 // Configuration
-const USE_MOCK_DATA = true; // Set to false when backend is ready
+const USE_MOCK_DATA = false; // Backend notifications app is now available
 const STORAGE_KEY = 'notification_preferences';
 
 type ChannelType = keyof NotificationChannels;

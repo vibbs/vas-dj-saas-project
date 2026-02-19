@@ -155,10 +155,7 @@ export default function DashboardScreen() {
               <Button
                 variant="ghost"
                 size="sm"
-                onPress={() => {
-                  // TODO: Implement verify-email route when available
-                  console.log('Navigate to Verify Email');
-                }}
+                onPress={() => router.push('/auth/verify-email')}
               >
                 Verify Email
               </Button>
@@ -199,28 +196,23 @@ export default function DashboardScreen() {
               {!isEmailVerified && (
                 <Button
                   variant="primary"
-                  onPress={() => {
-                    // TODO: Implement verify-email route when available
-                    console.log('Navigate to Verify Email');
-                  }}
+                  onPress={() => router.push('/auth/verify-email')}
                 >
                   Verify Email
                 </Button>
               )}
               <Button
                 variant="outline"
-                onPress={() => console.log('Navigate to Account Settings')}
+                onPress={() => router.push('/(tabs)/settings')}
               >
                 Account Settings
               </Button>
-              {hasAdminRole && (
-                <Button
-                  variant="outline"
-                  onPress={() => console.log('Navigate to Organization Settings')}
-                >
-                  Organization Settings
-                </Button>
-              )}
+              <Button
+                variant="outline"
+                onPress={() => router.push('/(tabs)/notifications')}
+              >
+                Notifications
+              </Button>
             </View>
           </Card>
         </View>

@@ -19,4 +19,8 @@ urlpatterns = [
     path("email_service/", include("apps.email_service.urls.api_v1")),
     # Feature Flags API endpoints
     path("feature-flags/", include("apps.feature_flags.urls.api_v1")),
+    # Notifications API endpoints
+    path("notifications/", include("apps.notifications.urls.api_v1")),
+    # Dashboard API endpoints
+    path("dashboard/", include("apps.dashboard.urls")),
 ]

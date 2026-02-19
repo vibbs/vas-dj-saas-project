@@ -85,6 +85,9 @@ INSTALLED_APPS += [
     "apps.billing",
     "apps.email_service",
     "apps.feature_flags",
+    "apps.notifications",
+    "apps.api_keys",
+    "apps.dashboard",
 ]
 
 # Observability: Conditionally add django_prometheus

@@ -27,7 +27,7 @@ import {
 // Configuration
 const POLLING_INTERVAL = 30000; // 30 seconds
 const PAGE_SIZE = 10;
-const USE_MOCK_DATA = true; // Set to false when backend is ready
+const USE_MOCK_DATA = false; // Backend notifications app is now available
 
 // Local storage key for read status fallback
 const READ_STATUS_KEY = 'notifications_read_status';

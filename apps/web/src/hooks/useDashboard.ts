@@ -4,6 +4,9 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  DashboardService,
+} from '@vas-dj-saas/api-client';
 import type {
   DashboardStats,
   Activity,
@@ -11,12 +14,6 @@ import type {
   UsageMetrics,
 } from '@vas-dj-saas/api-client';
 import { useOrganization } from './useOrganization';
-import {
-  mockDashboardStats,
-  mockRecentActivity,
-  mockTeamOverview,
-  mockUsageMetrics,
-} from '../test/mockDashboard';
 
 interface UseDashboardResult {
   // Data
@@ -107,16 +104,11 @@ export function useDashboard(): UseDashboardResult {
     setIsStatsLoading(true);
 
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const response = await DashboardService.getDashboardStats(organizationId);
-
-      // Simulate network delay for more realistic behavior
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      const response = await DashboardService.getDashboardStats(organizationId || '');
 
       if (!isMountedRef.current) return;
 
-      // Use mock data for now
-      const data = mockDashboardStats;
+      const data = response.data;
 
       // Update cache
       cache.stats = { data, timestamp: Date.now() };
@@ -149,14 +141,11 @@ export function useDashboard(): UseDashboardResult {
     setIsActivitiesLoading(true);
 
     try {
-      // TODO: Replace with actual API call
-      // const response = await DashboardService.getRecentActivity(organizationId);
-
-      await new Promise((resolve) => setTimeout(resolve, 400));
+      const response = await DashboardService.getRecentActivity(organizationId || '');
 
       if (!isMountedRef.current) return;
 
-      const data = mockRecentActivity.activities;
+      const data = response.data.activities;
 
       cache.activities = { data, timestamp: Date.now() };
 
@@ -188,14 +177,11 @@ export function useDashboard(): UseDashboardResult {
     setIsTeamLoading(true);
 
     try {
-      // TODO: Replace with actual API call
-      // const response = await DashboardService.getTeamOverview(organizationId);
-
-      await new Promise((resolve) => setTimeout(resolve, 350));
+      const response = await DashboardService.getTeamOverview(organizationId || '');
 
       if (!isMountedRef.current) return;
 
-      const data = mockTeamOverview;
+      const data = response.data;
 
       cache.teamOverview = { data, timestamp: Date.now() };
 
@@ -227,14 +213,11 @@ export function useDashboard(): UseDashboardResult {
     setIsUsageLoading(true);
 
     try {
-      // TODO: Replace with actual API call
-      // const response = await DashboardService.getUsageMetrics(organizationId);
-
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const response = await DashboardService.getUsageMetrics(organizationId || '');
 
       if (!isMountedRef.current) return;
 
-      const data = mockUsageMetrics;
+      const data = response.data;
 
       cache.usageMetrics = { data, timestamp: Date.now() };
 
