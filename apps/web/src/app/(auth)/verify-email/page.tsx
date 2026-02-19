@@ -1,12 +1,220 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AuthService } from '@vas-dj-saas/api-client';
 import { AuthCard } from '@/components/auth/AuthCard';
 
 type VerificationStatus = 'loading' | 'success' | 'error' | 'no-token';
+
+// Animation variants for staggered content entrance
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.16, 1, 0.3, 1] as const,
+    },
+  },
+};
+
+// Animated checkmark path
+const checkmarkVariants = {
+  hidden: { pathLength: 0, opacity: 0 },
+  visible: {
+    pathLength: 1,
+    opacity: 1,
+    transition: {
+      pathLength: { duration: 0.6, ease: 'easeOut' as const, delay: 0.3 },
+      opacity: { duration: 0.2, delay: 0.3 },
+    },
+  },
+};
+
+// Confetti particle component
+const ConfettiParticle = ({ delay, x, color }: { delay: number; x: number; color: string }) => (
+  <motion.div
+    className="absolute w-2 h-2 rounded-full"
+    style={{
+      backgroundColor: color,
+      left: `${x}%`,
+      top: '50%',
+    }}
+    initial={{ opacity: 0, y: 0, scale: 0 }}
+    animate={{
+      opacity: [0, 1, 1, 0],
+      y: [-20, -80, -120, -160],
+      x: [0, (Math.random() - 0.5) * 60, (Math.random() - 0.5) * 100],
+      scale: [0, 1, 1, 0.5],
+      rotate: [0, 180, 360],
+    }}
+    transition={{
+      duration: 2,
+      delay,
+      ease: 'easeOut',
+    }}
+  />
+);
+
+// Celebratory confetti effect
+const CelebrationEffect = () => {
+  const particles = useMemo(() => {
+    const colors = [
+      'var(--color-primary)',
+      'var(--color-success)',
+      'var(--color-accent)',
+      '#A78BFA',
+      '#34D399',
+    ];
+    return Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      delay: Math.random() * 0.5,
+      x: 20 + Math.random() * 60,
+      color: colors[Math.floor(Math.random() * colors.length)],
+    }));
+  }, []);
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {particles.map((particle) => (
+        <ConfettiParticle key={particle.id} {...particle} />
+      ))}
+    </div>
+  );
+};
+
+// Animated success checkmark
+const AnimatedCheckmark = () => (
+  <motion.div
+    className="relative w-20 h-20 mx-auto mb-6"
+    initial={{ scale: 0 }}
+    animate={{ scale: 1 }}
+    transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
+  >
+    {/* Pulsing glow effect */}
+    <motion.div
+      className="absolute inset-0 rounded-full"
+      style={{
+        background: 'var(--gradient-glow)',
+      }}
+      animate={{
+        scale: [1, 1.3, 1],
+        opacity: [0.5, 0.8, 0.5],
+      }}
+      transition={{
+        duration: 2,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      }}
+    />
+
+    {/* Background circle */}
+    <motion.div
+      className="absolute inset-0 rounded-full"
+      style={{
+        background: 'var(--color-success)',
+        boxShadow: 'var(--shadow-glow)',
+      }}
+      initial={{ scale: 0 }}
+      animate={{ scale: 1 }}
+      transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
+    />
+
+    {/* Checkmark SVG */}
+    <svg
+      className="absolute inset-0 w-full h-full p-5"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <motion.path
+        d="M5 13l4 4L19 7"
+        stroke="var(--color-success-foreground)"
+        strokeWidth={3}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        variants={checkmarkVariants}
+        initial="hidden"
+        animate="visible"
+      />
+    </svg>
+  </motion.div>
+);
+
+// Animated error icon
+const AnimatedErrorIcon = () => (
+  <motion.div
+    className="relative w-16 h-16 mx-auto mb-4"
+    initial={{ scale: 0, rotate: -180 }}
+    animate={{ scale: 1, rotate: 0 }}
+    transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+  >
+    <div
+      className="absolute inset-0 rounded-full flex items-center justify-center"
+      style={{
+        backgroundColor: 'var(--color-destructive)',
+        opacity: 0.15,
+      }}
+    />
+    <div
+      className="absolute inset-1 rounded-full flex items-center justify-center"
+      style={{
+        backgroundColor: 'var(--color-destructive)',
+        opacity: 0.1,
+      }}
+    />
+    <svg
+      className="absolute inset-0 w-full h-full p-4"
+      fill="none"
+      stroke="var(--color-destructive)"
+      viewBox="0 0 24 24"
+    >
+      <motion.path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M6 18L18 6M6 6l12 12"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      />
+    </svg>
+  </motion.div>
+);
+
+// Loading spinner with brand colors
+const AnimatedSpinner = () => (
+  <motion.div
+    className="relative w-14 h-14 mx-auto mb-4"
+    initial={{ opacity: 0, scale: 0.5 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ duration: 0.3 }}
+  >
+    <motion.div
+      className="w-full h-full rounded-full"
+      style={{
+        border: '3px solid var(--color-border)',
+        borderTopColor: 'var(--color-primary)',
+      }}
+      animate={{ rotate: 360 }}
+      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+    />
+  </motion.div>
+);
 
 /**
  * Email Verification Page
@@ -68,24 +276,42 @@ export default function VerifyEmailPage() {
         title="Invalid Link"
         description="No verification token found"
       >
-        <div className="text-center py-4">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-            <svg className="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </div>
+        <motion.div
+          className="text-center py-4"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div variants={itemVariants}>
+            <AnimatedErrorIcon />
+          </motion.div>
 
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            This verification link is invalid. Please check your email for the correct link or request a new verification email.
-          </p>
-
-          <Link
-            href="/login"
-            className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          <motion.p
+            variants={itemVariants}
+            className="mb-6"
+            style={{
+              color: 'var(--color-muted-foreground)',
+              fontFamily: 'var(--font-family-body)',
+            }}
           >
-            Go to Login
-          </Link>
-        </div>
+            This verification link is invalid. Please check your email for the correct link or request a new verification email.
+          </motion.p>
+
+          <motion.div variants={itemVariants}>
+            <Link
+              href="/login"
+              className="inline-flex justify-center px-5 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2"
+              style={{
+                background: 'var(--gradient-primary)',
+                color: 'var(--color-primary-foreground)',
+                fontFamily: 'var(--font-family-body)',
+                boxShadow: 'var(--shadow-md)',
+              }}
+            >
+              Go to Login
+            </Link>
+          </motion.div>
+        </motion.div>
       </AuthCard>
     );
   }
@@ -97,12 +323,25 @@ export default function VerifyEmailPage() {
         title="Verifying Email"
         description="Please wait while we verify your email address"
       >
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">
+        <motion.div
+          className="text-center py-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <AnimatedSpinner />
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            style={{
+              color: 'var(--color-muted-foreground)',
+              fontFamily: 'var(--font-family-body)',
+            }}
+          >
             Verifying your email address...
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
       </AuthCard>
     );
   }
@@ -114,27 +353,56 @@ export default function VerifyEmailPage() {
         title="Email Verified!"
         description="Your email has been successfully verified"
       >
-        <div className="text-center py-4">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-            <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
+        <motion.div
+          className="relative text-center py-4"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Celebration confetti effect */}
+          <CelebrationEffect />
 
-          <p className="text-gray-600 dark:text-gray-400 mb-2">
-            Your email address has been verified successfully.
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-500 mb-6">
-            Redirecting to login...
-          </p>
+          <motion.div variants={itemVariants}>
+            <AnimatedCheckmark />
+          </motion.div>
 
-          <Link
-            href="/login"
-            className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          <motion.p
+            variants={itemVariants}
+            className="mb-2 text-base"
+            style={{
+              color: 'var(--color-foreground)',
+              fontFamily: 'var(--font-family-body)',
+            }}
           >
-            Continue to Login
-          </Link>
-        </div>
+            Your email address has been verified successfully.
+          </motion.p>
+
+          <motion.p
+            variants={itemVariants}
+            className="text-sm mb-6"
+            style={{
+              color: 'var(--color-muted-foreground)',
+              fontFamily: 'var(--font-family-body)',
+            }}
+          >
+            Redirecting to login...
+          </motion.p>
+
+          <motion.div variants={itemVariants}>
+            <Link
+              href="/login"
+              className="inline-flex justify-center px-5 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:opacity-90"
+              style={{
+                background: 'var(--gradient-primary)',
+                color: 'var(--color-primary-foreground)',
+                fontFamily: 'var(--font-family-body)',
+                boxShadow: 'var(--shadow-md)',
+              }}
+            >
+              Continue to Login
+            </Link>
+          </motion.div>
+        </motion.div>
       </AuthCard>
     );
   }
@@ -145,38 +413,121 @@ export default function VerifyEmailPage() {
       title="Verification Failed"
       description="We couldn't verify your email"
     >
-      <div className="text-center py-4">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-          <svg className="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-        </div>
+      <motion.div
+        className="text-center py-4"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div variants={itemVariants}>
+          <motion.div
+            className="relative w-16 h-16 mx-auto mb-4"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+          >
+            <div
+              className="absolute inset-0 rounded-full flex items-center justify-center"
+              style={{
+                backgroundColor: 'var(--color-warning)',
+                opacity: 0.15,
+              }}
+            />
+            <svg
+              className="absolute inset-0 w-full h-full p-4"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <motion.path
+                stroke="var(--color-warning)"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              />
+            </svg>
+          </motion.div>
+        </motion.div>
 
-        {error && (
-          <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-            <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
-          </div>
-        )}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              variants={itemVariants}
+              initial="hidden"
+              animate="visible"
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-4 p-4 rounded-lg"
+              style={{
+                backgroundColor: 'var(--color-destructive)',
+                opacity: 0.1,
+                border: '1px solid var(--color-destructive)',
+              }}
+            >
+              <motion.div
+                className="p-4 rounded-lg"
+                style={{
+                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid var(--color-destructive)',
+                }}
+              >
+                <p
+                  className="text-sm"
+                  style={{
+                    color: 'var(--color-destructive)',
+                    fontFamily: 'var(--font-family-body)',
+                  }}
+                >
+                  {error}
+                </p>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <p className="text-gray-600 dark:text-gray-400 mb-6">
+        <motion.p
+          variants={itemVariants}
+          className="mb-6"
+          style={{
+            color: 'var(--color-muted-foreground)',
+            fontFamily: 'var(--font-family-body)',
+          }}
+        >
           The verification link may have expired or already been used. You can request a new verification email after logging in.
-        </p>
+        </motion.p>
 
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <motion.div
+          variants={itemVariants}
+          className="flex flex-col sm:flex-row gap-3 justify-center"
+        >
           <Link
             href="/login"
-            className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="inline-flex justify-center px-5 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:opacity-90"
+            style={{
+              background: 'var(--gradient-primary)',
+              color: 'var(--color-primary-foreground)',
+              fontFamily: 'var(--font-family-body)',
+              boxShadow: 'var(--shadow-md)',
+            }}
           >
             Go to Login
           </Link>
           <Link
             href="/register-organization"
-            className="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="inline-flex justify-center px-5 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2"
+            style={{
+              backgroundColor: 'var(--color-secondary)',
+              color: 'var(--color-secondary-foreground)',
+              border: '1px solid var(--color-border)',
+              fontFamily: 'var(--font-family-body)',
+            }}
           >
             Register Again
           </Link>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </AuthCard>
   );
 }

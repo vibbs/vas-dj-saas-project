@@ -74,49 +74,74 @@ export default function LoginPage() {
     return (
       <AuthCard title="Sign In" description="Welcome back">
         <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div
+            className="animate-spin rounded-full h-8 w-8 border-b-2"
+            style={{ borderColor: 'var(--color-primary)' }}
+          ></div>
         </div>
       </AuthCard>
     );
   }
 
   return (
-    <AuthCard
-      title="Sign In"
-      description="Welcome back! Please sign in to your account."
-    >
-      {/* Info Message */}
-      {infoMessage && (
-        <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-          <p className="text-sm text-blue-800 dark:text-blue-200">{infoMessage}</p>
-        </div>
-      )}
-
-      {/* Login Form */}
-      <LoginForm
-        onSubmit={handleSubmit}
-        isLoading={isLoading}
-        error={error}
-        showRememberMe={true}
-        showForgotPassword={true}
-        onForgotPassword={() => router.push('/forgot-password')}
-        onSignUpClick={() => router.push('/register-organization')}
-      />
-
-      {/* Registration Link */}
-      {env.features.registration && (
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Don't have an account?{' '}
-            <Link
-              href="/register-organization"
-              className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+    <div className="animate-fade-in-up">
+      <AuthCard
+        title="Sign In"
+        description="Welcome back! Please sign in to your account."
+      >
+        {/* Info Message */}
+        {infoMessage && (
+          <div
+            className="mb-4 p-4 rounded-lg border"
+            style={{
+              backgroundColor: 'var(--color-primary-light, rgba(59, 130, 246, 0.1))',
+              borderColor: 'var(--color-primary-border, rgba(59, 130, 246, 0.3))'
+            }}
+          >
+            <p
+              className="text-sm"
+              style={{ color: 'var(--color-primary-text, var(--color-primary))' }}
             >
-              Create one
-            </Link>
-          </p>
-        </div>
-      )}
-    </AuthCard>
+              {infoMessage}
+            </p>
+          </div>
+        )}
+
+        {/* Login Form */}
+        <LoginForm
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+          error={error}
+          showRememberMe={true}
+          showForgotPassword={true}
+          onForgotPassword={() => router.push('/forgot-password')}
+          onSignUpClick={() => router.push('/register-organization')}
+        />
+
+        {/* Registration Link */}
+        {env.features.registration && (
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Don't have an account?{' '}
+              <Link
+                href="/register-organization"
+                className="font-medium transition-colors"
+                style={{
+                  color: 'var(--color-primary)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--color-primary-hover, var(--color-primary))';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--color-primary)';
+                }}
+              >
+                Create one
+              </Link>
+            </p>
+          </div>
+        )}
+      </AuthCard>
+    </div>
   );
 }

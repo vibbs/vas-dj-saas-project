@@ -3,11 +3,47 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { RegisterForm } from '@vas-dj-saas/auth';
 import { AuthService } from '@vas-dj-saas/api-client';
 import type { RegistrationFormData } from '@vas-dj-saas/api-client';
-import { AuthCard } from '@/components/auth/AuthCard';
 import { useAuthGuard } from '@/hooks/useAuthGuard';
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const fadeInUpVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.16, 1, 0.3, 1] as const,
+    },
+  },
+};
+
+const scaleInVariants = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.4,
+      ease: [0.34, 1.56, 0.64, 1] as const,
+    },
+  },
+};
 
 /**
  * Register Organization Page
@@ -69,46 +105,291 @@ export default function RegisterOrganizationPage() {
   // Show loading while checking auth status
   if (authLoading) {
     return (
-      <AuthCard title="Register" description="Create your account and organization">
-        <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      </AuthCard>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{
+          background: 'var(--color-background)',
+        }}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <div
+            className="animate-spin rounded-full h-10 w-10 border-2"
+            style={{
+              borderColor: 'var(--color-border)',
+              borderTopColor: 'var(--color-primary)',
+            }}
+          />
+          <p
+            className="text-sm"
+            style={{
+              color: 'var(--color-muted-foreground)',
+              fontFamily: 'var(--font-family-body)',
+            }}
+          >
+            Loading...
+          </p>
+        </motion.div>
+      </div>
     );
   }
 
   return (
-    <AuthCard
-      title="Create Your Account"
-      description="Get started by creating your organization"
+    <div
+      className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
+      style={{
+        background: 'var(--color-background)',
+      }}
     >
-      {/* Success Message */}
-      {successMessage && (
-        <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-          <p className="text-sm text-green-800 dark:text-green-200">{successMessage}</p>
-        </div>
-      )}
-
-      {/* Registration Form */}
-      <RegisterForm
-        onSubmit={handleSubmit}
-        isLoading={isLoading}
-        error={error}
-        onLoginClick={() => router.push('/login')}
+      {/* Background gradient effects */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'var(--gradient-glow)',
+          opacity: 0.6,
+        }}
+      />
+      <div
+        className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl pointer-events-none"
+        style={{
+          background: 'var(--color-primary)',
+          opacity: 0.05,
+          transform: 'translate(30%, -30%)',
+        }}
+      />
+      <div
+        className="absolute bottom-0 left-0 w-80 h-80 rounded-full blur-3xl pointer-events-none"
+        style={{
+          background: 'var(--color-accent)',
+          opacity: 0.05,
+          transform: 'translate(-30%, 30%)',
+        }}
       />
 
-      {/* Login Link */}
-      <div className="mt-6 text-center">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Already have an account?{' '}
-          <Link
-            href="/login"
-            className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+      {/* Main content */}
+      <motion.div
+        className="w-full max-w-md relative z-10"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Card */}
+        <motion.div
+          variants={scaleInVariants}
+          className="rounded-2xl p-8 sm:p-10"
+          style={{
+            background: 'var(--color-card)',
+            border: '1px solid var(--color-border)',
+            boxShadow: 'var(--shadow-xl)',
+          }}
+        >
+          {/* Header */}
+          <motion.div variants={fadeInUpVariants} className="text-center mb-8">
+            {/* Logo/Brand mark */}
+            <motion.div
+              className="w-14 h-14 mx-auto mb-6 rounded-xl flex items-center justify-center"
+              style={{
+                background: 'var(--gradient-primary)',
+                boxShadow: 'var(--shadow-glow)',
+              }}
+              whileHover={{ scale: 1.05, rotate: 3 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+            >
+              <svg
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 2L2 7L12 12L22 7L12 2Z"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M2 17L12 22L22 17"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M2 12L12 17L22 12"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </motion.div>
+
+            <h1
+              className="text-3xl font-semibold tracking-tight"
+              style={{
+                fontFamily: 'var(--font-family-display)',
+                color: 'var(--color-foreground)',
+              }}
+            >
+              Create Your Account
+            </h1>
+            <p
+              className="mt-3 text-base"
+              style={{
+                fontFamily: 'var(--font-family-body)',
+                color: 'var(--color-muted-foreground)',
+              }}
+            >
+              Get started by creating your organization
+            </p>
+          </motion.div>
+
+          {/* Success Message */}
+          {successMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              className="mb-6 p-4 rounded-xl"
+              style={{
+                background: 'rgba(16, 185, 129, 0.1)',
+                border: '1px solid var(--color-success)',
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'var(--color-success)' }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path
+                      d="M2.5 6L5 8.5L9.5 4"
+                      stroke="white"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+                <p
+                  className="text-sm"
+                  style={{
+                    color: 'var(--color-success)',
+                    fontFamily: 'var(--font-family-body)',
+                  }}
+                >
+                  {successMessage}
+                </p>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Registration Form */}
+          <motion.div variants={fadeInUpVariants}>
+            <RegisterForm
+              onSubmit={handleSubmit}
+              isLoading={isLoading}
+              error={error}
+              onLoginClick={() => router.push('/login')}
+            />
+          </motion.div>
+
+          {/* Divider */}
+          <motion.div
+            variants={fadeInUpVariants}
+            className="mt-8 flex items-center gap-4"
           >
-            Sign in
+            <div
+              className="flex-1 h-px"
+              style={{ background: 'var(--color-border)' }}
+            />
+            <span
+              className="text-xs uppercase tracking-wider"
+              style={{
+                color: 'var(--color-muted-foreground)',
+                fontFamily: 'var(--font-family-body)',
+              }}
+            >
+              or
+            </span>
+            <div
+              className="flex-1 h-px"
+              style={{ background: 'var(--color-border)' }}
+            />
+          </motion.div>
+
+          {/* Login Link */}
+          <motion.div variants={fadeInUpVariants} className="mt-6 text-center">
+            <p
+              className="text-sm"
+              style={{
+                color: 'var(--color-muted-foreground)',
+                fontFamily: 'var(--font-family-body)',
+              }}
+            >
+              Already have an account?{' '}
+              <Link
+                href="/login"
+                className="font-medium transition-colors duration-200"
+                style={{
+                  color: 'var(--color-primary)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--color-primary-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--color-primary)';
+                }}
+              >
+                Sign in
+              </Link>
+            </p>
+          </motion.div>
+        </motion.div>
+
+        {/* Footer */}
+        <motion.p
+          variants={fadeInUpVariants}
+          className="mt-8 text-center text-xs"
+          style={{
+            color: 'var(--color-muted-foreground)',
+            fontFamily: 'var(--font-family-body)',
+          }}
+        >
+          By creating an account, you agree to our{' '}
+          <Link
+            href="/terms"
+            className="underline underline-offset-2 transition-colors duration-200"
+            style={{ color: 'var(--color-muted-foreground)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = 'var(--color-foreground)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'var(--color-muted-foreground)';
+            }}
+          >
+            Terms of Service
+          </Link>{' '}
+          and{' '}
+          <Link
+            href="/privacy"
+            className="underline underline-offset-2 transition-colors duration-200"
+            style={{ color: 'var(--color-muted-foreground)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = 'var(--color-foreground)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'var(--color-muted-foreground)';
+            }}
+          >
+            Privacy Policy
           </Link>
-        </p>
-      </div>
-    </AuthCard>
+        </motion.p>
+      </motion.div>
+    </div>
   );
 }
