@@ -1,4 +1,4 @@
-.PHONY: build start stop clean test test-verbose test-coverage test-parallel test-build test-clean test-feature-flags test-feature-flags-coverage test-feature-flags-models test-feature-flags-services test-feature-flags-api test-feature-flags-utils test-feature-flags-integration api-validate api-generate api-docs api-workflow api-list api-help help uv-install uv-install-dev uv-venv uv-venv-activate uv-add uv-add-package uv-remove uv-remove-package uv-lock uv-clean dev-setup dev-setup-system
+.PHONY: build start stop clean test test-verbose test-coverage test-parallel test-build test-clean test-feature-flags test-feature-flags-coverage test-feature-flags-models test-feature-flags-services test-feature-flags-api test-feature-flags-utils test-feature-flags-integration api-validate api-generate api-docs api-workflow api-list api-help help uv-install uv-install-dev uv-venv uv-venv-activate uv-add uv-add-package uv-remove uv-remove-package uv-lock uv-clean dev-setup dev-setup-system setup-seed-data setup-seed-data-reset start-with-seed start-with-seed-detached
 
 # CI/CD Pipeline Commands
 lint:
@@ -219,6 +219,24 @@ setup-local-data-quick:
 setup-local-data-reset:
 	@echo "🔧 Resetting and recreating local data..."
 	docker compose -f ./docker/docker-compose.yml run --rm web python manage.py setup_local_data --reset
+
+# Comprehensive Seed Data Commands
+
+setup-seed-data:
+	@echo "🌱 Seeding comprehensive development data..."
+	docker compose -f ./docker/docker-compose.yml run --rm web python manage.py setup_local_data --full --skip-superuser
+
+setup-seed-data-reset:
+	@echo "🔄 Resetting and re-seeding comprehensive data..."
+	docker compose -f ./docker/docker-compose.yml run --rm web python manage.py setup_local_data --reset --full --skip-superuser
+
+start-with-seed:
+	@echo "🚀 Starting services with auto seed data..."
+	AUTO_SEED_DATA=true docker compose -f ./docker/docker-compose.yml up
+
+start-with-seed-detached:
+	@echo "🚀 Starting services with auto seed data (detached)..."
+	AUTO_SEED_DATA=true docker compose -f ./docker/docker-compose.yml up -d
 
 # Testing Commands
 

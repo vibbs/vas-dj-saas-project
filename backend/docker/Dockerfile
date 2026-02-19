@@ -2,6 +2,11 @@
 
 FROM python:3.11-slim
 
+# Install system dependencies (netcat for database wait in entrypoint)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/*
+
 ENV APP_ENV=production
 
 # Keeps Python from generating .pyc files in the container
@@ -25,8 +30,8 @@ RUN uv pip install --system --no-cache -r pyproject.toml
 # Copy the rest of the application code
 COPY . .
 
-RUN ls -la /app
-RUN ls -la ./
+# Make entrypoint script executable
+RUN chmod +x /app/docker/entrypoint.sh
 
 # Creates a non-root user with an explicit UID and adds permission to access the /app folder
 # For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers

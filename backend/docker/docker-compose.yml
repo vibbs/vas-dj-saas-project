@@ -3,6 +3,7 @@ services:
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
+    entrypoint: ["bash", "/app/docker/entrypoint.sh"]
     command: gunicorn config.wsgi:application --reload --bind 0.0.0.0:8000
     volumes:
       - ..:/app
@@ -14,6 +15,8 @@ services:
       - mailhog
     env_file:
       - ../.env
+    environment:
+      - AUTO_SEED_DATA=${AUTO_SEED_DATA:-false}
     restart: always
     networks:
       - d-saas-network
