@@ -58,7 +58,7 @@ export const Input: React.FC<InputProps> = ({
     marginBottom: theme.spacing.xs,
   };
 
-  const inputStyles: ViewStyle = {
+  const inputStyles: TextStyle = {
     borderWidth: 1,
     borderColor: hasError ? '#ef4444' : '#d1d5db',
     borderRadius: 8,

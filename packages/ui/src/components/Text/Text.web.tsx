@@ -70,10 +70,11 @@ export const Text: React.FC<TextProps> = ({
   };
 
   // Define color styles using theme tokens
+  // Note: These use *Foreground colors for text, not background colors
   const colorStyles = {
     primary: { color: theme.colors.primary },
-    secondary: { color: theme.colors.secondary },
-    muted: { color: theme.colors.muted },
+    secondary: { color: theme.colors.secondaryForeground },
+    muted: { color: theme.colors.mutedForeground },
     destructive: { color: theme.colors.destructive },
     inherit: { color: 'inherit' },
   };

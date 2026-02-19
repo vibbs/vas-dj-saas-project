@@ -1,9 +1,12 @@
 export interface CardProps {
   children?: React.ReactNode;
-  variant?: 'default' | 'elevated' | 'outlined' | 'filled';
+  variant?: 'default' | 'elevated' | 'outlined' | 'filled' | 'glass' | 'gradient';
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
   loading?: boolean;
+  // Animation props
+  animate?: boolean;  // Enable entrance animation
+  animationDelay?: number;  // Delay for stagger effect (in seconds)
   // Platform-specific handlers
   onPress?: () => void;  // React Native
   onClick?: () => void;  // Web
@@ -11,7 +14,7 @@ export interface CardProps {
   className?: string;    // Web only
   style?: any;          // React Native only
   testID?: string;      // Cross-platform testing
-  
+
   // Accessibility props (WCAG 2.1 AA compliant)
   accessibilityLabel?: string;     // React Native: Accessible name
   accessibilityHint?: string;      // React Native: Additional context

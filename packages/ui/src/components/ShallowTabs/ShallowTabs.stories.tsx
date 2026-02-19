@@ -1,13 +1,57 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import React from 'react';
+import React, { useState } from 'react';
 // Import directly from web implementation for Storybook
 import { ShallowTabs as WebShallowTabs } from './ShallowTabs.web';
 import { ShallowTabs as NativeShallowTabs } from './ShallowTabs.native';
 import type { ShallowTabsProps } from './types';
+import type { TabRouterPort } from '../../adapters/router-port';
 import { Card, Heading, Text } from '../..';
 
 // Use Web implementation as the default for Storybook
 const ShallowTabs = WebShallowTabs;
+
+// Mock router for Storybook - simulates URL query parameter behavior
+const createMockRouter = (initialTab: string = ''): TabRouterPort => {
+    let queryParams = new Map<string, string>();
+    if (initialTab) {
+        queryParams.set('tab', initialTab);
+    }
+
+    return {
+        getValue: (key: string) => queryParams.get(key) || null,
+        setValue: (key: string, value: string) => {
+            if (value) {
+                queryParams.set(key, value);
+            } else {
+                queryParams.delete(key);
+            }
+        },
+        getPathname: () => '/storybook',
+        getSearchParams: () => {
+            const params = new URLSearchParams();
+            queryParams.forEach((v, k) => params.set(k, v));
+            return params.toString();
+        },
+    };
+};
+
+// Wrapper component that provides mock router with state
+const MockShallowTabs: React.FC<Omit<ShallowTabsProps, 'router'> & { defaultTab?: string }> = ({ defaultTab = '', tabs, ...props }) => {
+    const [currentTab, setCurrentTab] = useState(defaultTab || (tabs[0]?.value ?? ''));
+
+    const mockRouter: TabRouterPort = {
+        getValue: (key: string) => key === 'tab' ? currentTab : null,
+        setValue: (key: string, value: string) => {
+            if (key === 'tab') {
+                setCurrentTab(value);
+            }
+        },
+        getPathname: () => '/storybook',
+        getSearchParams: () => currentTab ? `tab=${currentTab}` : '',
+    };
+
+    return <WebShallowTabs {...props} tabs={tabs} router={mockRouter} />;
+};
 
 // Mock tab content components
 const OverviewTab = () => (
@@ -253,7 +297,7 @@ export const WithIcons: Story = {
     name: '🎨 With Icons & Badges',
     render: () => (
         <div style={{ width: '100%', maxWidth: '800px' }}>
-            <WebShallowTabs
+            <MockShallowTabs
                 defaultTab="overview"
                 tabs={[
                     {
@@ -292,7 +336,7 @@ export const DisabledState: Story = {
     name: '⛔ Disabled Tabs',
     render: () => (
         <div style={{ width: '100%', maxWidth: '800px' }}>
-            <WebShallowTabs
+            <MockShallowTabs
                 defaultTab="overview"
                 tabs={[
                     {

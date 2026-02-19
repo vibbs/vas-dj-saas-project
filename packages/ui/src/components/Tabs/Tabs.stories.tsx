@@ -6,7 +6,7 @@ import { Tabs as NativeTabs, TabsList as NativeTabsList, TabsTrigger as NativeTa
 import { TabsProps } from './types';
 import { ThemeProvider } from '../../theme/ThemeProvider';
 
-const TabsStoryComponent: React.FC<TabsProps> = (props) => {
+const TabsStoryComponent: React.FC<Partial<TabsProps>> = (props) => {
   return (
     <Tabs {...props} defaultValue="account">
       <TabsList>

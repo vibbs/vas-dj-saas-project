@@ -1,10 +1,17 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ModalProps } from './types';
 import { useTheme } from '../../theme/ThemeProvider';
 import { Spinner } from '../Spinner';
-import { Card } from '../Card';
 import { Button } from '../Button';
+import {
+  springConfig,
+  modalBackdrop,
+  modalContent,
+  bottomSheet,
+  scaleIn,
+} from '../../animations';
 
 export const Modal: React.FC<ModalProps> = ({
   children,
@@ -40,10 +47,8 @@ export const Modal: React.FC<ModalProps> = ({
   // Focus management
   React.useEffect(() => {
     if (isOpen) {
-      // Store the currently focused element
       lastActiveElement.current = document.activeElement as HTMLElement;
-      
-      // Focus the modal or specified element
+
       setTimeout(() => {
         if (initialFocusRef?.current) {
           initialFocusRef.current.focus();
@@ -52,7 +57,6 @@ export const Modal: React.FC<ModalProps> = ({
         }
       }, 100);
     } else if (lastActiveElement.current) {
-      // Return focus to the previously focused element
       setTimeout(() => {
         if (finalFocusRef?.current) {
           finalFocusRef.current.focus();
@@ -86,7 +90,9 @@ export const Modal: React.FC<ModalProps> = ({
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
     const firstElement = focusableElements[0] as HTMLElement;
-    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+    const lastElement = focusableElements[
+      focusableElements.length - 1
+    ] as HTMLElement;
 
     const handleTabKey = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return;
@@ -121,89 +127,66 @@ export const Modal: React.FC<ModalProps> = ({
     };
   }, [isOpen]);
 
-  // Add CSS for modal divider styling
-  React.useEffect(() => {
-    const styleId = 'modal-divider-styles';
-    if (!document.getElementById(styleId)) {
-      const style = document.createElement('style');
-      style.id = styleId;
-      style.textContent = `
-        .modal-content--with-divider > div:last-child[style*="marginTop: auto"] {
-          border-top: 1px solid ${theme.colors.border} !important;
-        }
-      `;
-      document.head.appendChild(style);
-    }
-  }, [theme.colors.border]);
-
-  const getVariantStyles = () => {
+  const getVariantConfig = () => {
     switch (variant) {
       case 'fullscreen':
         return {
-          modal: {
+          modalStyle: {
             width: '100vw',
             height: '100vh',
             maxWidth: 'none',
             maxHeight: 'none',
             margin: 0,
+            borderRadius: 0,
           },
-          backdrop: {
-            backgroundColor: 'rgba(0, 0, 0, 0.95)',
+          backdropStyle: {
+            backgroundColor: theme.colors.overlayDark,
           },
-          cardProps: {
-            style: {
-              borderRadius: 0,
-              height: '100%',
-            }
-          }
+          animation: scaleIn,
         };
       case 'bottom-sheet':
         return {
-          modal: {
+          modalStyle: {
             position: 'fixed' as const,
             bottom: 0,
             left: 0,
             right: 0,
             width: '100%',
             maxWidth: 'none',
-            transform: 'translateY(0)',
+            borderRadius: `${theme.borders.radius.xl}px ${theme.borders.radius.xl}px 0 0`,
           },
-          backdrop: {
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backdropStyle: {
+            backgroundColor: theme.colors.overlay,
+            alignItems: 'flex-end' as const,
           },
-          cardProps: {
-            style: {
-              borderRadius: `${theme.borders.radius.lg}px ${theme.borders.radius.lg}px 0 0`,
-            }
-          }
+          animation: bottomSheet,
         };
       case 'dialog':
         return {
-          modal: {},
-          backdrop: {
-            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          modalStyle: {
+            boxShadow: theme.shadows.xl,
           },
-          cardProps: {
-            variant: 'elevated' as const,
-            style: {
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            }
-          }
+          backdropStyle: {
+            backgroundColor: theme.colors.overlayLight,
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)',
+          },
+          animation: modalContent,
         };
       default:
         return {
-          modal: {},
-          backdrop: {
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          modalStyle: {},
+          backdropStyle: {
+            backgroundColor: theme.colors.overlay,
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
           },
-          cardProps: {
-            variant: 'elevated' as const,
-          }
+          animation: modalContent,
         };
     }
   };
 
-  const getSizeStyles = () => {
+  const getSizeStyles = (): React.CSSProperties => {
     if (variant === 'fullscreen' || variant === 'bottom-sheet') {
       return {};
     }
@@ -222,7 +205,7 @@ export const Modal: React.FC<ModalProps> = ({
     }
   };
 
-  const variantStyles = getVariantStyles();
+  const variantConfig = getVariantConfig();
   const sizeStyles = getSizeStyles();
 
   const backdropStyles: React.CSSProperties = {
@@ -233,24 +216,23 @@ export const Modal: React.FC<ModalProps> = ({
     bottom: 0,
     zIndex: 1000,
     display: 'flex',
-    alignItems: variant === 'bottom-sheet' ? 'flex-end' : 'center',
+    alignItems: 'center',
     justifyContent: 'center',
-    opacity: isOpen ? 1 : 0,
-    visibility: isOpen ? 'visible' : 'hidden',
-    transition: animationType === 'fade' ? 'opacity 0.2s ease-in-out' : undefined,
-    ...variantStyles.backdrop,
+    ...variantConfig.backdropStyle,
   };
 
   const modalStyles: React.CSSProperties = {
     position: 'relative',
     maxHeight: variant === 'bottom-sheet' ? '80vh' : '90vh',
     outline: 'none',
-    transform: isOpen ? 'scale(1)' : 'scale(0.95)',
-    transition: animationType === 'fade' ? 'transform 0.2s ease-in-out' : undefined,
     display: 'flex',
     flexDirection: 'column',
+    backgroundColor: theme.colors.card,
+    borderRadius: theme.borders.radius.xl,
+    boxShadow: theme.shadows.xl,
+    overflow: 'hidden',
     ...sizeStyles,
-    ...variantStyles.modal,
+    ...variantConfig.modalStyle,
     ...style,
   };
 
@@ -259,11 +241,14 @@ export const Modal: React.FC<ModalProps> = ({
     overflowY: 'auto',
     display: 'flex',
     flexDirection: 'column',
-    ...(variant === 'fullscreen' ? {
-      justifyContent: 'center',
-      alignItems: 'center',
-      textAlign: 'left' as const,
-    } : {}),
+    padding: theme.spacing.lg,
+    ...(variant === 'fullscreen'
+      ? {
+          justifyContent: 'center',
+          alignItems: 'center',
+          textAlign: 'left' as const,
+        }
+      : {}),
   };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -272,72 +257,139 @@ export const Modal: React.FC<ModalProps> = ({
     }
   };
 
-  if (!isOpen) return null;
-
-  const modalContent = (
-    <div
-      ref={backdropRef}
-      style={backdropStyles}
-      onClick={handleBackdropClick}
-      data-testid={testID}
-    >
-      <div
-        ref={modalRef}
-        // Web-specific accessibility attributes
-        role={role}
-        aria-modal={ariaModal}
-        aria-label={ariaLabel || accessibilityLabel}
-        aria-describedby={ariaDescribedBy}
-        aria-labelledby={ariaLabelledBy}
-        tabIndex={-1}
-        onClick={() => {}}
-        style={{ display: 'contents' }}
-      >
-        <Card
-          {...variantStyles.cardProps}
-          style={{
-            ...modalStyles,
-            ...variantStyles.cardProps?.style,
-          }}
-          className={className}
-          loading={loading}
+  const modalElement = (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          ref={backdropRef}
+          style={backdropStyles}
+          onClick={handleBackdropClick}
+          data-testid={testID}
+          variants={modalBackdrop}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
         >
-        {showCloseButton && (
-          <Button
-            variant="secondary"
-            size="sm"
-            style={{
-              position: 'absolute',
-              top: theme.spacing.md,
-              right: theme.spacing.md,
-              width: '32px',
-              height: '32px',
-              minHeight: '32px',
-              padding: '0',
-              border: 'none',
-              background: 'transparent',
-              color: theme.colors.mutedForeground,
-              zIndex: 2,
-            }}
-            onClick={onClose}
-            aria-label="Close dialog"
+          <motion.div
+            ref={modalRef}
+            style={modalStyles}
+            className={className}
+            variants={variantConfig.animation}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            // Accessibility
+            role={role}
+            aria-modal={ariaModal}
+            aria-label={ariaLabel || accessibilityLabel}
+            aria-describedby={ariaDescribedBy}
+            aria-labelledby={ariaLabelledBy}
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
           >
-            ×
-          </Button>
-        )}
+            {/* Close button */}
+            {showCloseButton && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1 }}
+                style={{
+                  position: 'absolute',
+                  top: theme.spacing.md,
+                  right: theme.spacing.md,
+                  zIndex: 10,
+                }}
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    minHeight: '36px',
+                    padding: 0,
+                    borderRadius: theme.borders.radius.full,
+                    color: theme.colors.mutedForeground,
+                  }}
+                  onClick={onClose}
+                  aria-label="Close dialog"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </Button>
+              </motion.div>
+            )}
 
-        <div 
-          style={modalContentStyles}
-          data-show-divider={showDivider}
-          className={`modal-content ${showDivider ? 'modal-content--with-divider' : ''}`}
-        >
-          {children}
-        </div>
-      </Card>
-      </div>
-    </div>
+            {/* Loading overlay */}
+            <AnimatePresence>
+              {loading && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: theme.colors.overlayLight,
+                    backdropFilter: 'blur(2px)',
+                    zIndex: 20,
+                    borderRadius: 'inherit',
+                  }}
+                >
+                  <motion.div
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: 1 }}
+                    transition={springConfig.bouncy}
+                  >
+                    <Spinner size="lg" color={theme.colors.primary} />
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Content */}
+            <motion.div
+              style={modalContentStyles}
+              animate={{
+                opacity: loading ? 0.5 : 1,
+                filter: loading ? 'blur(1px)' : 'blur(0px)',
+              }}
+              transition={{ duration: 0.2 }}
+            >
+              {children}
+            </motion.div>
+
+            {/* Divider accent line at bottom */}
+            {showDivider && (
+              <div
+                style={{
+                  height: 3,
+                  background: theme.gradients.primary,
+                  marginTop: 'auto',
+                }}
+              />
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 
   // Render modal in a portal
-  return createPortal(modalContent, document.body);
+  if (typeof document === 'undefined') return null;
+  return createPortal(modalElement, document.body);
 };
