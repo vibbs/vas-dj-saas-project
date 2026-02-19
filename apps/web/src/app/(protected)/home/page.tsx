@@ -53,12 +53,12 @@ function DashboardHeader({
   isRefreshing: boolean;
 }) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 animate-fade-in-up">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
+        <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--color-foreground)' }}>
           {getGreeting()}, {name}
         </h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
           {getCurrentDate()}
         </p>
       </div>
@@ -173,7 +173,7 @@ export default function HomePage() {
 
       {/* Onboarding Checklist - shown for new users */}
       {showOnboardingChecklist && (
-        <section className="mb-6">
+        <section className="mb-6 animate-fade-in-up stagger-1">
           <OnboardingChecklist
             steps={steps}
             completedCount={completedCount}
@@ -194,44 +194,51 @@ export default function HomePage() {
 
       {/* Error banner */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+        <div
+          className="mb-6 p-4 border rounded-lg animate-fade-in-up"
+          style={{
+            backgroundColor: 'color-mix(in srgb, var(--color-destructive) 10%, var(--color-background))',
+            borderColor: 'color-mix(in srgb, var(--color-destructive) 30%, var(--color-border))',
+          }}
+        >
           <div className="flex items-center">
             <Icon
               name="AlertCircle"
               size="sm"
-              className="text-red-600 dark:text-red-400 mr-2"
+              className="mr-2"
+              style={{ color: 'var(--color-destructive)' }}
               aria-hidden={true}
             />
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            <p className="text-sm" style={{ color: 'var(--color-destructive)' }}>{error}</p>
           </div>
         </div>
       )}
 
       {/* Row 1: Stat Cards */}
-      <section className="mb-6">
+      <section className="mb-6 animate-fade-in-up stagger-1">
         <StatCardGrid stats={statsArray} isLoading={isStatsLoading} />
       </section>
 
       {/* Row 2: Activity Feed + Quick Actions */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-2">
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 animate-fade-in-up stagger-2">
+        <div className="lg:col-span-2 animate-fade-in-up stagger-3">
           <ActivityFeed
             activities={activities}
             isLoading={isActivitiesLoading}
             maxItems={6}
           />
         </div>
-        <div data-tour="quick-actions">
+        <div data-tour="quick-actions" className="animate-fade-in-up stagger-4">
           <QuickActions layout="list" />
         </div>
       </section>
 
       {/* Row 3: Team Overview + Usage Chart */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div>
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in-up stagger-3">
+        <div className="animate-fade-in-up stagger-4">
           <TeamOverview data={teamOverview} isLoading={isTeamLoading} />
         </div>
-        <div>
+        <div className="animate-fade-in-up stagger-5">
           <UsageChart data={usageMetrics} isLoading={isUsageLoading} />
         </div>
       </section>

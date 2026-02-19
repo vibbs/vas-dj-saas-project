@@ -1,8 +1,40 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { Card, Icon, Skeleton } from '@vas-dj-saas/ui';
 import type { UsageMetrics, UsageDataPoint } from '@vas-dj-saas/api-client';
+
+/**
+ * Helper to read CSS variable values from computed styles
+ * Returns the actual color value for use in SVG/Canvas contexts
+ */
+function useCSSVariable(variableName: string, fallback: string): string {
+  const [value, setValue] = useState(fallback);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const computedValue = getComputedStyle(document.documentElement)
+        .getPropertyValue(variableName)
+        .trim();
+      if (computedValue) {
+        setValue(computedValue);
+      }
+    }
+  }, [variableName]);
+
+  return value;
+}
+
+/**
+ * Hook to get theme-aware chart colors
+ */
+function useChartColors() {
+  const info = useCSSVariable('--color-info', '#3B82F6');
+  const primary = useCSSVariable('--color-primary', '#8B5CF6');
+  const success = useCSSVariable('--color-success', '#10B981');
+
+  return { info, primary, success };
+}
 
 /**
  * Simple SVG Bar Chart Component
@@ -18,9 +50,12 @@ interface SimpleBarChartProps {
 function SimpleBarChart({
   data,
   height = 120,
-  barColor = '#3b82f6',
+  barColor,
   showLabels = true,
 }: SimpleBarChartProps) {
+  const chartColors = useChartColors();
+  const resolvedColor = barColor || chartColors.info;
+
   const maxValue = useMemo(
     () => Math.max(...data.map((d) => d.value), 1),
     [data]
@@ -70,7 +105,7 @@ function SimpleBarChart({
                 y={y}
                 width={barWidth - barPadding * 2}
                 height={barHeight}
-                fill={barColor}
+                fill={resolvedColor}
                 rx="1"
                 className="transition-all duration-300 hover:opacity-80"
               >
@@ -86,7 +121,7 @@ function SimpleBarChart({
       {/* X-axis labels */}
       {showLabels && (
         <div className="flex justify-between mt-2 px-1">
-          <span className="text-xs text-gray-400 dark:text-gray-500">
+          <span className="text-xs text-[var(--color-muted-foreground)]">
             {displayData[0]?.date
               ? new Date(displayData[0].date).toLocaleDateString('en-US', {
                   month: 'short',
@@ -94,7 +129,7 @@ function SimpleBarChart({
                 })
               : ''}
           </span>
-          <span className="text-xs text-gray-400 dark:text-gray-500">
+          <span className="text-xs text-[var(--color-muted-foreground)]">
             {displayData[displayData.length - 1]?.date
               ? new Date(displayData[displayData.length - 1].date).toLocaleDateString('en-US', {
                   month: 'short',
@@ -123,8 +158,11 @@ function Sparkline({
   data,
   width = 80,
   height = 24,
-  color = '#3b82f6',
+  color,
 }: SparklineProps) {
+  const chartColors = useChartColors();
+  const resolvedColor = color || chartColors.info;
+
   const points = useMemo(() => {
     const maxValue = Math.max(...data.map((d) => d.value), 1);
     const displayData = data.slice(-10);
@@ -144,7 +182,7 @@ function Sparkline({
     <svg width={width} height={height} className="overflow-visible">
       <polyline
         fill="none"
-        stroke={color}
+        stroke={resolvedColor}
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -182,13 +220,13 @@ function UsageChartEmpty() {
       <Icon
         name="BarChart3"
         size="lg"
-        className="mx-auto text-gray-400 dark:text-gray-500 mb-3"
+        className="mx-auto text-[var(--color-muted-foreground)] mb-3"
         aria-hidden
       />
-      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+      <p className="text-sm font-medium text-[var(--color-foreground)]">
         Usage data coming soon
       </p>
-      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+      <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
         Check back later for usage analytics
       </p>
     </div>
@@ -210,23 +248,25 @@ export function UsageChart({
   isLoading = false,
   metric = 'apiCalls',
 }: UsageChartProps) {
+  const chartColors = useChartColors();
+
   const metricConfig = {
     apiCalls: {
       label: 'API Calls',
       summaryLabel: 'Total Calls',
-      color: '#3b82f6',
+      color: chartColors.info,
       formatValue: (v: number) => v.toLocaleString(),
     },
     storage: {
       label: 'Storage Usage',
       summaryLabel: 'Current Storage',
-      color: '#8b5cf6',
+      color: chartColors.primary,
       formatValue: (v: number) => `${v.toFixed(1)} GB`,
     },
     activeUsers: {
       label: 'Active Users',
       summaryLabel: 'Avg. Daily Users',
-      color: '#10b981',
+      color: chartColors.success,
       formatValue: (v: number) => v.toString(),
     },
   };
@@ -260,11 +300,11 @@ export function UsageChart({
       <div className="p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+          <h3 className="text-base font-semibold text-[var(--color-foreground)]">
             Usage Analytics
           </h3>
           {data?.period && (
-            <span className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="text-xs text-[var(--color-muted-foreground)]">
               Last 30 days
             </span>
           )}
@@ -285,19 +325,19 @@ export function UsageChart({
 
             {/* Summary stats */}
             {summaryValues && (
-              <div className="grid grid-cols-3 gap-4 pt-2 border-t border-gray-100 dark:border-gray-800">
+              <div className="grid grid-cols-3 gap-4 pt-2 border-t border-[var(--color-border)]">
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-[var(--color-muted-foreground)]">
                     Total Calls
                   </p>
                   <div className="flex items-center mt-1">
-                    <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    <span className="text-lg font-semibold text-[var(--color-foreground)]">
                       {summaryValues.apiCalls.formatted}
                     </span>
                     {data?.apiCalls && (
                       <Sparkline
                         data={data.apiCalls}
-                        color="#3b82f6"
+                        color={chartColors.info}
                         width={40}
                         height={16}
                       />
@@ -305,17 +345,17 @@ export function UsageChart({
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-[var(--color-muted-foreground)]">
                     Storage
                   </p>
                   <div className="flex items-center mt-1">
-                    <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    <span className="text-lg font-semibold text-[var(--color-foreground)]">
                       {summaryValues.storage.formatted}
                     </span>
                     {data?.storage && (
                       <Sparkline
                         data={data.storage}
-                        color="#8b5cf6"
+                        color={chartColors.primary}
                         width={40}
                         height={16}
                       />
@@ -323,17 +363,17 @@ export function UsageChart({
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-[var(--color-muted-foreground)]">
                     Avg. Users
                   </p>
                   <div className="flex items-center mt-1">
-                    <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    <span className="text-lg font-semibold text-[var(--color-foreground)]">
                       {summaryValues.activeUsers.formatted}
                     </span>
                     {data?.activeUsers && (
                       <Sparkline
                         data={data.activeUsers}
-                        color="#10b981"
+                        color={chartColors.success}
                         width={40}
                         height={16}
                       />

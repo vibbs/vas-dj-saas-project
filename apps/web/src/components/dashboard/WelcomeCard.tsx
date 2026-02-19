@@ -8,22 +8,36 @@ export interface WelcomeCardProps {
 /**
  * WelcomeCard
  * Greeting card showing user info and organization
+ * Uses CSS variables from the design system for consistent theming
  */
 export function WelcomeCard({ account }: WelcomeCardProps) {
   const greeting = getGreeting();
 
   return (
-    <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-lg p-8 text-white">
+    <div
+      className="rounded-lg p-8 animate-fade-in-up"
+      style={{
+        background: 'var(--gradient-primary)',
+        boxShadow: 'var(--shadow-glow)',
+        color: 'var(--color-primary-foreground)',
+      }}
+    >
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold">
             {greeting}, {account.firstName || account.fullName}!
           </h1>
-          <p className="text-blue-100">
+          <p style={{ color: 'var(--color-primary-foreground)', opacity: 0.8 }}>
             Welcome to your dashboard
           </p>
           {account.role && (
-            <div className="inline-flex items-center px-3 py-1 bg-blue-500/30 rounded-full text-sm">
+            <div
+              className="inline-flex items-center px-3 py-1 rounded-full text-sm"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--color-primary) 30%, transparent)',
+                color: 'var(--color-primary-foreground)',
+              }}
+            >
               <span className="capitalize">{account.role.toLowerCase()}</span>
             </div>
           )}
@@ -31,13 +45,21 @@ export function WelcomeCard({ account }: WelcomeCardProps) {
 
         {/* Account Badge */}
         <div className="flex flex-col items-end space-y-2">
-          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--color-primary-foreground) 20%, transparent)',
+            }}
+          >
             <span className="text-2xl font-bold">
               {account.abbreviatedName}
             </span>
           </div>
           {account.isEmailVerified ? (
-            <div className="flex items-center space-x-1 text-xs text-blue-100">
+            <div
+              className="flex items-center space-x-1 text-xs"
+              style={{ color: 'var(--color-primary-foreground)', opacity: 0.8 }}
+            >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
@@ -48,7 +70,10 @@ export function WelcomeCard({ account }: WelcomeCardProps) {
               <span>Verified</span>
             </div>
           ) : (
-            <div className="flex items-center space-x-1 text-xs text-yellow-200">
+            <div
+              className="flex items-center space-x-1 text-xs"
+              style={{ color: 'var(--color-warning)' }}
+            >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
@@ -75,8 +100,18 @@ export function WelcomeCard({ account }: WelcomeCardProps) {
 function StatItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-blue-200 text-xs uppercase tracking-wide">{label}</p>
-      <p className="text-white font-semibold mt-1 capitalize">{value.toLowerCase()}</p>
+      <p
+        className="text-xs uppercase tracking-wide"
+        style={{ color: 'var(--color-primary-foreground)', opacity: 0.7 }}
+      >
+        {label}
+      </p>
+      <p
+        className="font-semibold mt-1 capitalize"
+        style={{ color: 'var(--color-primary-foreground)' }}
+      >
+        {value.toLowerCase()}
+      </p>
     </div>
   );
 }

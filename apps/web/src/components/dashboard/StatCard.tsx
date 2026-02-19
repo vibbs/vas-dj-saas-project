@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Card, Icon, Skeleton } from '@vas-dj-saas/ui';
 import type { DashboardStat } from '@vas-dj-saas/api-client';
 
@@ -28,7 +29,14 @@ export interface StatCardProps {
 export function StatCard({ stat, isLoading = false }: StatCardProps) {
   if (isLoading) {
     return (
-      <Card variant="default" className="relative overflow-hidden">
+      <Card
+        variant="default"
+        className="relative overflow-hidden"
+        style={{
+          borderLeft: '4px solid var(--color-primary)',
+          boxShadow: 'var(--shadow-md)',
+        }}
+      >
         <div className="p-5">
           <div className="flex items-start justify-between">
             <div className="flex-1 space-y-3">
@@ -46,83 +54,125 @@ export function StatCard({ stat, isLoading = false }: StatCardProps) {
   const { label, formattedValue, trend, icon } = stat;
   const iconName = icon ? iconMap[icon] || 'BarChart3' : 'BarChart3';
 
-  // Trend colors and icons
-  const trendConfig = {
-    up: {
-      color: 'text-green-600 dark:text-green-400',
-      bgColor: 'bg-green-50 dark:bg-green-900/20',
-      icon: 'TrendingUp',
-    },
-    down: {
-      color: 'text-red-600 dark:text-red-400',
-      bgColor: 'bg-red-50 dark:bg-red-900/20',
-      icon: 'TrendingDown',
-    },
-    neutral: {
-      color: 'text-gray-500 dark:text-gray-400',
-      bgColor: 'bg-gray-50 dark:bg-gray-800/50',
-      icon: 'Minus',
-    },
+  // Trend direction configurations
+  const getTrendStyles = (direction: string) => {
+    switch (direction) {
+      case 'up':
+        return {
+          color: 'var(--color-success)',
+          bgColor: 'color-mix(in srgb, var(--color-success) 10%, transparent)',
+          icon: 'TrendingUp',
+        };
+      case 'down':
+        return {
+          color: 'var(--color-destructive)',
+          bgColor: 'color-mix(in srgb, var(--color-destructive) 10%, transparent)',
+          icon: 'TrendingDown',
+        };
+      default:
+        return {
+          color: 'var(--color-muted-foreground)',
+          bgColor: 'color-mix(in srgb, var(--color-muted-foreground) 10%, transparent)',
+          icon: 'Minus',
+        };
+    }
   };
 
-  const trendStyle = trend ? trendConfig[trend.direction as keyof typeof trendConfig] : null;
+  const trendStyle = trend ? getTrendStyles(trend.direction) : null;
 
   return (
-    <Card
-      variant="default"
-      className="relative overflow-hidden hover:shadow-md transition-shadow duration-200"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      whileHover={{ y: -2 }}
     >
-      <div className="p-5">
-        <div className="flex items-start justify-between">
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            {/* Label */}
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-              {label}
-            </p>
+      <Card
+        variant="default"
+        className="relative overflow-hidden transition-shadow duration-200"
+        style={{
+          borderLeft: '4px solid var(--color-primary)',
+          boxShadow: 'var(--shadow-md)',
+        }}
+      >
+        <motion.div
+          className="p-5"
+          whileHover={{
+            boxShadow: 'var(--shadow-lg)',
+          }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="flex items-start justify-between">
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              {/* Label */}
+              <p
+                className="text-sm font-medium truncate"
+                style={{ color: 'var(--color-muted-foreground)' }}
+              >
+                {label}
+              </p>
 
-            {/* Value */}
-            <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-              {formattedValue}
-            </p>
+              {/* Value */}
+              <p
+                className="mt-2 text-3xl font-bold"
+                style={{ color: 'var(--color-foreground)' }}
+              >
+                {formattedValue}
+              </p>
 
-            {/* Trend */}
-            {trend && trendStyle && (
-              <div className="mt-2 flex items-center space-x-1.5">
-                <span
-                  className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${trendStyle.bgColor} ${trendStyle.color}`}
-                >
-                  <Icon
-                    name={trendStyle.icon as any}
-                    size="xs"
-                    className="mr-0.5"
-                    aria-hidden
-                  />
-                  {trend.percentage > 0 ? '+' : ''}
-                  {trend.percentage}%
-                </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  {trend.period}
-                </span>
-              </div>
-            )}
+              {/* Trend */}
+              {trend && trendStyle && (
+                <div className="mt-2 flex items-center space-x-1.5">
+                  <span
+                    className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium"
+                    style={{
+                      color: trendStyle.color,
+                      backgroundColor: trendStyle.bgColor,
+                    }}
+                  >
+                    <Icon
+                      name={trendStyle.icon as any}
+                      size="xs"
+                      className="mr-0.5"
+                      style={{ color: trendStyle.color }}
+                      aria-hidden
+                    />
+                    {trend.percentage > 0 ? '+' : ''}
+                    {trend.percentage}%
+                  </span>
+                  <span
+                    className="text-xs"
+                    style={{ color: 'var(--color-muted-foreground)' }}
+                  >
+                    {trend.period}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Icon */}
+            <div
+              className="flex-shrink-0 p-2.5 rounded-lg"
+              style={{ backgroundColor: 'var(--color-primary-muted)' }}
+            >
+              <Icon
+                name={iconName as any}
+                size="lg"
+                style={{ color: 'var(--color-primary)' }}
+                aria-hidden
+              />
+            </div>
           </div>
+        </motion.div>
 
-          {/* Icon */}
-          <div className="flex-shrink-0 p-2.5 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <Icon
-              name={iconName as any}
-              size="lg"
-              className="text-blue-600 dark:text-blue-400"
-              aria-hidden
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Subtle gradient accent at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500/20 via-blue-500/40 to-blue-500/20" />
-    </Card>
+        {/* Subtle gradient accent at bottom */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-1"
+          style={{ background: 'var(--gradient-primary)' }}
+        />
+      </Card>
+    </motion.div>
   );
 }
 
@@ -147,11 +197,24 @@ export function StatCardGrid({ stats, isLoading = false }: StatCardGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <motion.div
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+      initial="hidden"
+      animate="visible"
+      variants={{
+        hidden: { opacity: 0 },
+        visible: {
+          opacity: 1,
+          transition: {
+            staggerChildren: 0.1,
+          },
+        },
+      }}
+    >
       {stats.map((stat) => (
         <StatCard key={stat.id} stat={stat} />
       ))}
-    </div>
+    </motion.div>
   );
 }
 

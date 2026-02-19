@@ -177,7 +177,7 @@ export default function PaymentMethodsPage() {
     if (!billingConfig?.secondarySidebar) {
         return (
             <div className="flex-1 p-6">
-                <p className="text-red-500">
+                <p style={{ color: 'var(--color-destructive)' }}>
                     Error: Secondary sidebar configuration not found.
                     Please check the navigation configuration in packages/core/src/navigation/config/nav-items.ts
                 </p>
@@ -449,7 +449,7 @@ export default function PaymentMethodsPage() {
                                 <Text size="sm" weight="medium" style={{ marginBottom: '0.25rem' }}>
                                     Card Number
                                 </Text>
-                                <div className="h-10 border rounded-md bg-muted/20 flex items-center px-3">
+                                <div className="h-10 border rounded-md bg-[--color-muted] flex items-center px-3">
                                     <Text color="muted" size="sm">Stripe Elements will be integrated here</Text>
                                 </div>
                             </div>
@@ -458,7 +458,7 @@ export default function PaymentMethodsPage() {
                                     <Text size="sm" weight="medium" style={{ marginBottom: '0.25rem' }}>
                                         Expiry Date
                                     </Text>
-                                    <div className="h-10 border rounded-md bg-muted/20 flex items-center px-3">
+                                    <div className="h-10 border rounded-md bg-[--color-muted] flex items-center px-3">
                                         <Text color="muted" size="sm">MM/YY</Text>
                                     </div>
                                 </div>
@@ -466,7 +466,7 @@ export default function PaymentMethodsPage() {
                                     <Text size="sm" weight="medium" style={{ marginBottom: '0.25rem' }}>
                                         CVC
                                     </Text>
-                                    <div className="h-10 border rounded-md bg-muted/20 flex items-center px-3">
+                                    <div className="h-10 border rounded-md bg-[--color-muted] flex items-center px-3">
                                         <Text color="muted" size="sm">***</Text>
                                     </div>
                                 </div>
@@ -475,14 +475,20 @@ export default function PaymentMethodsPage() {
                                 <Text size="sm" weight="medium" style={{ marginBottom: '0.25rem' }}>
                                     Cardholder Name
                                 </Text>
-                                <div className="h-10 border rounded-md bg-muted/20 flex items-center px-3">
+                                <div className="h-10 border rounded-md bg-[--color-muted] flex items-center px-3">
                                     <Text color="muted" size="sm">Name on card</Text>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md">
-                            <Text size="sm" color="primary">
+                        <div
+                            className="p-4 rounded-md"
+                            style={{
+                                backgroundColor: 'color-mix(in srgb, var(--color-info) 10%, transparent)',
+                                border: '1px solid color-mix(in srgb, var(--color-info) 30%, transparent)',
+                            }}
+                        >
+                            <Text size="sm" style={{ color: 'var(--color-info)' }}>
                                 Note: Stripe Elements integration required for secure card collection.
                                 This is a placeholder UI.
                             </Text>

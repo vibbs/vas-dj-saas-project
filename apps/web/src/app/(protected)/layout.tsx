@@ -50,8 +50,14 @@ export default function ProtectedLayout({
   // Show loading state while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: 'var(--color-background)' }}
+      >
+        <div
+          className="animate-spin rounded-full h-12 w-12 border-b-2"
+          style={{ borderColor: 'var(--color-primary)' }}
+        />
       </div>
     );
   }
@@ -62,7 +68,10 @@ export default function ProtectedLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div
+      className="flex min-h-screen"
+      style={{ backgroundColor: 'var(--color-background)' }}
+    >
       {/* Unified Sidebar Navigation */}
       <MainSidebar
         isMobileMenuOpen={isMobileMenuOpen}
@@ -81,7 +90,16 @@ export default function ProtectedLayout({
               isMobile ? (
                 <button
                   onClick={() => setIsMobileMenuOpen(true)}
-                  className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors md:hidden"
+                  className="p-2 rounded-md transition-colors md:hidden"
+                  style={{
+                    color: 'var(--color-foreground)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--color-muted)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
                   aria-label="Open menu"
                 >
                   <Menu size={20} />

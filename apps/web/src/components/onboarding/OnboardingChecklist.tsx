@@ -153,7 +153,7 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+            backgroundColor: 'color-mix(in srgb, var(--color-success) 10%, transparent)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -164,7 +164,7 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
         >
           <div
             style={{
-              color: '#22c55e',
+              color: 'var(--color-success)',
               marginBottom: 12,
               animation: 'bounceIn 0.5s ease-in-out',
             }}
@@ -175,7 +175,7 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
             style={{
               fontSize: 18,
               fontWeight: 600,
-              color: '#22c55e',
+              color: 'var(--color-success)',
               margin: 0,
             }}
           >
@@ -184,7 +184,7 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
           <p
             style={{
               fontSize: 14,
-              color: '#4b5563',
+              color: 'var(--color-muted-foreground)',
               margin: '8px 0 0',
             }}
           >
@@ -197,12 +197,12 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
       <div
         style={{
           padding: '16px 20px',
-          borderBottom: isExpanded ? '1px solid #e5e7eb' : 'none',
+          borderBottom: isExpanded ? '1px solid var(--color-border)' : 'none',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           cursor: 'pointer',
-          backgroundColor: '#fafafa',
+          backgroundColor: 'var(--color-muted)',
         }}
         onClick={() => setIsExpanded(!isExpanded)}
       >
@@ -212,11 +212,13 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
               width: 40,
               height: 40,
               borderRadius: '50%',
-              backgroundColor: progressPercentage === 100 ? '#dcfce7' : '#dbeafe',
+              backgroundColor: progressPercentage === 100
+                ? 'color-mix(in srgb, var(--color-success) 10%, transparent)'
+                : 'var(--color-primary-muted)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: progressPercentage === 100 ? '#22c55e' : '#3b82f6',
+              color: progressPercentage === 100 ? 'var(--color-success)' : 'var(--color-primary)',
               fontWeight: 600,
               fontSize: 14,
             }}
@@ -228,7 +230,7 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
               style={{
                 fontSize: 16,
                 fontWeight: 600,
-                color: '#111827',
+                color: 'var(--color-foreground)',
                 margin: 0,
               }}
             >
@@ -237,7 +239,7 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
             <p
               style={{
                 fontSize: 13,
-                color: '#6b7280',
+                color: 'var(--color-muted-foreground)',
                 margin: '2px 0 0',
               }}
             >
@@ -258,7 +260,7 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
               border: 'none',
               borderRadius: 4,
               cursor: 'pointer',
-              color: '#9ca3af',
+              color: 'var(--color-muted-foreground)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -348,22 +350,24 @@ const StepItem: React.FC<StepItemProps> = ({ step, stepNumber, onClick }) => {
         gap: 12,
         padding: '12px 16px',
         borderRadius: 8,
-        backgroundColor: step.isComplete ? '#f0fdf4' : '#f9fafb',
-        border: `1px solid ${step.isComplete ? '#bbf7d0' : '#e5e7eb'}`,
+        backgroundColor: step.isComplete
+          ? 'color-mix(in srgb, var(--color-success) 10%, transparent)'
+          : 'var(--color-card)',
+        border: `1px solid ${step.isComplete ? 'color-mix(in srgb, var(--color-success) 30%, transparent)' : 'var(--color-border)'}`,
         cursor: step.href ? 'pointer' : 'default',
         transition: 'all 0.2s ease-in-out',
       }}
       onClick={onClick}
       onMouseEnter={(e) => {
         if (step.href && !step.isComplete) {
-          e.currentTarget.style.backgroundColor = '#f3f4f6';
-          e.currentTarget.style.borderColor = '#d1d5db';
+          e.currentTarget.style.backgroundColor = 'var(--color-muted)';
+          e.currentTarget.style.borderColor = 'var(--color-border)';
         }
       }}
       onMouseLeave={(e) => {
         if (step.href && !step.isComplete) {
-          e.currentTarget.style.backgroundColor = '#f9fafb';
-          e.currentTarget.style.borderColor = '#e5e7eb';
+          e.currentTarget.style.backgroundColor = 'var(--color-card)';
+          e.currentTarget.style.borderColor = 'var(--color-border)';
         }
       }}
     >
@@ -373,8 +377,8 @@ const StepItem: React.FC<StepItemProps> = ({ step, stepNumber, onClick }) => {
           width: 28,
           height: 28,
           borderRadius: '50%',
-          backgroundColor: step.isComplete ? '#22c55e' : '#e5e7eb',
-          color: step.isComplete ? '#fff' : '#6b7280',
+          backgroundColor: step.isComplete ? 'var(--color-success)' : 'var(--color-border)',
+          color: step.isComplete ? '#fff' : 'var(--color-muted-foreground)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -392,7 +396,7 @@ const StepItem: React.FC<StepItemProps> = ({ step, stepNumber, onClick }) => {
           style={{
             fontSize: 14,
             fontWeight: 500,
-            color: step.isComplete ? '#166534' : '#111827',
+            color: step.isComplete ? 'var(--color-success)' : 'var(--color-foreground)',
             margin: 0,
             textDecoration: step.isComplete ? 'line-through' : 'none',
           }}
@@ -402,7 +406,9 @@ const StepItem: React.FC<StepItemProps> = ({ step, stepNumber, onClick }) => {
         <p
           style={{
             fontSize: 12,
-            color: step.isComplete ? '#4ade80' : '#6b7280',
+            color: step.isComplete
+              ? 'color-mix(in srgb, var(--color-success) 70%, transparent)'
+              : 'var(--color-muted-foreground)',
             margin: '2px 0 0',
           }}
         >
@@ -414,7 +420,7 @@ const StepItem: React.FC<StepItemProps> = ({ step, stepNumber, onClick }) => {
       {step.href && !step.isComplete && (
         <div
           style={{
-            color: '#9ca3af',
+            color: 'var(--color-muted-foreground)',
             flexShrink: 0,
           }}
         >

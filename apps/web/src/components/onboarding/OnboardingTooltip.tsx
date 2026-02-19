@@ -56,7 +56,7 @@ const TooltipArrow: React.FC<{ position: TooltipPosition }> = ({ position }) => 
           left: '50%',
           transform: 'translateX(-50%)',
           borderWidth: '8px 8px 0 8px',
-          borderColor: '#fff transparent transparent transparent',
+          borderColor: 'var(--color-card) transparent transparent transparent',
         };
       case 'bottom':
         return {
@@ -65,7 +65,7 @@ const TooltipArrow: React.FC<{ position: TooltipPosition }> = ({ position }) => 
           left: '50%',
           transform: 'translateX(-50%)',
           borderWidth: '0 8px 8px 8px',
-          borderColor: 'transparent transparent #fff transparent',
+          borderColor: 'transparent transparent var(--color-card) transparent',
         };
       case 'left':
         return {
@@ -74,7 +74,7 @@ const TooltipArrow: React.FC<{ position: TooltipPosition }> = ({ position }) => 
           top: '50%',
           transform: 'translateY(-50%)',
           borderWidth: '8px 0 8px 8px',
-          borderColor: 'transparent transparent transparent #fff',
+          borderColor: 'transparent transparent transparent var(--color-card)',
         };
       case 'right':
         return {
@@ -83,7 +83,7 @@ const TooltipArrow: React.FC<{ position: TooltipPosition }> = ({ position }) => 
           top: '50%',
           transform: 'translateY(-50%)',
           borderWidth: '8px 8px 8px 0',
-          borderColor: 'transparent #fff transparent transparent',
+          borderColor: 'transparent var(--color-card) transparent transparent',
         };
       default:
         return base;
@@ -219,7 +219,7 @@ export const OnboardingTooltip: React.FC<OnboardingTooltipProps> = ({
         style={{
           position: 'fixed',
           inset: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+          backgroundColor: 'var(--color-overlay)',
           zIndex: 9998,
         }}
         onClick={onClose}
@@ -237,9 +237,9 @@ export const OnboardingTooltip: React.FC<OnboardingTooltipProps> = ({
           left: coords?.left ?? 0,
           zIndex: 9999,
           width: 320,
-          backgroundColor: '#fff',
+          backgroundColor: 'var(--color-card)',
           borderRadius: 12,
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+          boxShadow: 'var(--shadow-lg)',
           opacity: coords && !isAnimating ? 1 : 0,
           transform: coords && !isAnimating ? 'scale(1)' : 'scale(0.95)',
           transition: 'opacity 0.2s ease-in-out, transform 0.2s ease-in-out',
@@ -266,7 +266,7 @@ export const OnboardingTooltip: React.FC<OnboardingTooltipProps> = ({
                     width: 24,
                     height: 4,
                     borderRadius: 2,
-                    backgroundColor: index < currentStep ? '#3b82f6' : '#e5e7eb',
+                    backgroundColor: index < currentStep ? 'var(--color-primary)' : 'var(--color-border)',
                     transition: 'background-color 0.2s ease-in-out',
                   }}
                 />
@@ -280,7 +280,7 @@ export const OnboardingTooltip: React.FC<OnboardingTooltipProps> = ({
             style={{
               fontSize: 16,
               fontWeight: 600,
-              color: '#111827',
+              color: 'var(--color-foreground)',
               margin: 0,
               marginBottom: 8,
             }}
@@ -293,7 +293,7 @@ export const OnboardingTooltip: React.FC<OnboardingTooltipProps> = ({
             id={`${id}-description`}
             style={{
               fontSize: 14,
-              color: '#6b7280',
+              color: 'var(--color-muted-foreground)',
               margin: 0,
               lineHeight: 1.5,
             }}
@@ -309,8 +309,8 @@ export const OnboardingTooltip: React.FC<OnboardingTooltipProps> = ({
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '12px 20px',
-            borderTop: '1px solid #f3f4f6',
-            backgroundColor: '#fafafa',
+            borderTop: '1px solid var(--color-border)',
+            backgroundColor: 'var(--color-muted)',
             borderRadius: '0 0 12px 12px',
           }}
         >
@@ -320,7 +320,7 @@ export const OnboardingTooltip: React.FC<OnboardingTooltipProps> = ({
               padding: '8px 16px',
               fontSize: 14,
               fontWeight: 500,
-              color: '#6b7280',
+              color: 'var(--color-muted-foreground)',
               backgroundColor: 'transparent',
               border: 'none',
               cursor: 'pointer',
@@ -328,10 +328,10 @@ export const OnboardingTooltip: React.FC<OnboardingTooltipProps> = ({
               transition: 'color 0.2s ease-in-out',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#111827';
+              e.currentTarget.style.color = 'var(--color-foreground)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#6b7280';
+              e.currentTarget.style.color = 'var(--color-muted-foreground)';
             }}
           >
             Skip tour
@@ -342,7 +342,8 @@ export const OnboardingTooltip: React.FC<OnboardingTooltipProps> = ({
               <span
                 style={{
                   fontSize: 13,
-                  color: '#9ca3af',
+                  color: 'var(--color-muted-foreground)',
+                  opacity: 0.8,
                 }}
               >
                 {currentStep} of {totalSteps}

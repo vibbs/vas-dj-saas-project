@@ -102,13 +102,39 @@ export function MainSidebar({ isMobileMenuOpen = false, onMobileMenuToggle }: Ma
         key={item.id}
         href={item.href}
         className={cn(
-          'flex items-center px-3 py-2 rounded-md transition-colors text-sm font-medium',
-          isActive
-            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+          'flex items-center px-3 py-2 rounded-md text-sm font-medium',
           isCollapsed ? 'justify-center' : 'space-x-3'
         )}
+        style={{
+          transition: 'all 0.2s ease-in-out',
+          ...(isActive
+            ? {
+                backgroundColor: 'var(--color-primary-muted)',
+                color: 'var(--color-primary)',
+                borderLeft: '3px solid var(--color-primary)',
+                marginLeft: '-3px',
+                paddingLeft: 'calc(0.75rem + 3px)',
+              }
+            : {
+                color: 'var(--color-foreground)',
+                borderLeft: '3px solid transparent',
+                marginLeft: '-3px',
+                paddingLeft: 'calc(0.75rem + 3px)',
+              }),
+        }}
         title={isCollapsed ? item.label : item.description}
+        onMouseEnter={(e) => {
+          if (!isActive) {
+            e.currentTarget.style.backgroundColor = 'var(--color-secondary)';
+            e.currentTarget.style.transform = 'translateX(2px)';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isActive) {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.transform = 'translateX(0)';
+          }
+        }}
       >
         <Icon name={item.icon} size="md" className="flex-shrink-0" />
         {!isCollapsed && <span>{item.label}</span>}
@@ -121,7 +147,11 @@ export function MainSidebar({ isMobileMenuOpen = false, onMobileMenuToggle }: Ma
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 z-40 md:hidden"
+          style={{
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            transition: 'opacity 0.2s ease-in-out',
+          }}
           onClick={() => onMobileMenuToggle?.(false)}
           aria-hidden="true"
         />
@@ -129,22 +159,35 @@ export function MainSidebar({ isMobileMenuOpen = false, onMobileMenuToggle }: Ma
 
       <aside
         className={cn(
-          'bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 flex flex-col h-screen sticky top-0 z-50',
+          'transition-all duration-300 flex flex-col h-screen sticky top-0 z-50',
           // Desktop and Tablet behavior
           'hidden md:flex',
           isCollapsed ? 'md:w-16' : 'md:w-64',
           // Mobile drawer behavior
           isMobileMenuOpen && 'flex fixed inset-y-0 left-0 w-64'
         )}
+        style={{
+          backgroundColor: 'var(--color-card)',
+          borderRight: '1px solid var(--color-border)',
+        }}
       >
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+      <div
+        className="p-4 flex items-center justify-between"
+        style={{ borderBottom: '1px solid var(--color-border)' }}
+      >
         {!isCollapsed && (
           <Link href="/home" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: 'var(--gradient-primary)' }}
+            >
               <span className="text-white font-bold text-lg">V</span>
             </div>
-            <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <span
+              className="text-lg font-semibold"
+              style={{ color: 'var(--color-foreground)' }}
+            >
               {env.appName}
             </span>
           </Link>
@@ -152,7 +195,14 @@ export function MainSidebar({ isMobileMenuOpen = false, onMobileMenuToggle }: Ma
         {/* Desktop/Tablet toggle - hide on mobile */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hidden md:block p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className="hidden md:block p-2 rounded-md"
+          style={{ transition: 'background-color 0.2s ease-in-out' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--color-secondary)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
           aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           <Icon
@@ -168,7 +218,14 @@ export function MainSidebar({ isMobileMenuOpen = false, onMobileMenuToggle }: Ma
         {/* Mobile close button */}
         <button
           onClick={() => onMobileMenuToggle?.(false)}
-          className="md:hidden p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className="md:hidden p-2 rounded-md"
+          style={{ transition: 'background-color 0.2s ease-in-out' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--color-secondary)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
           aria-label="Close menu"
         >
           <Icon name="X" size="md" />
@@ -180,7 +237,10 @@ export function MainSidebar({ isMobileMenuOpen = false, onMobileMenuToggle }: Ma
         {sections.map((section) => (
           <div key={section.id} className="space-y-2">
             {section.title && !isCollapsed && (
-              <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-3">
+              <h3
+                className="text-xs font-semibold uppercase tracking-wider px-3"
+                style={{ color: 'var(--color-muted-foreground)' }}
+              >
                 {section.title}
               </h3>
             )}
@@ -192,20 +252,32 @@ export function MainSidebar({ isMobileMenuOpen = false, onMobileMenuToggle }: Ma
       </nav>
 
       {/* User Profile & Logout */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+      <div
+        className="p-4 space-y-2"
+        style={{ borderTop: '1px solid var(--color-border)' }}
+      >
         {!isCollapsed && account ? (
           <>
             <div className="flex items-center space-x-3 px-3 py-2">
-              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ background: 'var(--gradient-primary)' }}
+              >
                 <span className="text-white font-semibold text-sm">
                   {account.abbreviatedName}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                <p
+                  className="text-sm font-medium truncate"
+                  style={{ color: 'var(--color-foreground)' }}
+                >
                   {account.fullName}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                <p
+                  className="text-xs truncate"
+                  style={{ color: 'var(--color-muted-foreground)' }}
+                >
                   {account.email}
                 </p>
               </div>
@@ -213,7 +285,17 @@ export function MainSidebar({ isMobileMenuOpen = false, onMobileMenuToggle }: Ma
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
-              className="w-full flex items-center space-x-3 px-3 py-2 rounded-md text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
+              className="w-full flex items-center space-x-3 px-3 py-2 rounded-md text-sm disabled:opacity-50"
+              style={{
+                color: 'var(--color-destructive)',
+                transition: 'all 0.2s ease-in-out',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--color-destructive) 10%, transparent)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
             >
               <Icon name="LogOut" size="md" />
               <span>{isLoggingOut ? 'Signing out...' : 'Sign Out'}</span>
@@ -223,7 +305,17 @@ export function MainSidebar({ isMobileMenuOpen = false, onMobileMenuToggle }: Ma
           <button
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className="w-full flex items-center justify-center p-2 rounded-md text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
+            className="w-full flex items-center justify-center p-2 rounded-md disabled:opacity-50"
+            style={{
+              color: 'var(--color-destructive)',
+              transition: 'all 0.2s ease-in-out',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--color-destructive) 10%, transparent)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
             title="Sign Out"
           >
             <Icon name="LogOut" size="md" />

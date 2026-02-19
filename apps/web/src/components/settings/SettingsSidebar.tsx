@@ -98,27 +98,41 @@ export function SettingsSidebar({ account }: SettingsSidebarProps) {
   return (
     <aside
       className={cn(
-        'bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300',
+        'border-r transition-all duration-300',
         isCollapsed ? 'w-16' : 'w-64'
       )}
+      style={{
+        backgroundColor: 'var(--color-card)',
+        borderColor: 'var(--color-border)',
+      }}
     >
       {/* Collapse Toggle */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+      <div
+        className="p-4 border-b flex justify-between items-center"
+        style={{ borderColor: 'var(--color-border)' }}
+      >
         {!isCollapsed && (
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <h2
+            className="text-lg font-semibold"
+            style={{ color: 'var(--color-foreground)' }}
+          >
             Settings
           </h2>
         )}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className="p-2 rounded-md transition-colors"
+          style={{ '--hover-bg': 'var(--color-secondary)' } as React.CSSProperties}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-secondary)')}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
           aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           <svg
             className={cn(
-              'w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform',
+              'w-5 h-5 transition-transform',
               isCollapsed ? 'rotate-180' : ''
             )}
+            style={{ color: 'var(--color-muted-foreground)' }}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -138,7 +152,10 @@ export function SettingsSidebar({ account }: SettingsSidebarProps) {
         {visibleSections.map((section) => (
           <div key={section.title}>
             {!isCollapsed && (
-              <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+              <h3
+                className="text-xs font-semibold uppercase tracking-wider mb-2"
+                style={{ color: 'var(--color-muted-foreground)' }}
+              >
                 {section.title}
               </h3>
             )}
@@ -151,11 +168,31 @@ export function SettingsSidebar({ account }: SettingsSidebarProps) {
                       href={item.href}
                       className={cn(
                         'flex items-center px-3 py-2 rounded-md transition-colors',
-                        isActive
-                          ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
                         isCollapsed ? 'justify-center' : 'space-x-3'
                       )}
+                      style={
+                        isActive
+                          ? {
+                              backgroundColor: 'var(--color-primary-muted)',
+                              color: 'var(--color-primary)',
+                              borderLeft: '3px solid var(--color-primary)',
+                              marginLeft: '-3px',
+                              paddingLeft: 'calc(0.75rem + 3px)',
+                            }
+                          : {
+                              color: 'var(--color-foreground)',
+                            }
+                      }
+                      onMouseEnter={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.backgroundColor = 'var(--color-secondary)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }
+                      }}
                       title={isCollapsed ? item.label : undefined}
                     >
                       <span className="text-lg">{item.icon}</span>

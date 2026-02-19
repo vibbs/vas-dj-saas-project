@@ -143,7 +143,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
             display: 'flex',
             justifyContent: 'center',
             marginBottom: 24,
-            color: '#3b82f6',
+            color: 'var(--color-primary)',
             animation: isAnimating ? 'bounceIn 0.6s ease-out' : 'none',
           }}
         >
@@ -152,7 +152,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
               width: 80,
               height: 80,
               borderRadius: '50%',
-              backgroundColor: '#eff6ff',
+              backgroundColor: 'var(--color-primary-muted)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -167,7 +167,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
           style={{
             fontSize: 24,
             fontWeight: 700,
-            color: '#111827',
+            color: 'var(--color-foreground)',
             margin: 0,
             marginBottom: 8,
           }}
@@ -178,7 +178,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
         <p
           style={{
             fontSize: 15,
-            color: '#6b7280',
+            color: 'var(--color-muted-foreground)',
             margin: 0,
             marginBottom: 32,
             lineHeight: 1.5,
@@ -205,9 +205,9 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                 alignItems: 'center',
                 gap: 16,
                 padding: 16,
-                backgroundColor: '#f9fafb',
+                backgroundColor: 'var(--color-muted)',
                 borderRadius: 12,
-                border: '1px solid #f3f4f6',
+                border: '1px solid var(--color-secondary)',
                 textAlign: 'left',
                 animation: isAnimating
                   ? `slideInUp 0.4s ease-out ${0.1 + index * 0.1}s both`
@@ -219,8 +219,8 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                   width: 48,
                   height: 48,
                   borderRadius: 10,
-                  backgroundColor: '#dbeafe',
-                  color: '#3b82f6',
+                  backgroundColor: 'var(--color-primary-muted)',
+                  color: 'var(--color-primary)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -234,7 +234,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                   style={{
                     fontSize: 14,
                     fontWeight: 600,
-                    color: '#111827',
+                    color: 'var(--color-foreground)',
                     margin: 0,
                     marginBottom: 2,
                   }}
@@ -244,7 +244,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                 <p
                   style={{
                     fontSize: 13,
-                    color: '#6b7280',
+                    color: 'var(--color-muted-foreground)',
                     margin: 0,
                   }}
                 >
@@ -277,7 +277,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
               padding: '12px 24px',
               fontSize: 14,
               fontWeight: 500,
-              color: '#6b7280',
+              color: 'var(--color-muted-foreground)',
               backgroundColor: 'transparent',
               border: 'none',
               cursor: 'pointer',
@@ -285,10 +285,10 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
               transition: 'color 0.2s ease-in-out',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#111827';
+              e.currentTarget.style.color = 'var(--color-foreground)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#6b7280';
+              e.currentTarget.style.color = 'var(--color-muted-foreground)';
             }}
           >
             Skip for now

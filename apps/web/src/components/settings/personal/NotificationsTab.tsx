@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Card, Heading, Text, Switch, Spinner, Button } from '@vas-dj-saas/ui';
 import { Shield, CreditCard, Users, Megaphone, Mail, Bell, Smartphone, RotateCcw } from 'lucide-react';
 import {
@@ -15,24 +16,37 @@ type NotificationCategory = keyof NotificationPreferences;
 
 type ChannelType = keyof NotificationChannels;
 
+// Animation variants
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.1,
+      duration: 0.4,
+      ease: [0.16, 1, 0.3, 1] as const,
+    },
+  }),
+};
+
 /**
  * Get category icon component
  */
 function getCategoryIcon(category: NotificationCategory): React.ReactNode {
   const iconSize = 20;
-  const className = 'text-gray-500 dark:text-gray-400';
 
   switch (category) {
     case 'security':
-      return <Shield size={iconSize} className={className} />;
+      return <Shield size={iconSize} style={{ color: 'var(--color-muted-foreground)' }} />;
     case 'billing':
-      return <CreditCard size={iconSize} className={className} />;
+      return <CreditCard size={iconSize} style={{ color: 'var(--color-muted-foreground)' }} />;
     case 'team':
-      return <Users size={iconSize} className={className} />;
+      return <Users size={iconSize} style={{ color: 'var(--color-muted-foreground)' }} />;
     case 'marketing':
-      return <Megaphone size={iconSize} className={className} />;
+      return <Megaphone size={iconSize} style={{ color: 'var(--color-muted-foreground)' }} />;
     default:
-      return <Bell size={iconSize} className={className} />;
+      return <Bell size={iconSize} style={{ color: 'var(--color-muted-foreground)' }} />;
   }
 }
 
@@ -41,15 +55,14 @@ function getCategoryIcon(category: NotificationCategory): React.ReactNode {
  */
 function getChannelIcon(channel: ChannelType): React.ReactNode {
   const iconSize = 16;
-  const className = 'text-gray-400';
 
   switch (channel) {
     case 'email':
-      return <Mail size={iconSize} className={className} />;
+      return <Mail size={iconSize} style={{ color: 'var(--color-muted-foreground)' }} />;
     case 'inApp':
-      return <Bell size={iconSize} className={className} />;
+      return <Bell size={iconSize} style={{ color: 'var(--color-muted-foreground)' }} />;
     case 'push':
-      return <Smartphone size={iconSize} className={className} />;
+      return <Smartphone size={iconSize} style={{ color: 'var(--color-muted-foreground)' }} />;
     default:
       return null;
   }
@@ -62,6 +75,7 @@ interface CategoryPreferenceCardProps {
   channelLabels: Record<ChannelType, { label: string; description: string }>;
   onChannelChange: (category: NotificationCategory, channel: ChannelType, enabled: boolean) => void;
   isSaving: boolean;
+  index: number;
 }
 
 function CategoryPreferenceCard({
@@ -71,59 +85,124 @@ function CategoryPreferenceCard({
   channelLabels,
   onChannelChange,
   isSaving,
+  index,
 }: CategoryPreferenceCardProps) {
   const channelOrder: ChannelType[] = ['email', 'inApp', 'push'];
 
   return (
-    <Card className="p-6">
-      <div className="flex items-start gap-4">
-        {/* Category icon */}
-        <div className="flex-shrink-0 w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-          {getCategoryIcon(category)}
-        </div>
-
-        {/* Category info and toggles */}
-        <div className="flex-1">
-          <div className="mb-4">
-            <h4 className="text-base font-semibold text-gray-900 dark:text-white">
-              {categoryLabel.label}
-            </h4>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-              {categoryLabel.description}
-            </p>
+    <motion.div
+      custom={index}
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <Card
+        style={{
+          padding: 'var(--spacing-lg)',
+          background: 'var(--color-card)',
+          borderRadius: 'var(--radius-lg)',
+          border: '1px solid var(--color-border)',
+          boxShadow: 'var(--shadow-sm)',
+          transition: 'all var(--animation-fast) ease',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--spacing-md)' }}>
+          {/* Category icon */}
+          <div
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: 'var(--radius-md)',
+              backgroundColor: 'var(--color-muted)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            {getCategoryIcon(category)}
           </div>
 
-          {/* Channel toggles */}
-          <div className="space-y-3">
-            {channelOrder.map((channel: ChannelType) => (
-              <div
-                key={channel as string}
-                className="flex items-center justify-between py-2 border-t border-gray-100 dark:border-gray-700 first:border-t-0 first:pt-0"
+          {/* Category info and toggles */}
+          <div style={{ flex: 1 }}>
+            <div style={{ marginBottom: 'var(--spacing-md)' }}>
+              <h4
+                style={{
+                  fontFamily: 'var(--font-family-body)',
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  color: 'var(--color-foreground)',
+                  margin: 0,
+                }}
               >
-                <div className="flex items-center gap-3">
-                  {getChannelIcon(channel)}
-                  <div>
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                      {channelLabels[channel].label}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {channelLabels[channel].description}
-                    </p>
+                {categoryLabel.label}
+              </h4>
+              <p
+                style={{
+                  fontFamily: 'var(--font-family-body)',
+                  fontSize: '0.875rem',
+                  color: 'var(--color-muted-foreground)',
+                  margin: 0,
+                  marginTop: '2px',
+                }}
+              >
+                {categoryLabel.description}
+              </p>
+            </div>
+
+            {/* Channel toggles */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+              {channelOrder.map((channel: ChannelType, channelIndex) => (
+                <div
+                  key={channel as string}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: 'var(--spacing-sm) 0',
+                    borderTop: channelIndex > 0 ? '1px solid var(--color-border)' : 'none',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+                    {getChannelIcon(channel)}
+                    <div>
+                      <p
+                        style={{
+                          fontFamily: 'var(--font-family-body)',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                          color: 'var(--color-foreground)',
+                          margin: 0,
+                        }}
+                      >
+                        {channelLabels[channel].label}
+                      </p>
+                      <p
+                        style={{
+                          fontFamily: 'var(--font-family-body)',
+                          fontSize: '0.75rem',
+                          color: 'var(--color-muted-foreground)',
+                          margin: 0,
+                        }}
+                      >
+                        {channelLabels[channel].description}
+                      </p>
+                    </div>
                   </div>
+                  <Switch
+                    checked={channels[channel]}
+                    onCheckedChange={(checked) => onChannelChange(category, channel, checked)}
+                    disabled={isSaving}
+                    size="sm"
+                    aria-label={`${categoryLabel.label} ${channelLabels[channel].label} notifications`}
+                  />
                 </div>
-                <Switch
-                  checked={channels[channel]}
-                  onCheckedChange={(checked) => onChannelChange(category, channel, checked)}
-                  disabled={isSaving}
-                  size="sm"
-                  aria-label={`${categoryLabel.label} ${channelLabels[channel].label} notifications`}
-                />
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+    </motion.div>
   );
 }
 
@@ -162,7 +241,14 @@ export function NotificationsTab() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 'var(--spacing-3xl) 0',
+        }}
+      >
         <Spinner size="lg" />
       </div>
     );
@@ -170,8 +256,16 @@ export function NotificationsTab() {
 
   if (error && !preferences) {
     return (
-      <div className="text-center py-12">
-        <p className="text-red-500 dark:text-red-400 mb-4">{error}</p>
+      <div style={{ textAlign: 'center', padding: 'var(--spacing-3xl) 0' }}>
+        <p
+          style={{
+            color: 'var(--color-destructive)',
+            marginBottom: 'var(--spacing-md)',
+            fontFamily: 'var(--font-family-body)',
+          }}
+        >
+          {error}
+        </p>
         <Button onClick={() => window.location.reload()}>
           Try Again
         </Button>
@@ -180,46 +274,115 @@ export function NotificationsTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--spacing-lg)',
+      }}
+    >
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+        }}
+      >
         <div>
-          <Heading level={3}>Notification Preferences</Heading>
-          <Text color="muted" size="sm">
+          <Heading
+            level={3}
+            style={{
+              fontFamily: 'var(--font-family-display)',
+              color: 'var(--color-foreground)',
+              marginBottom: 'var(--spacing-xs)',
+            }}
+          >
+            Notification Preferences
+          </Heading>
+          <Text
+            color="muted"
+            size="sm"
+            style={{
+              fontFamily: 'var(--font-family-body)',
+            }}
+          >
             Control how and when you receive notifications for different activities
           </Text>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleResetToDefaults}
-          disabled={isSaving}
-          className="flex items-center gap-2"
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          <RotateCcw size={14} />
-          Reset to defaults
-        </Button>
-      </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleResetToDefaults}
+            disabled={isSaving}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--spacing-xs)',
+              fontFamily: 'var(--font-family-body)',
+            }}
+          >
+            <RotateCcw size={14} />
+            Reset to defaults
+          </Button>
+        </motion.div>
+      </motion.div>
 
       {/* Saving indicator */}
       {isSaving && (
-        <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--spacing-sm)',
+            fontSize: '0.875rem',
+            color: 'var(--color-info)',
+            fontFamily: 'var(--font-family-body)',
+          }}
+        >
           <Spinner size="sm" />
           Saving preferences...
-        </div>
+        </motion.div>
       )}
 
       {/* Error message */}
       {error && (
-        <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-        </div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          style={{
+            padding: 'var(--spacing-md)',
+            background: 'color-mix(in srgb, var(--color-destructive) 10%, var(--color-card))',
+            border: '1px solid var(--color-destructive)',
+            borderRadius: 'var(--radius-md)',
+          }}
+        >
+          <p
+            style={{
+              fontSize: '0.875rem',
+              color: 'var(--color-destructive)',
+              margin: 0,
+              fontFamily: 'var(--font-family-body)',
+            }}
+          >
+            {error}
+          </p>
+        </motion.div>
       )}
 
       {/* Category cards */}
       {preferences && (
-        <div className="space-y-4">
-          {categories.map((category) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+          {categories.map((category, index) => (
             <CategoryPreferenceCard
               key={category}
               category={category}
@@ -228,27 +391,58 @@ export function NotificationsTab() {
               channelLabels={channelLabels}
               onChannelChange={handleChannelChange}
               isSaving={isSaving}
+              index={index}
             />
           ))}
         </div>
       )}
 
       {/* Additional info */}
-      <Card className="p-6 bg-gray-50 dark:bg-gray-800/50">
-        <div className="flex items-start gap-3">
-          <Bell size={20} className="text-gray-400 flex-shrink-0 mt-0.5" />
-          <div>
-            <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-              About Notifications
-            </h4>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Email notifications are sent to your primary email address.
-              In-app notifications appear in the notification center.
-              Push notifications are delivered to your registered devices (coming soon).
-            </p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <Card
+          style={{
+            padding: 'var(--spacing-lg)',
+            background: 'var(--color-muted)',
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid var(--color-border)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--spacing-sm)' }}>
+            <Bell size={20} style={{ color: 'var(--color-muted-foreground)', flexShrink: 0, marginTop: '2px' }} />
+            <div>
+              <h4
+                style={{
+                  fontFamily: 'var(--font-family-body)',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  color: 'var(--color-foreground)',
+                  margin: 0,
+                  marginBottom: 'var(--spacing-xs)',
+                }}
+              >
+                About Notifications
+              </h4>
+              <p
+                style={{
+                  fontFamily: 'var(--font-family-body)',
+                  fontSize: '0.875rem',
+                  color: 'var(--color-muted-foreground)',
+                  margin: 0,
+                  lineHeight: 1.5,
+                }}
+              >
+                Email notifications are sent to your primary email address.
+                In-app notifications appear in the notification center.
+                Push notifications are delivered to your registered devices (coming soon).
+              </p>
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      </motion.div>
     </div>
   );
 }

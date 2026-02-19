@@ -2,10 +2,12 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { SettingsHub, Card, Heading, Text, Badge, Spinner } from '@vas-dj-saas/ui';
+import { motion, AnimatePresence } from 'framer-motion';
+import { SettingsHub, Card, Heading, Text, Badge } from '@vas-dj-saas/ui';
 import { navigationConfig } from '@vas-dj-saas/core';
 import { convertToHubConfig } from '@/utils/navigation-helpers';
 import { useBilling } from '@/hooks/useBilling';
+import { CreditCard, RefreshCw } from 'lucide-react';
 import type { HubCardProps } from '@vas-dj-saas/ui';
 
 // Define types locally since they're not exported from UI package
@@ -33,6 +35,42 @@ interface HubConfig {
     summaryMetrics?: SummaryMetric[];
 }
 
+// Animation variants
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.1,
+            delayChildren: 0.05,
+        },
+    },
+} as const;
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.4,
+            ease: [0.16, 1, 0.3, 1] as const,
+        },
+    },
+};
+
+const bannerVariants = {
+    hidden: { opacity: 0, scale: 0.98 },
+    visible: {
+        opacity: 1,
+        scale: 1,
+        transition: {
+            duration: 0.5,
+            ease: [0.16, 1, 0.3, 1] as const,
+        },
+    },
+};
+
 /**
  * Billing Settings Hub Page
  *
@@ -51,7 +89,6 @@ export default function BillingSettingsPage() {
     const router = useRouter();
     const {
         currentSubscription,
-        plans,
         invoices,
         billingOverview,
         isLoading,
@@ -156,48 +193,125 @@ export default function BillingSettingsPage() {
 
     if (!billingConfig || !billingConfig.hubConfig) {
         return (
-            <div className="flex-1 p-6">
-                <p className="text-red-500">
-                    Error: Hub configuration not found for billing settings.
-                    Please check the navigation configuration in packages/core/src/navigation/config/nav-items.ts
-                </p>
-            </div>
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex-1 p-6"
+            >
+                <div
+                    style={{
+                        padding: 'var(--spacing-lg)',
+                        background: 'color-mix(in srgb, var(--color-destructive) 10%, var(--color-card))',
+                        borderRadius: 'var(--radius-lg)',
+                        border: '1px solid var(--color-destructive)',
+                    }}
+                >
+                    <p style={{ color: 'var(--color-destructive)', margin: 0 }}>
+                        Error: Hub configuration not found for billing settings.
+                        Please check the navigation configuration in packages/core/src/navigation/config/nav-items.ts
+                    </p>
+                </div>
+            </motion.div>
         );
     }
 
     // Loading state
     if (isLoading && !currentSubscription) {
         return (
-            <div className="flex-1 p-6">
-                <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-                    <Spinner size="lg" />
-                    <Text color="muted">Loading billing information...</Text>
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex-1"
+                style={{ padding: 'var(--spacing-lg)' }}
+            >
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '400px',
+                        gap: 'var(--spacing-lg)',
+                    }}
+                >
+                    <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    >
+                        <RefreshCw
+                            className="w-8 h-8"
+                            style={{ color: 'var(--color-primary)' }}
+                        />
+                    </motion.div>
+                    <Text color="muted" style={{ fontFamily: 'var(--font-family-body)' }}>
+                        Loading billing information...
+                    </Text>
                 </div>
-            </div>
+            </motion.div>
         );
     }
 
     // Error state
     if (error) {
         return (
-            <div className="flex-1 p-6">
-                <Card>
-                    <div className="p-6 text-center">
-                        <Heading level={4} style={{ marginBottom: '0.5rem' }}>
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex-1"
+                style={{ padding: 'var(--spacing-lg)' }}
+            >
+                <Card
+                    style={{
+                        borderColor: 'var(--color-destructive)',
+                        boxShadow: 'var(--shadow-md)',
+                    }}
+                >
+                    <div
+                        style={{
+                            padding: 'var(--spacing-xl)',
+                            textAlign: 'center',
+                        }}
+                    >
+                        <Heading
+                            level={4}
+                            style={{
+                                marginBottom: 'var(--spacing-sm)',
+                                fontFamily: 'var(--font-family-display)',
+                                color: 'var(--color-foreground)',
+                            }}
+                        >
                             Unable to load billing information
                         </Heading>
-                        <Text color="muted" style={{ marginBottom: '1rem' }}>
+                        <Text
+                            color="muted"
+                            style={{
+                                marginBottom: 'var(--spacing-md)',
+                                fontFamily: 'var(--font-family-body)',
+                            }}
+                        >
                             {error}
                         </Text>
-                        <button
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                             onClick={() => window.location.reload()}
-                            className="text-primary hover:underline"
+                            style={{
+                                padding: 'var(--spacing-sm) var(--spacing-md)',
+                                background: 'var(--color-primary)',
+                                color: 'var(--color-primary-foreground)',
+                                borderRadius: 'var(--radius-md)',
+                                border: 'none',
+                                fontFamily: 'var(--font-family-body)',
+                                fontWeight: 500,
+                                cursor: 'pointer',
+                                transition: 'background var(--animation-fast) ease',
+                            }}
                         >
                             Try again
-                        </button>
+                        </motion.button>
                     </div>
                 </Card>
-            </div>
+            </motion.div>
         );
     }
 
@@ -206,75 +320,213 @@ export default function BillingSettingsPage() {
     }
 
     return (
-        <div className="flex-1">
+        <motion.div
+            className="flex-1"
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+            style={{
+                fontFamily: 'var(--font-family-body)',
+            }}
+        >
             {/* Current Plan Banner */}
-            {currentSubscription && (
-                <Card style={{ marginBottom: '1.5rem' }}>
-                    <div className="p-4 sm:p-6">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                            <div className="flex items-center gap-4">
-                                <div className="flex flex-col">
-                                    <div className="flex items-center gap-2">
-                                        <Heading level={4} style={{ margin: 0 }}>
-                                            {currentSubscription.planName}
-                                        </Heading>
-                                        <Badge
-                                            variant={currentSubscription.isActive ? 'success' : 'warning'}
+            <AnimatePresence mode="wait">
+                {currentSubscription && (
+                    <motion.div
+                        variants={bannerVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit={{ opacity: 0, scale: 0.98 }}
+                    >
+                        <Card
+                            style={{
+                                marginBottom: 'var(--spacing-lg)',
+                                background: 'var(--color-card)',
+                                borderRadius: 'var(--radius-lg)',
+                                boxShadow: 'var(--shadow-sm)',
+                                border: '1px solid var(--color-border)',
+                                overflow: 'hidden',
+                            }}
+                        >
+                            {/* Gradient accent bar */}
+                            <div
+                                style={{
+                                    height: '4px',
+                                    background: 'var(--gradient-primary)',
+                                }}
+                            />
+                            <div style={{ padding: 'var(--spacing-lg)' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: 'var(--spacing-md)',
+                                    }}
+                                    className="sm:flex-row sm:items-center sm:justify-between"
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
+                                        <div
+                                            style={{
+                                                width: '48px',
+                                                height: '48px',
+                                                borderRadius: 'var(--radius-lg)',
+                                                background: 'var(--gradient-primary)',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                            }}
                                         >
-                                            {currentSubscription.statusDisplay}
-                                        </Badge>
+                                            <CreditCard className="w-6 h-6" style={{ color: 'var(--color-primary-foreground)' }} />
+                                        </div>
+                                        <div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+                                                <Heading
+                                                    level={4}
+                                                    style={{
+                                                        margin: 0,
+                                                        fontFamily: 'var(--font-family-display)',
+                                                        color: 'var(--color-foreground)',
+                                                    }}
+                                                >
+                                                    {currentSubscription.planName}
+                                                </Heading>
+                                                <Badge
+                                                    variant={currentSubscription.isActive ? 'success' : 'warning'}
+                                                >
+                                                    {currentSubscription.statusDisplay}
+                                                </Badge>
+                                            </div>
+                                            <Text
+                                                color="muted"
+                                                size="sm"
+                                                style={{
+                                                    marginTop: 'var(--spacing-xs)',
+                                                    fontFamily: 'var(--font-family-body)',
+                                                }}
+                                            >
+                                                {currentSubscription.cancelAtPeriodEnd
+                                                    ? `Cancels on ${new Date(currentSubscription.currentPeriodEnd).toLocaleDateString()}`
+                                                    : `Renews on ${new Date(currentSubscription.currentPeriodEnd).toLocaleDateString()}`
+                                                }
+                                            </Text>
+                                        </div>
                                     </div>
-                                    <Text color="muted" size="sm" style={{ marginTop: '0.25rem' }}>
-                                        {currentSubscription.cancelAtPeriodEnd
-                                            ? `Cancels on ${new Date(currentSubscription.currentPeriodEnd).toLocaleDateString()}`
-                                            : `Renews on ${new Date(currentSubscription.currentPeriodEnd).toLocaleDateString()}`
-                                        }
-                                    </Text>
+                                    <div
+                                        style={{
+                                            textAlign: 'right',
+                                            padding: 'var(--spacing-sm) var(--spacing-md)',
+                                            background: 'var(--color-muted)',
+                                            borderRadius: 'var(--radius-md)',
+                                        }}
+                                    >
+                                        <Text
+                                            color="muted"
+                                            size="sm"
+                                            style={{
+                                                fontFamily: 'var(--font-family-body)',
+                                                marginBottom: '2px',
+                                            }}
+                                        >
+                                            Monthly cost
+                                        </Text>
+                                        <Heading
+                                            level={4}
+                                            style={{
+                                                margin: 0,
+                                                fontFamily: 'var(--font-family-display)',
+                                                color: 'var(--color-primary)',
+                                            }}
+                                        >
+                                            ${currentSubscription.planDetails?.amount || '0.00'}
+                                        </Heading>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4">
-                                <div className="text-right">
-                                    <Text color="muted" size="sm">Monthly cost</Text>
-                                    <Heading level={4} style={{ margin: 0 }}>
-                                        ${currentSubscription.planDetails?.amount || '0.00'}
-                                    </Heading>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </Card>
-            )}
+                        </Card>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* No Subscription Banner */}
-            {!currentSubscription && !isLoading && (
-                <Card style={{ marginBottom: '1.5rem' }}>
-                    <div className="p-4 sm:p-6">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                            <div>
-                                <Heading level={4} style={{ margin: 0, marginBottom: '0.25rem' }}>
-                                    No Active Subscription
-                                </Heading>
-                                <Text color="muted" size="sm">
-                                    Choose a plan to unlock premium features for your organization
-                                </Text>
+            <AnimatePresence mode="wait">
+                {!currentSubscription && !isLoading && (
+                    <motion.div
+                        variants={bannerVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit={{ opacity: 0, scale: 0.98 }}
+                    >
+                        <Card
+                            style={{
+                                marginBottom: 'var(--spacing-lg)',
+                                background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 10%, var(--color-card)) 0%, var(--color-card) 100%)',
+                                borderRadius: 'var(--radius-lg)',
+                                boxShadow: 'var(--shadow-sm)',
+                                border: '1px solid var(--color-accent)',
+                            }}
+                        >
+                            <div style={{ padding: 'var(--spacing-lg)' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: 'var(--spacing-md)',
+                                    }}
+                                    className="sm:flex-row sm:items-center sm:justify-between"
+                                >
+                                    <div>
+                                        <Heading
+                                            level={4}
+                                            style={{
+                                                margin: 0,
+                                                marginBottom: 'var(--spacing-xs)',
+                                                fontFamily: 'var(--font-family-display)',
+                                                color: 'var(--color-foreground)',
+                                            }}
+                                        >
+                                            No Active Subscription
+                                        </Heading>
+                                        <Text
+                                            color="muted"
+                                            size="sm"
+                                            style={{ fontFamily: 'var(--font-family-body)' }}
+                                        >
+                                            Choose a plan to unlock premium features for your organization
+                                        </Text>
+                                    </div>
+                                    <motion.button
+                                        whileHover={{ scale: 1.02, boxShadow: 'var(--shadow-md)' }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => router.push('/settings/billing/subscription')}
+                                        style={{
+                                            padding: 'var(--spacing-sm) var(--spacing-lg)',
+                                            background: 'var(--gradient-accent)',
+                                            color: 'var(--color-accent-foreground)',
+                                            borderRadius: 'var(--radius-md)',
+                                            border: 'none',
+                                            fontFamily: 'var(--font-family-body)',
+                                            fontWeight: 600,
+                                            cursor: 'pointer',
+                                            transition: 'all var(--animation-fast) ease',
+                                        }}
+                                    >
+                                        View Plans
+                                    </motion.button>
+                                </div>
                             </div>
-                            <button
-                                onClick={() => router.push('/settings/billing/subscription')}
-                                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-                            >
-                                View Plans
-                            </button>
-                        </div>
-                    </div>
-                </Card>
-            )}
+                        </Card>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Settings Hub */}
-            <SettingsHub
-                config={dynamicHubConfig}
-                onNavigate={handleNavigate}
-                isLoading={isLoadingPlans || isLoadingInvoices}
-            />
-        </div>
+            <motion.div variants={itemVariants}>
+                <SettingsHub
+                    config={dynamicHubConfig}
+                    onNavigate={handleNavigate}
+                    isLoading={isLoadingPlans || isLoadingInvoices}
+                />
+            </motion.div>
+        </motion.div>
     );
 }

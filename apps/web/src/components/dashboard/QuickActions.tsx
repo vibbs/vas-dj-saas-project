@@ -10,8 +10,7 @@ interface QuickAction {
   description?: string;
   icon: string;
   href: string;
-  iconColor?: string;
-  iconBg?: string;
+  accentColor?: 'primary' | 'success' | 'accent' | 'muted';
 }
 
 const defaultActions: QuickAction[] = [
@@ -21,8 +20,7 @@ const defaultActions: QuickAction[] = [
     description: 'Add someone to your team',
     icon: 'UserPlus',
     href: '/settings/organization?tab=members',
-    iconColor: 'text-blue-600 dark:text-blue-400',
-    iconBg: 'bg-blue-50 dark:bg-blue-900/20',
+    accentColor: 'primary',
   },
   {
     id: 'view-billing',
@@ -30,8 +28,7 @@ const defaultActions: QuickAction[] = [
     description: 'Manage subscription & invoices',
     icon: 'CreditCard',
     href: '/settings/billing',
-    iconColor: 'text-green-600 dark:text-green-400',
-    iconBg: 'bg-green-50 dark:bg-green-900/20',
+    accentColor: 'success',
   },
   {
     id: 'manage-settings',
@@ -39,8 +36,7 @@ const defaultActions: QuickAction[] = [
     description: 'Configure your workspace',
     icon: 'Settings',
     href: '/settings',
-    iconColor: 'text-gray-600 dark:text-gray-400',
-    iconBg: 'bg-gray-50 dark:bg-gray-800/50',
+    accentColor: 'muted',
   },
   {
     id: 'view-docs',
@@ -48,10 +44,31 @@ const defaultActions: QuickAction[] = [
     description: 'Learn how to use features',
     icon: 'BookOpen',
     href: '/docs',
-    iconColor: 'text-purple-600 dark:text-purple-400',
-    iconBg: 'bg-purple-50 dark:bg-purple-900/20',
+    accentColor: 'accent',
   },
 ];
+
+const accentStyles: Record<
+  NonNullable<QuickAction['accentColor']>,
+  { iconColor: string; iconBg: string }
+> = {
+  primary: {
+    iconColor: 'var(--color-primary)',
+    iconBg: 'var(--color-primary)',
+  },
+  success: {
+    iconColor: 'var(--color-success)',
+    iconBg: 'var(--color-success)',
+  },
+  accent: {
+    iconColor: 'var(--color-accent)',
+    iconBg: 'var(--color-accent)',
+  },
+  muted: {
+    iconColor: 'var(--color-muted-foreground)',
+    iconBg: 'var(--color-muted-foreground)',
+  },
+};
 
 interface QuickActionButtonProps {
   action: QuickAction;
@@ -63,26 +80,45 @@ interface QuickActionButtonProps {
  * Single action button with icon and label
  */
 function QuickActionButton({ action, compact = false }: QuickActionButtonProps) {
-  const iconColor = action.iconColor || 'text-blue-600 dark:text-blue-400';
-  const iconBg = action.iconBg || 'bg-blue-50 dark:bg-blue-900/20';
+  const accent = action.accentColor || 'primary';
+  const styles = accentStyles[accent];
 
   if (compact) {
     return (
       <Link
         href={action.href}
-        className="flex flex-col items-center p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
+        className="flex flex-col items-center p-4 rounded-lg transition-all duration-200 group"
+        style={{
+          border: '1px solid var(--color-border)',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--color-secondary)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+          e.currentTarget.style.transform = 'translateY(-2px)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+          e.currentTarget.style.boxShadow = 'none';
+          e.currentTarget.style.transform = 'translateY(0)';
+        }}
       >
         <div
-          className={`w-10 h-10 ${iconBg} rounded-lg flex items-center justify-center mb-2 group-hover:scale-105 transition-transform`}
+          className="w-10 h-10 rounded-full flex items-center justify-center mb-2 group-hover:scale-105 transition-transform"
+          style={{
+            backgroundColor: `color-mix(in srgb, ${styles.iconBg} 10%, transparent)`,
+          }}
         >
           <Icon
             name={action.icon as any}
             size="md"
-            className={iconColor}
+            style={{ color: styles.iconColor }}
             aria-hidden
           />
         </div>
-        <span className="text-sm font-medium text-gray-900 dark:text-gray-100 text-center">
+        <span
+          className="text-sm font-medium text-center"
+          style={{ color: 'var(--color-foreground)' }}
+        >
           {action.label}
         </span>
       </Link>
@@ -92,24 +128,46 @@ function QuickActionButton({ action, compact = false }: QuickActionButtonProps) 
   return (
     <Link
       href={action.href}
-      className="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
+      className="flex items-center p-3 rounded-lg transition-all duration-200 group"
+      style={{
+        border: '1px solid var(--color-border)',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = 'var(--color-secondary)';
+        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+        e.currentTarget.style.transform = 'translateY(-2px)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = 'transparent';
+        e.currentTarget.style.boxShadow = 'none';
+        e.currentTarget.style.transform = 'translateY(0)';
+      }}
     >
       <div
-        className={`w-10 h-10 ${iconBg} rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform`}
+        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform"
+        style={{
+          backgroundColor: `color-mix(in srgb, ${styles.iconBg} 10%, transparent)`,
+        }}
       >
         <Icon
           name={action.icon as any}
           size="md"
-          className={iconColor}
+          style={{ color: styles.iconColor }}
           aria-hidden
         />
       </div>
       <div className="ml-3 min-w-0">
-        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+        <p
+          className="text-sm font-medium"
+          style={{ color: 'var(--color-foreground)' }}
+        >
           {action.label}
         </p>
         {action.description && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+          <p
+            className="text-xs truncate"
+            style={{ color: 'var(--color-muted-foreground)' }}
+          >
             {action.description}
           </p>
         )}
@@ -117,7 +175,8 @@ function QuickActionButton({ action, compact = false }: QuickActionButtonProps) 
       <Icon
         name="ChevronRight"
         size="sm"
-        className="ml-auto text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity"
+        style={{ color: 'var(--color-muted-foreground)' }}
         aria-hidden
       />
     </Link>
@@ -145,7 +204,10 @@ export function QuickActions({
     <Card variant="default" className="h-full">
       <div className="p-5">
         {/* Header */}
-        <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-4">
+        <h3
+          className="text-base font-semibold mb-4"
+          style={{ color: 'var(--color-foreground)' }}
+        >
           Quick Actions
         </h3>
 
@@ -161,7 +223,7 @@ export function QuickActions({
             ))}
           </div>
         ) : (
-          <div className="space-y-1">
+          <div className="space-y-2">
             {actions.map((action) => (
               <QuickActionButton key={action.id} action={action} />
             ))}

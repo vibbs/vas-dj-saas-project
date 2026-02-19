@@ -10,21 +10,29 @@ import type { TeamOverview as TeamOverviewData, RoleBreakdown, RecentMember } fr
  * Visual breakdown of roles
  */
 function RoleBar({ roles }: { roles: RoleBreakdown[] }) {
-  const colors: Record<string, string> = {
-    Admin: 'bg-purple-500',
-    Member: 'bg-blue-500',
-    Viewer: 'bg-gray-400',
+  const colors: Record<string, React.CSSProperties> = {
+    Admin: { backgroundColor: 'var(--color-accent)' },
+    Member: { backgroundColor: 'var(--color-primary)' },
+    Viewer: { backgroundColor: 'var(--color-muted-foreground)' },
   };
+
+  const defaultColor: React.CSSProperties = { backgroundColor: 'var(--color-muted-foreground)' };
 
   return (
     <div className="space-y-2">
       {/* Stacked bar */}
-      <div className="h-2 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden flex">
+      <div
+        className="h-2 w-full rounded-full overflow-hidden flex"
+        style={{ backgroundColor: 'var(--color-muted)' }}
+      >
         {roles.map((role) => (
           <div
             key={role.role}
-            className={`${colors[role.role] || 'bg-gray-400'} transition-all duration-300`}
-            style={{ width: `${role.percentage}%` }}
+            className="transition-all duration-300"
+            style={{
+              width: `${role.percentage}%`,
+              ...(colors[role.role] || defaultColor)
+            }}
             title={`${role.role}: ${role.count} (${role.percentage}%)`}
           />
         ))}
@@ -35,11 +43,18 @@ function RoleBar({ roles }: { roles: RoleBreakdown[] }) {
         {roles.map((role) => (
           <div key={role.role} className="flex items-center space-x-1.5">
             <div
-              className={`w-2.5 h-2.5 rounded-full ${colors[role.role] || 'bg-gray-400'}`}
+              className="w-2.5 h-2.5 rounded-full"
+              style={colors[role.role] || defaultColor}
             />
-            <span className="text-xs text-gray-600 dark:text-gray-400">
+            <span
+              className="text-xs"
+              style={{ color: 'var(--color-muted-foreground)' }}
+            >
               {role.role}:{' '}
-              <span className="font-medium text-gray-900 dark:text-gray-100">
+              <span
+                className="font-medium"
+                style={{ color: 'var(--color-foreground)' }}
+              >
                 {role.count}
               </span>
             </span>
@@ -108,12 +123,16 @@ export function TeamOverview({
       <div className="p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+          <h3
+            className="text-base font-semibold"
+            style={{ color: 'var(--color-foreground)' }}
+          >
             Team Overview
           </h3>
           <Link
             href={teamHref}
-            className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+            className="text-sm font-medium transition-colors hover:opacity-80"
+            style={{ color: 'var(--color-primary)' }}
           >
             Manage team
           </Link>
@@ -126,10 +145,14 @@ export function TeamOverview({
             <Icon
               name="Users"
               size="lg"
-              className="mx-auto text-gray-400 dark:text-gray-500 mb-2"
+              className="mx-auto mb-2"
+              style={{ color: 'var(--color-muted-foreground)' }}
               aria-hidden
             />
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p
+              className="text-sm"
+              style={{ color: 'var(--color-muted-foreground)' }}
+            >
               No team data available
             </p>
           </div>
@@ -138,10 +161,16 @@ export function TeamOverview({
             {/* Total members and pending invites */}
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p
+                  className="text-sm"
+                  style={{ color: 'var(--color-muted-foreground)' }}
+                >
                   Total Members
                 </p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">
+                <p
+                  className="text-3xl font-bold mt-1"
+                  style={{ color: 'var(--color-foreground)' }}
+                >
                   {data.totalMembers}
                 </p>
               </div>
@@ -155,7 +184,10 @@ export function TeamOverview({
             {/* Role breakdown */}
             {data.roleBreakdown.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+                <p
+                  className="text-xs font-medium uppercase tracking-wide mb-2"
+                  style={{ color: 'var(--color-muted-foreground)' }}
+                >
                   By Role
                 </p>
                 <RoleBar roles={data.roleBreakdown} />
@@ -165,7 +197,10 @@ export function TeamOverview({
             {/* Recent members */}
             {data.recentMembers.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+                <p
+                  className="text-xs font-medium uppercase tracking-wide mb-2"
+                  style={{ color: 'var(--color-muted-foreground)' }}
+                >
                   Recently Joined
                 </p>
                 <div className="flex items-center">
@@ -176,19 +211,26 @@ export function TeamOverview({
                         name={member.name}
                         src={member.avatar}
                         size="sm"
-                        className="ring-2 ring-white dark:ring-gray-900"
+                        className="ring-2"
+                        style={{ ['--tw-ring-color' as string]: 'var(--color-card)' }}
                         title={member.name}
                       />
                     ))}
                   </div>
                   {data.recentMembers.length > 5 && (
-                    <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                    <span
+                      className="ml-2 text-xs"
+                      style={{ color: 'var(--color-muted-foreground)' }}
+                    >
                       +{data.recentMembers.length - 5} more
                     </span>
                   )}
                 </div>
                 {/* Recent member names */}
-                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                <p
+                  className="mt-2 text-xs"
+                  style={{ color: 'var(--color-muted-foreground)' }}
+                >
                   {data.recentMembers
                     .slice(0, 3)
                     .map((m: RecentMember) => m.name.split(' ')[0])
@@ -201,7 +243,11 @@ export function TeamOverview({
             {/* Invite CTA */}
             <Link
               href="/settings/organization?tab=members"
-              className="flex items-center justify-center w-full py-2.5 px-4 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:border-blue-300 dark:hover:border-blue-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
+              className="flex items-center justify-center w-full py-2.5 px-4 border-2 border-dashed rounded-lg text-sm font-medium transition-colors group hover:opacity-80"
+              style={{
+                borderColor: 'var(--color-border)',
+                color: 'var(--color-muted-foreground)'
+              }}
             >
               <Icon
                 name="UserPlus"
