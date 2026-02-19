@@ -18,12 +18,7 @@ export default function DashboardScreen() {
 
   // Derived state from account
   const user = account;
-  const organization = account?.organization || null;
-  const isOnTrial = organization?.onTrial || false;
-  const trialDaysRemaining = organization?.trialEndsOn
-    ? Math.ceil((new Date(organization.trialEndsOn).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-    : null;
-  const hasAdminRole = account?.role === 'admin' || account?.role === 'owner';
+  const hasAdminRole = account?.role === 'ADMIN';
   const isEmailVerified = account?.isEmailVerified ?? false;
 
   // Redirect to landing page if unauthenticated
@@ -71,13 +66,13 @@ export default function DashboardScreen() {
       marginBottom: theme.spacing.lg,
     },
     emailNotice: {
-      backgroundColor: '#FEF3C7',
-      borderColor: '#F59E0B',
+      backgroundColor: theme.colors.accentMuted,
+      borderColor: theme.colors.warning,
       borderWidth: 1,
     },
     trialNotice: {
-      backgroundColor: '#EBF8FF',
-      borderColor: '#3B82F6',
+      backgroundColor: theme.colors.primaryMuted,
+      borderColor: theme.colors.info,
       borderWidth: 1,
     },
     noticeText: {
@@ -86,10 +81,10 @@ export default function DashboardScreen() {
       flexWrap: 'wrap',
     },
     emailNoticeText: {
-      color: '#92400E',
+      color: theme.colors.accentForeground === '#FFFFFF' ? theme.colors.accent : theme.colors.accentForeground,
     },
     trialNoticeText: {
-      color: '#1E40AF',
+      color: theme.colors.primaryForeground === '#FFFFFF' ? theme.colors.primary : theme.colors.primaryForeground,
     },
     cardsGrid: {
       gap: theme.spacing.lg,
@@ -160,23 +155,12 @@ export default function DashboardScreen() {
               <Button
                 variant="ghost"
                 size="sm"
-                onPress={() => router.push('/auth/verify-email' as any)}
+                onPress={() => {
+                  // TODO: Implement verify-email route when available
+                  console.log('Navigate to Verify Email');
+                }}
               >
                 Verify Email
-              </Button>
-            </View>
-          </Card>
-        )}
-
-        {/* Trial notice */}
-        {isOnTrial && trialDaysRemaining !== null && (
-          <Card style={[styles.noticeCard, styles.trialNotice]}>
-            <View style={styles.noticeText}>
-              <Text style={styles.trialNoticeText}>
-                You&apos;re on a free trial! {trialDaysRemaining} days remaining.{' '}
-              </Text>
-              <Button variant="ghost" size="sm">
-                Upgrade Now
               </Button>
             </View>
           </Card>
@@ -199,41 +183,14 @@ export default function DashboardScreen() {
               <Text style={styles.value}>{user.role}</Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.label}>Status:</Text>
-              <Text style={styles.value}>{user.status}</Text>
+              <Text style={styles.label}>Active:</Text>
+              <Text style={styles.value}>{user.isActive ? 'Yes' : 'No'}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.label}>Admin:</Text>
               <Text style={styles.value}>{hasAdminRole ? 'Yes' : 'No'}</Text>
             </View>
           </Card>
-
-          {/* Organization Info */}
-          {organization && (
-            <Card style={styles.card}>
-              <Text style={styles.cardTitle}>Organization</Text>
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>Name:</Text>
-                <Text style={styles.value}>{organization.name}</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>Subdomain:</Text>
-                <Text style={styles.value}>{organization.subdomain}.vas-dj.com</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>Trial:</Text>
-                <Text style={styles.value}>{organization.onTrial ? 'Yes' : 'No'}</Text>
-              </View>
-              {organization.trialEndsOn && (
-                <View style={styles.infoRow}>
-                  <Text style={styles.label}>Trial Ends:</Text>
-                  <Text style={styles.value}>
-                    {new Date(organization.trialEndsOn).toLocaleDateString()}
-                  </Text>
-                </View>
-              )}
-            </Card>
-          )}
 
           {/* Quick Actions */}
           <Card style={styles.card}>
@@ -242,22 +199,26 @@ export default function DashboardScreen() {
               {!isEmailVerified && (
                 <Button
                   variant="primary"
-                  onPress={() => router.push('/auth/verify-email' as any)}
+                  onPress={() => {
+                    // TODO: Implement verify-email route when available
+                    console.log('Navigate to Verify Email');
+                  }}
                 >
                   Verify Email
                 </Button>
               )}
-              <Button variant="outline">
+              <Button
+                variant="outline"
+                onPress={() => console.log('Navigate to Account Settings')}
+              >
                 Account Settings
               </Button>
               {hasAdminRole && (
-                <Button variant="outline">
+                <Button
+                  variant="outline"
+                  onPress={() => console.log('Navigate to Organization Settings')}
+                >
                   Organization Settings
-                </Button>
-              )}
-              {isOnTrial && (
-                <Button variant="primary">
-                  Upgrade to Pro
                 </Button>
               )}
             </View>

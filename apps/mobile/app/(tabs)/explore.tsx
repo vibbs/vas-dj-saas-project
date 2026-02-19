@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
 import { Platform, StyleSheet } from 'react-native';
+import { useTheme } from '@vas-dj-saas/ui';
 
 import { Collapsible } from '@/components/Collapsible';
 import { ExternalLink } from '@/components/ExternalLink';
@@ -9,15 +10,17 @@ import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 
 export default function TabTwoScreen() {
+  const { theme } = useTheme();
+
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+      headerBackgroundColor={{ light: theme.colors.muted, dark: theme.colors.secondary }}
       headerImage={
         <IconSymbol
           size={310}
-          color="#808080"
+          color={theme.colors.mutedForeground}
           name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
+          style={[styles.headerImage, { color: theme.colors.mutedForeground }]}
         />
       }>
       <ThemedView style={styles.titleContainer}>
@@ -98,7 +101,6 @@ export default function TabTwoScreen() {
 
 const styles = StyleSheet.create({
   headerImage: {
-    color: '#808080',
     bottom: -90,
     left: -35,
     position: 'absolute',

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LoginForm, useAuthActions, useAuthStatus } from '@vas-dj-saas/auth';
 import type { LoginCredentials } from '@vas-dj-saas/api-client';
-import { Card, Text, Heading, useTheme } from '@vas-dj-saas/ui';
+import { Text, Heading, useTheme } from '@vas-dj-saas/ui';
 import { StatusBar } from 'expo-status-bar';
 
 /**
@@ -20,12 +20,34 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    // Animation value for subtle card entrance
+    const fadeAnim = React.useRef(new Animated.Value(0)).current;
+    const slideAnim = React.useRef(new Animated.Value(20)).current;
+
     // Redirect authenticated users to main app
     useEffect(() => {
         if (authStatus === 'authenticated') {
             router.replace('/(tabs)');
         }
     }, [authStatus, router]);
+
+    // Entrance animation
+    useEffect(() => {
+        if (authStatus === 'unauthenticated') {
+            Animated.parallel([
+                Animated.timing(fadeAnim, {
+                    toValue: 1,
+                    duration: 400,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(slideAnim, {
+                    toValue: 0,
+                    duration: 400,
+                    useNativeDriver: true,
+                }),
+            ]).start();
+        }
+    }, [authStatus, fadeAnim, slideAnim]);
 
     const handleSubmit = async (credentials: LoginCredentials) => {
         setIsLoading(true);
@@ -76,6 +98,33 @@ export default function LoginPage() {
             maxWidth: 400,
             alignSelf: 'center',
         },
+        cardWrapper: {
+            backgroundColor: theme.colors.card,
+            borderRadius: theme.borders.radius.lg,
+            padding: theme.spacing.xl,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+            // Shadow for iOS
+            shadowColor: theme.colors.foreground,
+            shadowOffset: {
+                width: 0,
+                height: 10,
+            },
+            shadowOpacity: 0.1,
+            shadowRadius: 25,
+            // Shadow for Android
+            elevation: 10,
+        },
+        logoContainer: {
+            alignItems: 'center',
+            marginBottom: theme.spacing.xl,
+        },
+        logoText: {
+            fontSize: 32,
+            fontWeight: '700',
+            color: theme.colors.primary,
+            letterSpacing: -0.5,
+        },
         header: {
             marginBottom: theme.spacing.xl,
             alignItems: 'center',
@@ -83,34 +132,64 @@ export default function LoginPage() {
         title: {
             marginBottom: theme.spacing.sm,
             textAlign: 'center',
+            color: theme.colors.foreground,
         },
         subtitle: {
             textAlign: 'center',
             color: theme.colors.mutedForeground,
+            fontSize: theme.typography.fontSize.base,
+            lineHeight: 24,
         },
         infoBox: {
             padding: theme.spacing.md,
-            backgroundColor: theme.colors.muted,
+            backgroundColor: theme.colors.primaryMuted,
             borderRadius: theme.borders.radius.md,
             marginBottom: theme.spacing.lg,
+            borderWidth: 1,
+            borderColor: theme.colors.primary + '20', // 20% opacity
         },
         infoText: {
             fontSize: theme.typography.fontSize.sm,
-            color: theme.colors.mutedForeground,
+            color: theme.colors.primary,
             textAlign: 'center',
+            lineHeight: 20,
         },
         loadingContainer: {
             flex: 1,
             justifyContent: 'center',
             alignItems: 'center',
+            backgroundColor: theme.colors.background,
+        },
+        loadingText: {
+            color: theme.colors.mutedForeground,
+            fontSize: theme.typography.fontSize.base,
+        },
+        spinnerContainer: {
+            width: 48,
+            height: 48,
+            borderRadius: theme.borders.radius.full,
+            backgroundColor: theme.colors.primaryMuted,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: theme.spacing.md,
+        },
+        spinnerDot: {
+            width: 8,
+            height: 8,
+            borderRadius: 4,
+            backgroundColor: theme.colors.primary,
         },
     });
 
     // Show loading while checking auth status
     if (authStatus === 'authenticating' || authStatus === 'authenticated') {
         return (
-            <View style={[styles.container, styles.loadingContainer]}>
-                <Text style={{ color: theme.colors.mutedForeground }}>Loading...</Text>
+            <View style={styles.loadingContainer}>
+                <StatusBar style="auto" />
+                <View style={styles.spinnerContainer}>
+                    <View style={styles.spinnerDot} />
+                </View>
+                <Text style={styles.loadingText}>Loading...</Text>
             </View>
         );
     }
@@ -125,18 +204,33 @@ export default function LoginPage() {
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
                 keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
             >
-                <View style={styles.cardContainer}>
-                    <View style={styles.header}>
-                        <Heading level={1} style={styles.title}>
-                            Welcome Back
-                        </Heading>
-                        <Text style={styles.subtitle}>
-                            Sign in to your account to continue
-                        </Text>
-                    </View>
+                <Animated.View
+                    style={[
+                        styles.cardContainer,
+                        {
+                            opacity: fadeAnim,
+                            transform: [{ translateY: slideAnim }],
+                        },
+                    ]}
+                >
+                    <View style={styles.cardWrapper}>
+                        {/* Logo */}
+                        <View style={styles.logoContainer}>
+                            <Text style={styles.logoText}>VAS-DJ</Text>
+                        </View>
 
-                    <Card>
+                        {/* Header */}
+                        <View style={styles.header}>
+                            <Heading level={1} style={styles.title}>
+                                Welcome Back
+                            </Heading>
+                            <Text style={styles.subtitle}>
+                                Sign in to your account to continue
+                            </Text>
+                        </View>
+
                         {/* Info Message for Mobile Users */}
                         <View style={styles.infoBox}>
                             <Text style={styles.infoText}>
@@ -152,8 +246,8 @@ export default function LoginPage() {
                             showRememberMe={true}
                             showForgotPassword={false}
                         />
-                    </Card>
-                </View>
+                    </View>
+                </Animated.View>
             </ScrollView>
         </KeyboardAvoidingView>
     );
