@@ -1,16 +1,12 @@
 """
-ASGI config for config project.
+ASGI config for the project.
 
-It exposes the ASGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
+Supports both HTTP and WebSocket protocols via Django Channels.
 """
 
 import os
 
 import django
-from django.core.asgi import get_asgi_application
 
 if os.environ.get("APP_ENV") == "prod":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
@@ -19,4 +15,18 @@ else:
 
 django.setup()
 
-application = get_asgi_application()
+from channels.routing import ProtocolTypeRouter, URLRouter  # noqa: E402
+from channels.security.websocket import AllowedHostsOriginValidator  # noqa: E402
+from django.core.asgi import get_asgi_application  # noqa: E402
+
+from apps.notifications.middleware import JWTAuthMiddleware  # noqa: E402
+from apps.notifications.routing import websocket_urlpatterns  # noqa: E402
+
+application = ProtocolTypeRouter(
+    {
+        "http": get_asgi_application(),
+        "websocket": AllowedHostsOriginValidator(
+            JWTAuthMiddleware(URLRouter(websocket_urlpatterns))
+        ),
+    }
+)

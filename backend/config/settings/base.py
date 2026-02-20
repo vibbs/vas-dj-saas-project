@@ -78,6 +78,8 @@ INSTALLED_APPS += [
     "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "djangorestframework_camel_case",
+    "daphne",
+    "channels",
     # Local apps
     "apps.core",
     "apps.organizations",
@@ -148,6 +150,21 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
+
+# Django Channels
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [config("REDIS_URL", default="redis://localhost:6379/0")],
+        },
+    }
+    if not config("USE_IN_MEMORY_CHANNEL_LAYER", default=True, cast=bool)
+    else {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+}
 
 
 # Database
@@ -457,6 +474,12 @@ GLOBAL_SCOPE_ORG_SLUG = config("GLOBAL_SCOPE_ORG_SLUG", default="platform")
 
 # Optional: Custom name for the global organization
 GLOBAL_SCOPE_ORG_NAME = config("GLOBAL_SCOPE_ORG_NAME", default="Platform")
+
+# OAuth Provider Settings
+GOOGLE_OAUTH_CLIENT_ID = config("GOOGLE_OAUTH_CLIENT_ID", default="")
+GOOGLE_OAUTH_CLIENT_SECRET = config("GOOGLE_OAUTH_CLIENT_SECRET", default="")
+GITHUB_OAUTH_CLIENT_ID = config("GITHUB_OAUTH_CLIENT_ID", default="")
+GITHUB_OAUTH_CLIENT_SECRET = config("GITHUB_OAUTH_CLIENT_SECRET", default="")
 
 # Initialize OpenTelemetry instrumentation if observability is enabled
 if OBSERVABILITY_ENABLED:

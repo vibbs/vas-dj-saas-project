@@ -1,8 +1,12 @@
-import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useAuthStatus, useAuthAccount, useAuthActions } from '@vas-dj-saas/auth';
-import { Button, Card, Text, useTheme } from '@vas-dj-saas/ui';
+import React, { useEffect, useRef } from "react";
+import { View, StyleSheet, ScrollView } from "react-native";
+import { useRouter } from "expo-router";
+import {
+  useAuthStatus,
+  useAuthAccount,
+  useAuthActions,
+} from "@vas-dj-saas/auth";
+import { Button, Card, Text, useTheme } from "@vas-dj-saas/ui";
 
 export default function DashboardScreen() {
   const router = useRouter();
@@ -18,7 +22,7 @@ export default function DashboardScreen() {
 
   // Derived state from account
   const user = account;
-  const hasAdminRole = account?.role === 'ADMIN';
+  const hasAdminRole = account?.role === "ADMIN";
   const isEmailVerified = account?.isEmailVerified ?? false;
 
   // Redirect to landing page if unauthenticated
@@ -27,97 +31,107 @@ export default function DashboardScreen() {
     // Only proceed if we have a definitive unauthenticated status
     // 'idle' means auth is still being checked (hydration in progress)
     // 'authenticating' means login is in progress
-    if (authStatus === 'unauthenticated' && !hasNavigated.current) {
+    if (authStatus === "unauthenticated" && !hasNavigated.current) {
       hasNavigated.current = true;
-      router.replace('/');
+      router.replace("/");
     }
   }, [authStatus, router]);
 
   const handleLogout = async () => {
     await logout();
-    router.replace('/');
+    router.replace("/");
   };
 
-  const styles = React.useMemo(() => StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    loading: {
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    scrollContent: {
-      padding: theme.spacing.lg,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: theme.spacing.xl,
-    },
-    title: {
-      fontSize: theme.typography.fontSize['2xl'],
-      fontWeight: 'bold',
-      color: theme.colors.foreground,
-    },
-    noticeCard: {
-      padding: theme.spacing.md,
-      marginBottom: theme.spacing.lg,
-    },
-    emailNotice: {
-      backgroundColor: theme.colors.accentMuted,
-      borderColor: theme.colors.warning,
-      borderWidth: 1,
-    },
-    trialNotice: {
-      backgroundColor: theme.colors.primaryMuted,
-      borderColor: theme.colors.info,
-      borderWidth: 1,
-    },
-    noticeText: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flexWrap: 'wrap',
-    },
-    emailNoticeText: {
-      color: theme.colors.accentForeground === '#FFFFFF' ? theme.colors.accent : theme.colors.accentForeground,
-    },
-    trialNoticeText: {
-      color: theme.colors.primaryForeground === '#FFFFFF' ? theme.colors.primary : theme.colors.primaryForeground,
-    },
-    cardsGrid: {
-      gap: theme.spacing.lg,
-    },
-    card: {
-      padding: theme.spacing.lg,
-    },
-    cardTitle: {
-      fontSize: theme.typography.fontSize.lg,
-      fontWeight: '600',
-      color: theme.colors.foreground,
-      marginBottom: theme.spacing.md,
-    },
-    infoRow: {
-      flexDirection: 'row',
-      marginBottom: theme.spacing.sm,
-    },
-    label: {
-      fontWeight: '600',
-      minWidth: 80,
-    },
-    value: {
-      flex: 1,
-      color: theme.colors.mutedForeground,
-    },
-    actionsContainer: {
-      gap: theme.spacing.sm,
-    },
-  }), [theme]);
+  const styles = React.useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flex: 1,
+          backgroundColor: theme.colors.background,
+        },
+        loading: {
+          justifyContent: "center",
+          alignItems: "center",
+        },
+        scrollContent: {
+          padding: theme.spacing.lg,
+        },
+        header: {
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: theme.spacing.xl,
+        },
+        title: {
+          fontSize: theme.typography.fontSize["2xl"],
+          fontWeight: "bold",
+          color: theme.colors.foreground,
+        },
+        noticeCard: {
+          padding: theme.spacing.md,
+          marginBottom: theme.spacing.lg,
+        },
+        emailNotice: {
+          backgroundColor: theme.colors.accentMuted,
+          borderColor: theme.colors.warning,
+          borderWidth: 1,
+        },
+        trialNotice: {
+          backgroundColor: theme.colors.primaryMuted,
+          borderColor: theme.colors.info,
+          borderWidth: 1,
+        },
+        noticeText: {
+          flexDirection: "row",
+          alignItems: "center",
+          flexWrap: "wrap",
+        },
+        emailNoticeText: {
+          color:
+            theme.colors.accentForeground === "#FFFFFF"
+              ? theme.colors.accent
+              : theme.colors.accentForeground,
+        },
+        trialNoticeText: {
+          color:
+            theme.colors.primaryForeground === "#FFFFFF"
+              ? theme.colors.primary
+              : theme.colors.primaryForeground,
+        },
+        cardsGrid: {
+          gap: theme.spacing.lg,
+        },
+        card: {
+          padding: theme.spacing.lg,
+        },
+        cardTitle: {
+          fontSize: theme.typography.fontSize.lg,
+          fontWeight: "600",
+          color: theme.colors.foreground,
+          marginBottom: theme.spacing.md,
+        },
+        infoRow: {
+          flexDirection: "row",
+          marginBottom: theme.spacing.sm,
+        },
+        label: {
+          fontWeight: "600",
+          minWidth: 80,
+        },
+        value: {
+          flex: 1,
+          color: theme.colors.mutedForeground,
+        },
+        actionsContainer: {
+          gap: theme.spacing.sm,
+        },
+      }),
+    [theme],
+  );
 
   // Show loading while auth is being hydrated or checked
   // This prevents the infinite loop by not rendering the dashboard until auth is determined
-  if (authStatus === 'idle' || authStatus === 'authenticating') {
+  if (authStatus === "idle" || authStatus === "authenticating") {
     return (
       <View style={[styles.container, styles.loading]}>
         <Text>Loading...</Text>
@@ -127,7 +141,7 @@ export default function DashboardScreen() {
 
   // If not authenticated, show loading while redirect happens
   // The useEffect above handles the actual navigation
-  if (authStatus !== 'authenticated' || !user) {
+  if (authStatus !== "authenticated" || !user) {
     return (
       <View style={[styles.container, styles.loading]}>
         <Text>Redirecting...</Text>
@@ -150,12 +164,12 @@ export default function DashboardScreen() {
           <Card style={[styles.noticeCard, styles.emailNotice]}>
             <View style={styles.noticeText}>
               <Text style={styles.emailNoticeText}>
-                Please verify your email address to access all features.{' '}
+                Please verify your email address to access all features.{" "}
               </Text>
               <Button
                 variant="ghost"
                 size="sm"
-                onPress={() => router.push('/auth/verify-email')}
+                onPress={() => router.push("/auth/verify-email" as any)}
               >
                 Verify Email
               </Button>
@@ -181,11 +195,11 @@ export default function DashboardScreen() {
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.label}>Active:</Text>
-              <Text style={styles.value}>{user.isActive ? 'Yes' : 'No'}</Text>
+              <Text style={styles.value}>{user.isActive ? "Yes" : "No"}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.label}>Admin:</Text>
-              <Text style={styles.value}>{hasAdminRole ? 'Yes' : 'No'}</Text>
+              <Text style={styles.value}>{hasAdminRole ? "Yes" : "No"}</Text>
             </View>
           </Card>
 
@@ -196,20 +210,20 @@ export default function DashboardScreen() {
               {!isEmailVerified && (
                 <Button
                   variant="primary"
-                  onPress={() => router.push('/auth/verify-email')}
+                  onPress={() => router.push("/auth/verify-email" as any)}
                 >
                   Verify Email
                 </Button>
               )}
               <Button
                 variant="outline"
-                onPress={() => router.push('/(tabs)/settings')}
+                onPress={() => router.push("/(tabs)/settings" as any)}
               >
                 Account Settings
               </Button>
               <Button
                 variant="outline"
-                onPress={() => router.push('/(tabs)/notifications')}
+                onPress={() => router.push("/(tabs)/notifications" as any)}
               >
                 Notifications
               </Button>

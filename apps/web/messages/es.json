@@ -1,0 +1,143 @@
+{
+  "common": {
+    "appName": "VAS-DJ SaaS",
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "submit": "Enviar",
+    "confirm": "Confirmar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "noResults": "No se encontraron resultados",
+    "error": "Algo salió mal",
+    "success": "Éxito",
+    "retry": "Intentar de nuevo"
+  },
+  "auth": {
+    "login": {
+      "title": "Bienvenido de nuevo",
+      "subtitle": "Inicia sesión en tu cuenta",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "rememberMe": "Recordarme",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "submit": "Iniciar sesión",
+      "noAccount": "¿No tienes una cuenta?",
+      "register": "Crear una cuenta",
+      "orContinueWith": "O continúa con",
+      "google": "Continuar con Google",
+      "github": "Continuar con GitHub"
+    },
+    "register": {
+      "title": "Crea tu cuenta",
+      "subtitle": "Comienza con una prueba gratuita",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "password": "Contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "organizationName": "Nombre de la organización",
+      "subdomain": "Subdominio preferido",
+      "submit": "Crear cuenta",
+      "hasAccount": "¿Ya tienes una cuenta?",
+      "login": "Iniciar sesión"
+    },
+    "forgotPassword": {
+      "title": "Restablecer contraseña",
+      "subtitle": "Te enviaremos un enlace para restablecer tu contraseña",
+      "email": "Correo electrónico",
+      "submit": "Enviar enlace",
+      "backToLogin": "Volver a iniciar sesión",
+      "sent": "Si existe una cuenta con este correo, hemos enviado un enlace."
+    },
+    "resetPassword": {
+      "title": "Nueva contraseña",
+      "newPassword": "Nueva contraseña",
+      "confirmPassword": "Confirmar nueva contraseña",
+      "submit": "Restablecer contraseña",
+      "success": "Contraseña restablecida. Ya puedes iniciar sesión."
+    },
+    "verifyEmail": {
+      "title": "Verifica tu correo",
+      "subtitle": "Hemos enviado un enlace de verificación a tu correo",
+      "resend": "Reenviar correo de verificación",
+      "success": "¡Correo verificado exitosamente!"
+    },
+    "logout": "Cerrar sesión"
+  },
+  "nav": {
+    "home": "Inicio",
+    "settings": "Configuración",
+    "billing": "Facturación",
+    "team": "Equipo",
+    "notifications": "Notificaciones",
+    "apiKeys": "Claves API",
+    "developer": "Desarrollador"
+  },
+  "dashboard": {
+    "welcome": "Bienvenido, {name}",
+    "stats": {
+      "title": "Resumen",
+      "totalUsers": "Usuarios totales",
+      "activeUsers": "Usuarios activos",
+      "revenue": "Ingresos",
+      "apiCalls": "Llamadas API"
+    },
+    "activity": {
+      "title": "Actividad reciente"
+    },
+    "quickActions": {
+      "title": "Acciones rápidas"
+    }
+  },
+  "settings": {
+    "title": "Configuración",
+    "profile": {
+      "title": "Perfil",
+      "subtitle": "Gestiona tu información personal"
+    },
+    "security": {
+      "title": "Seguridad",
+      "subtitle": "Gestiona tus preferencias de seguridad",
+      "mfa": {
+        "title": "Autenticación de dos factores",
+        "enable": "Activar 2FA",
+        "disable": "Desactivar 2FA",
+        "enabled": "2FA está activado",
+        "disabled": "2FA no está activado"
+      }
+    },
+    "notifications": {
+      "title": "Notificaciones",
+      "subtitle": "Gestiona las preferencias de notificación"
+    },
+    "organization": {
+      "title": "Organización",
+      "subtitle": "Gestiona la configuración de tu organización"
+    },
+    "billing": {
+      "title": "Facturación",
+      "subtitle": "Gestiona tu suscripción y métodos de pago"
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "Página no encontrada",
+      "description": "La página que buscas no existe.",
+      "goHome": "Ir al inicio"
+    },
+    "generic": {
+      "title": "Algo salió mal",
+      "description": "Ocurrió un error inesperado.",
+      "tryAgain": "Intentar de nuevo"
+    },
+    "unauthorized": "Necesitas iniciar sesión para acceder a esta página",
+    "forbidden": "No tienes permiso para acceder a este recurso"
+  }
+}

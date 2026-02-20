@@ -1,0 +1,143 @@
+{
+  "common": {
+    "appName": "VAS-DJ SaaS",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "confirm": "Confirm",
+    "search": "Search",
+    "filter": "Filter",
+    "noResults": "No results found",
+    "error": "Something went wrong",
+    "success": "Success",
+    "retry": "Try again"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to your account",
+      "email": "Email address",
+      "password": "Password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "noAccount": "Don't have an account?",
+      "register": "Create an account",
+      "orContinueWith": "Or continue with",
+      "google": "Continue with Google",
+      "github": "Continue with GitHub"
+    },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Get started with a free trial",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email address",
+      "phone": "Phone number",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "organizationName": "Organization name",
+      "subdomain": "Preferred subdomain",
+      "submit": "Create account",
+      "hasAccount": "Already have an account?",
+      "login": "Sign in"
+    },
+    "forgotPassword": {
+      "title": "Reset your password",
+      "subtitle": "We'll send you a link to reset your password",
+      "email": "Email address",
+      "submit": "Send reset link",
+      "backToLogin": "Back to sign in",
+      "sent": "If an account exists with this email, we've sent a reset link."
+    },
+    "resetPassword": {
+      "title": "Set new password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "submit": "Reset password",
+      "success": "Password reset successfully. You can now sign in."
+    },
+    "verifyEmail": {
+      "title": "Verify your email",
+      "subtitle": "We've sent a verification link to your email",
+      "resend": "Resend verification email",
+      "success": "Email verified successfully!"
+    },
+    "logout": "Sign out"
+  },
+  "nav": {
+    "home": "Home",
+    "settings": "Settings",
+    "billing": "Billing",
+    "team": "Team",
+    "notifications": "Notifications",
+    "apiKeys": "API Keys",
+    "developer": "Developer"
+  },
+  "dashboard": {
+    "welcome": "Welcome back, {name}",
+    "stats": {
+      "title": "Overview",
+      "totalUsers": "Total Users",
+      "activeUsers": "Active Users",
+      "revenue": "Revenue",
+      "apiCalls": "API Calls"
+    },
+    "activity": {
+      "title": "Recent Activity"
+    },
+    "quickActions": {
+      "title": "Quick Actions"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": {
+      "title": "Profile",
+      "subtitle": "Manage your personal information"
+    },
+    "security": {
+      "title": "Security",
+      "subtitle": "Manage your security preferences",
+      "mfa": {
+        "title": "Two-Factor Authentication",
+        "enable": "Enable 2FA",
+        "disable": "Disable 2FA",
+        "enabled": "2FA is enabled",
+        "disabled": "2FA is not enabled"
+      }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "Manage notification preferences"
+    },
+    "organization": {
+      "title": "Organization",
+      "subtitle": "Manage your organization settings"
+    },
+    "billing": {
+      "title": "Billing",
+      "subtitle": "Manage your subscription and payment methods"
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you're looking for doesn't exist.",
+      "goHome": "Go to dashboard"
+    },
+    "generic": {
+      "title": "Something went wrong",
+      "description": "An unexpected error occurred.",
+      "tryAgain": "Try again"
+    },
+    "unauthorized": "You need to sign in to access this page",
+    "forbidden": "You don't have permission to access this resource"
+  }
+}

@@ -5,7 +5,7 @@
  * Connects to /api/v1/dashboard/ endpoints.
  */
 
-import { customFetch } from '../core/mutator';
+import { customFetch } from "../core/mutator";
 
 // Dashboard Stats Types
 export interface DashboardStat {
@@ -14,7 +14,7 @@ export interface DashboardStat {
   value: number;
   formattedValue: string;
   trend?: {
-    direction: 'up' | 'down' | 'neutral';
+    direction: "up" | "down" | "neutral";
     percentage: number;
     period: string;
   };
@@ -30,14 +30,14 @@ export interface DashboardStats {
 
 // Activity Types
 export type ActivityType =
-  | 'member_joined'
-  | 'member_left'
-  | 'invite_sent'
-  | 'invite_accepted'
-  | 'settings_changed'
-  | 'project_created'
-  | 'project_updated'
-  | 'role_changed';
+  | "member_joined"
+  | "member_left"
+  | "invite_sent"
+  | "invite_accepted"
+  | "settings_changed"
+  | "project_created"
+  | "project_updated"
+  | "role_changed";
 
 export interface Activity {
   id: string;
@@ -126,40 +126,45 @@ export interface UsageMetricsResponse {
 function transformStats(raw: Record<string, number>): DashboardStats {
   return {
     totalMembers: {
-      id: 'total-members',
-      label: 'Total Members',
-      value: raw.totalMembers ?? 0,
-      formattedValue: String(raw.totalMembers ?? 0),
+      id: "total-members",
+      label: "Total Members",
+      value: raw["totalMembers"] ?? 0,
+      formattedValue: String(raw["totalMembers"] ?? 0),
     },
     activeProjects: {
-      id: 'active-api-keys',
-      label: 'Active API Keys',
-      value: raw.activeApiKeys ?? 0,
-      formattedValue: String(raw.activeApiKeys ?? 0),
+      id: "active-api-keys",
+      label: "Active API Keys",
+      value: raw["activeApiKeys"] ?? 0,
+      formattedValue: String(raw["activeApiKeys"] ?? 0),
     },
     pendingInvites: {
-      id: 'pending-invites',
-      label: 'Pending Invites',
-      value: raw.pendingInvites ?? 0,
-      formattedValue: String(raw.pendingInvites ?? 0),
+      id: "pending-invites",
+      label: "Pending Invites",
+      value: raw["pendingInvites"] ?? 0,
+      formattedValue: String(raw["pendingInvites"] ?? 0),
     },
     monthlyUsage: {
-      id: 'unread-notifications',
-      label: 'Unread Notifications',
-      value: raw.unreadNotifications ?? 0,
-      formattedValue: String(raw.unreadNotifications ?? 0),
+      id: "unread-notifications",
+      label: "Unread Notifications",
+      value: raw["unreadNotifications"] ?? 0,
+      formattedValue: String(raw["unreadNotifications"] ?? 0),
     },
   };
 }
 
 export const DashboardService = {
-  getDashboardStats: async (_organizationPk: string): Promise<DashboardStatsResponse> => {
+  getDashboardStats: async (
+    _organizationPk: string,
+  ): Promise<DashboardStatsResponse> => {
     try {
       const response = await customFetch<Record<string, number>>(
-        '/api/v1/dashboard/stats/',
-        { method: 'GET' }
+        "/api/v1/dashboard/stats/",
+        { method: "GET" },
       );
-      return { status: 200, data: transformStats(response as Record<string, number>) };
+      return {
+        status: 200,
+        data: transformStats(response as Record<string, number>),
+      };
     } catch {
       return { status: 500, data: transformStats({}) };
     }
@@ -167,29 +172,40 @@ export const DashboardService = {
 
   getRecentActivity: async (
     _organizationPk: string,
-    _limit: number = 10
+    _limit: number = 10,
   ): Promise<RecentActivityAPIResponse> => {
     try {
       const response = await customFetch<Activity[]>(
-        '/api/v1/dashboard/activity/',
-        { method: 'GET' }
+        "/api/v1/dashboard/activity/",
+        { method: "GET" },
       );
       const activities = Array.isArray(response) ? response : [];
-      return { status: 200, data: { activities, total: activities.length, hasMore: false } };
+      return {
+        status: 200,
+        data: { activities, total: activities.length, hasMore: false },
+      };
     } catch {
-      return { status: 500, data: { activities: [], total: 0, hasMore: false } };
+      return {
+        status: 500,
+        data: { activities: [], total: 0, hasMore: false },
+      };
     }
   },
 
-  getTeamOverview: async (_organizationPk: string): Promise<TeamOverviewResponse> => {
+  getTeamOverview: async (
+    _organizationPk: string,
+  ): Promise<TeamOverviewResponse> => {
     try {
       const response = await customFetch<Record<string, unknown>>(
-        '/api/v1/dashboard/team/',
-        { method: 'GET' }
+        "/api/v1/dashboard/team/",
+        { method: "GET" },
       );
       const raw = response as Record<string, unknown>;
-      const membersByRole = (raw.membersByRole ?? {}) as Record<string, number>;
-      const total = (raw.totalMembers as number) ?? 0;
+      const membersByRole = (raw["membersByRole"] ?? {}) as Record<
+        string,
+        number
+      >;
+      const total = (raw["totalMembers"] as number) ?? 0;
       return {
         status: 200,
         data: {
@@ -206,19 +222,24 @@ export const DashboardService = {
     } catch {
       return {
         status: 500,
-        data: { totalMembers: 0, roleBreakdown: [], recentMembers: [], pendingInvitations: 0 },
+        data: {
+          totalMembers: 0,
+          roleBreakdown: [],
+          recentMembers: [],
+          pendingInvitations: 0,
+        },
       };
     }
   },
 
   getUsageMetrics: async (
     _organizationPk: string,
-    _period: 'week' | 'month' | 'quarter' = 'month'
+    _period: "week" | "month" | "quarter" = "month",
   ): Promise<UsageMetricsResponse> => {
     try {
       const response = await customFetch<Record<string, number>>(
-        '/api/v1/dashboard/usage/',
-        { method: 'GET' }
+        "/api/v1/dashboard/usage/",
+        { method: "GET" },
       );
       const raw = response as Record<string, number>;
       return {
@@ -228,13 +249,15 @@ export const DashboardService = {
           storage: [],
           activeUsers: [],
           period: {
-            start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+            start: new Date(
+              Date.now() - 30 * 24 * 60 * 60 * 1000,
+            ).toISOString(),
             end: new Date().toISOString(),
           },
           summary: {
-            totalApiCalls: raw.apiRequestsThisMonth ?? 0,
-            totalStorage: raw.storageUsedMb ?? 0,
-            averageActiveUsers: raw.activeIntegrations ?? 0,
+            totalApiCalls: raw["apiRequestsThisMonth"] ?? 0,
+            totalStorage: raw["storageUsedMb"] ?? 0,
+            averageActiveUsers: raw["activeIntegrations"] ?? 0,
           },
         },
       };
@@ -246,7 +269,9 @@ export const DashboardService = {
           storage: [],
           activeUsers: [],
           period: {
-            start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+            start: new Date(
+              Date.now() - 30 * 24 * 60 * 60 * 1000,
+            ).toISOString(),
             end: new Date().toISOString(),
           },
           summary: { totalApiCalls: 0, totalStorage: 0, averageActiveUsers: 0 },

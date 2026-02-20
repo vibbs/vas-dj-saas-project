@@ -1,0 +1,16 @@
+import pytest
+from django.urls import reverse
+from rest_framework.test import APIClient
+
+
+@pytest.mark.django_db
+class Test{{pascalCase name}}API:
+    def setup_method(self):
+        self.client = APIClient()
+
+    def test_list_requires_auth(self):
+        """Unauthenticated requests should be rejected."""
+        # TODO: Update URL name once connected to router
+        # response = self.client.get(reverse("{{name}}-list"))
+        # assert response.status_code == 401
+        pass

@@ -1,8 +1,18 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useAuthAccount, useAuthActions, useAuthStatus } from '@vas-dj-saas/auth';
-import { Text, Card, Button, useTheme } from '@vas-dj-saas/ui';
+import React from "react";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
+import { useRouter } from "expo-router";
+import {
+  useAuthAccount,
+  useAuthActions,
+  useAuthStatus,
+} from "@vas-dj-saas/auth";
+import { Text, Card, Button, useTheme } from "@vas-dj-saas/ui";
 
 interface SettingsRow {
   label: string;
@@ -19,14 +29,14 @@ export default function SettingsScreen() {
   const account = useAuthAccount();
 
   const handleLogout = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert("Sign Out", "Are you sure you want to sign out?", [
+      { text: "Cancel", style: "cancel" },
       {
-        text: 'Sign Out',
-        style: 'destructive',
+        text: "Sign Out",
+        style: "destructive",
         onPress: async () => {
           await logout();
-          router.replace('/');
+          router.replace("/");
         },
       },
     ]);
@@ -46,8 +56,8 @@ export default function SettingsScreen() {
           borderBottomColor: theme.colors.border,
         },
         title: {
-          fontSize: theme.typography.fontSize['2xl'],
-          fontWeight: 'bold',
+          fontSize: theme.typography.fontSize["2xl"],
+          fontWeight: "bold",
           color: theme.colors.foreground,
         },
         scrollContent: {
@@ -56,19 +66,19 @@ export default function SettingsScreen() {
         },
         sectionTitle: {
           fontSize: theme.typography.fontSize.sm,
-          fontWeight: '600',
+          fontWeight: "600",
           color: theme.colors.mutedForeground,
-          textTransform: 'uppercase',
+          textTransform: "uppercase",
           letterSpacing: 0.5,
           marginBottom: theme.spacing.sm,
         },
         card: {
-          overflow: 'hidden',
+          overflow: "hidden",
         },
         row: {
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
           paddingVertical: theme.spacing.md,
           paddingHorizontal: theme.spacing.lg,
           borderBottomWidth: 1,
@@ -93,24 +103,24 @@ export default function SettingsScreen() {
         },
         empty: {
           flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
+          justifyContent: "center",
+          alignItems: "center",
           padding: theme.spacing.xl,
         },
         emptyText: {
           color: theme.colors.mutedForeground,
         },
         version: {
-          textAlign: 'center',
+          textAlign: "center",
           color: theme.colors.mutedForeground,
           fontSize: theme.typography.fontSize.xs,
           marginTop: theme.spacing.lg,
         },
       }),
-    [theme]
+    [theme],
   );
 
-  if (authStatus !== 'authenticated' || !account) {
+  if (authStatus !== "authenticated" || !account) {
     return (
       <View style={[styles.container, styles.empty]}>
         <Text style={styles.emptyText}>Please log in to view settings.</Text>
@@ -119,19 +129,22 @@ export default function SettingsScreen() {
   }
 
   const profileSection: SettingsRow[] = [
-    { label: 'Name', value: account.fullName || 'Not set' },
-    { label: 'Email', value: account.email },
-    { label: 'Role', value: account.role || 'Member' },
+    { label: "Name", value: account.fullName || "Not set" },
+    { label: "Email", value: account.email },
+    { label: "Role", value: account.role || "Member" },
     {
-      label: 'Email Verified',
-      value: account.isEmailVerified ? 'Yes' : 'No',
+      label: "Email Verified",
+      value: account.isEmailVerified ? "Yes" : "No",
     },
   ];
 
   const appSection: SettingsRow[] = [
-    { label: 'Notifications', onPress: () => router.push('/(tabs)/notifications') },
-    { label: 'Appearance', value: 'System' },
-    { label: 'Language', value: 'English' },
+    {
+      label: "Notifications",
+      onPress: () => router.push("/(tabs)/notifications" as any),
+    },
+    { label: "Appearance", value: "System" },
+    { label: "Language", value: "English" },
   ];
 
   const renderRow = (row: SettingsRow, index: number, isLast: boolean) => (
@@ -141,7 +154,9 @@ export default function SettingsScreen() {
       onPress={row.onPress}
       disabled={!row.onPress}
     >
-      <Text style={[styles.rowLabel, row.destructive && styles.destructiveLabel]}>
+      <Text
+        style={[styles.rowLabel, row.destructive && styles.destructiveLabel]}
+      >
         {row.label}
       </Text>
       {row.value && <Text style={styles.rowValue}>{row.value}</Text>}
@@ -159,7 +174,7 @@ export default function SettingsScreen() {
           <Text style={styles.sectionTitle}>Profile</Text>
           <Card style={styles.card}>
             {profileSection.map((row, i) =>
-              renderRow(row, i, i === profileSection.length - 1)
+              renderRow(row, i, i === profileSection.length - 1),
             )}
           </Card>
         </View>
@@ -169,7 +184,7 @@ export default function SettingsScreen() {
           <Text style={styles.sectionTitle}>App</Text>
           <Card style={styles.card}>
             {appSection.map((row, i) =>
-              renderRow(row, i, i === appSection.length - 1)
+              renderRow(row, i, i === appSection.length - 1),
             )}
           </Card>
         </View>

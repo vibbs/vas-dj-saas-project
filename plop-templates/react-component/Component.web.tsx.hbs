@@ -1,0 +1,10 @@
+import React from 'react';
+import type { {{name}}Props } from './types';
+
+export const {{name}}: React.FC<{{name}}Props> = ({ children, ...props }) => {
+  return (
+    <div data-testid="{{dashCase name}}" {...props}>
+      {children}
+    </div>
+  );
+};

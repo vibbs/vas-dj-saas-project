@@ -1,0 +1,31 @@
+import uuid
+
+from django.conf import settings
+from django.db import models
+
+
+class {{pascalCase name}}(models.Model):
+    """Base model for {{name}} app."""
+
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, unique=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # TODO: Add your fields here
+    name = models.CharField(max_length=255)
+
+    organization = models.ForeignKey(
+        "organizations.Organization",
+        on_delete=models.CASCADE,
+        related_name="{{name}}s",
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.name

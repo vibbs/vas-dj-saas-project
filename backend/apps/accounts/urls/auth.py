@@ -4,6 +4,7 @@ JWT Authentication URL patterns
 
 from django.urls import include, path
 
+from apps.accounts.oauth.views import oauth_callback
 from apps.accounts.views.auth import (
     login,
     logout,
@@ -42,5 +43,6 @@ urlpatterns = [
     ),
     path("social/", social_auth, name="auth-social"),
     path("social-login/", social_login, name="auth-social-login"),
+    path("oauth/callback/", oauth_callback, name="auth-oauth-callback"),
     path("mfa/", include("apps.accounts.mfa.urls")),
 ]

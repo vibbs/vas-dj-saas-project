@@ -1,0 +1,11 @@
+from django.contrib import admin
+
+from .models import {{pascalCase name}}
+
+
+@admin.register({{pascalCase name}})
+class {{pascalCase name}}Admin(admin.ModelAdmin):
+    list_display = ["name", "organization", "created_at"]
+    list_filter = ["created_at"]
+    search_fields = ["name"]
+    readonly_fields = ["id", "created_at", "updated_at"]
