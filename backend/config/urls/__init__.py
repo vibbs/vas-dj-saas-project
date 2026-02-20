@@ -57,6 +57,8 @@ urlpatterns = [
     # API URLs - Versioned
     path("api/v1/", include("config.urls.api_v1")),
     # path('api/v2/', include('config.urls.api_v2')),  # Future version
+    # Health check (before API versioning, no auth required)
+    path("api/health/", include("apps.core.urls.health")),
     # Observability endpoints
     path("metrics", metrics_view, name="metrics"),  # Prometheus metrics endpoint
 ]

@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
+from django.core.cache import cache
 from django.db import transaction
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -7,6 +8,7 @@ from drf_spectacular.utils import OpenApiExample, extend_schema
 from rest_framework import permissions, serializers, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.accounts.models import Account
@@ -334,6 +336,25 @@ def login(request):
             email_verification_required=True,
             user_id=str(user.id),
         )
+
+    # Check if MFA is enabled — if so, return a challenge instead of tokens
+    if user.is_2fa_enabled:
+        from apps.accounts.mfa.models import TOTPDevice
+
+        device = TOTPDevice.objects.filter(user=user, confirmed=True).first()
+        if device:
+            import secrets
+
+            mfa_token = secrets.token_urlsafe(32)
+            cache.set(f"mfa_challenge:{mfa_token}", str(user.id), timeout=300)
+
+            return Response(
+                {
+                    "mfa_required": True,
+                    "mfa_token": mfa_token,
+                },
+                status=200,
+            )
 
     # Generate tokens
     refresh = RefreshToken.for_user(user)

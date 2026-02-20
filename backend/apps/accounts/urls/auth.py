@@ -2,7 +2,7 @@
 JWT Authentication URL patterns
 """
 
-from django.urls import path
+from django.urls import include, path
 
 from apps.accounts.views.auth import (
     login,
@@ -42,4 +42,5 @@ urlpatterns = [
     ),
     path("social/", social_auth, name="auth-social"),
     path("social-login/", social_login, name="auth-social-login"),
+    path("mfa/", include("apps.accounts.mfa.urls")),
 ]

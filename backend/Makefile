@@ -319,6 +319,19 @@ test-clean:
 	docker compose -f ./docker/docker-compose.test.yml down --volumes
 	docker volume prune -f
 
+# Database Backup/Restore
+backup:
+	@echo "💾 Creating database backup..."
+	@bash ./scripts/backup.sh
+
+restore:
+	@echo "📥 Restoring database..."
+	@bash ./scripts/restore.sh $(FILE)
+
+# Sanity Check
+sanity-check: check-system
+	@echo "✅ System check passed!"
+
 # API Response Code Documentation Commands
 
 api-validate:

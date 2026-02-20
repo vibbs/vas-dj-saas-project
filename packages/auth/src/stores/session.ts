@@ -193,6 +193,17 @@ export const useAuth = create<AuthState>()(
   )
 );
 
+// Sync auth state to a cookie so Next.js middleware can read it server-side
+if (typeof document !== 'undefined') {
+  useAuth.subscribe((state) => {
+    if (state.accessToken) {
+      document.cookie = `vas_dj_auth=1; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+    } else {
+      document.cookie = 'vas_dj_auth=; path=/; max-age=0; SameSite=Lax';
+    }
+  });
+}
+
 // Convenience hooks
 export const useAuthStatus = () => useAuth((state) => state.status);
 export const useAuthAccount = () => useAuth((state) => state.account);

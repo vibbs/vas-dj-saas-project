@@ -2,30 +2,53 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 /**
- * Middleware for route protection and authentication
- * Runs before every request to check authentication status
+ * Auth routes (accessible only when NOT authenticated)
+ */
+const AUTH_ROUTES = ['/login', '/register-organization', '/forgot-password', '/reset-password'];
+
+/**
+ * Protected route prefixes (require authentication)
+ */
+const PROTECTED_PREFIXES = ['/home', '/settings'];
+
+/**
+ * Public routes that are always accessible
+ */
+const PUBLIC_ROUTES = ['/', '/accept-invite', '/verify-email'];
+
+function isAuthRoute(pathname: string): boolean {
+  return AUTH_ROUTES.some((route) => pathname === route || pathname.startsWith(route + '/'));
+}
+
+function isProtectedRoute(pathname: string): boolean {
+  return PROTECTED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(prefix + '/'));
+}
+
+/**
+ * Middleware for server-side route protection.
+ *
+ * Reads the `vas_dj_auth` cookie (synced from the client-side Zustand auth store)
+ * to determine if the user is authenticated. This provides a server-side guard
+ * so protected pages are never served to unauthenticated users.
+ *
+ * The client-side auth guard (useAuthGuard) still handles the full token
+ * validation and refresh flow after the page loads.
  */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const hasAuthCookie = request.cookies.has('vas_dj_auth');
 
-  // Define protected and public routes
-  const isAuthRoute = pathname.startsWith('/login') ||
-                      pathname.startsWith('/register-organization') ||
-                      pathname.startsWith('/accept-invite');
+  // Authenticated users trying to access auth pages → redirect to dashboard
+  if (hasAuthCookie && isAuthRoute(pathname)) {
+    return NextResponse.redirect(new URL('/home', request.url));
+  }
 
-  const isDashboardRoute = pathname.startsWith('/dashboard');
-
-  // Note: Token checking is handled client-side by the auth guard hooks
-  // This middleware primarily handles redirects for obvious cases
-
-  // If accessing auth pages while logged in, redirect to dashboard
-  // (This will be fine-tuned by the client-side guard)
-
-  // If accessing dashboard without auth, redirect to login
-  // (This will be fine-tuned by the client-side guard)
-
-  // For now, let the client-side guards handle all auth logic
-  // Middleware can be enhanced later with server-side token validation
+  // Unauthenticated users trying to access protected pages → redirect to login
+  if (!hasAuthCookie && isProtectedRoute(pathname)) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
 
   return NextResponse.next();
 }
@@ -36,12 +59,12 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
+     * Match all request paths except for:
      * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder files
+     * - public folder files (images, etc.)
      */
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
