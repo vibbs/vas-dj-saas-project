@@ -10,7 +10,12 @@
       "Bash(make build:*)",
       "Bash(make start:*)",
       "Bash(make test:*)",
-      "Bash(make clean:*)"
+      "Bash(make clean:*)",
+      "Skill(ralph-loop:ralph-loop)",
+      "Skill(ralph-loop:ralph-loop:*)",
+      "Bash(python manage.py:*)",
+      "Bash(npx prettier:*)",
+      "Bash(echo:*)"
     ],
     "deny": [
       "Bash(rm:*)",
